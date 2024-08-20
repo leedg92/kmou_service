@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+            "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 
+	1. IDX, RBS_SBJT_1_INFO, SUBJECT, IDX, 테이블명 등 변경해서 사용
+	2. 그 외 필요에 따라 쿼리 수정하여 사용 
+-->
+
+<mapper namespace="mart.modules.studPlan.studPlanOraMapper">
+
+	<select id="getCollegeList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT A.*
+			FROM SCO.V_AI_ORG A
+			WHERE 1=1
+			AND DEPT_CD LIKE '3%'
+			AND UP_DEPT_CD = 300000
+			AND USE_FG = 'Y'
+			AND COLG_CD IN ('301000', '309000', '310000', '308000')
+			<if test='SBJT_DGN_RNG_FG.equals("IMG")'>
+				OR DEPT_CD = '446000'
+			</if>
+			ORDER BY DEPT_NM ASC
+	</select>
+	
+	<select id="getDepartList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT A.*
+			FROM SCO.V_AI_ORG A
+			WHERE ORG_LVL = 3
+			AND DEPT_CD LIKE '3%'
+			AND CATEGORY != '부서'
+			<if test='UNIV != null and !UNIV.equals("")'>
+			AND UP_DEPT_CD = #{UNIV}
+			</if>
+			AND USE_FG = 'Y'
+			AND COLG_CD IS NOT NULL
+			ORDER BY DEPT_NM ASC
+	</select>
+	
+	<select id="getMajorList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT A.*
+			FROM SCO.V_AI_ORG A
+			WHERE ORG_LVL = 4
+			AND DEPT_CD LIKE '3%'
+			<if test='DEPART != null and !DEPART.equals("")'>
+			AND UP_DEPT_CD = #{DEPART}
+			</if>
+			AND USE_FG = 'Y'
+			AND COLG_CD IS NOT NULL
+			ORDER BY DEPT_NM ASC
+	</select>
+	
+	<select id="getProfDepartList" parameterType="java.util.HashMap" resultType="dataMap">
+            SELECT
+                   NOW_DEPT_CD AS DEPT_CD, UF_GET_ORG_CODESET('D', NOW_DEPT_CD) AS DEPT_NM
+            FROM APS.APS010TB
+            WHERE EMP_GB_CODE NOT IN ('PS011', 'PS016')
+              AND NOW_JOBG_CD NOT IN
+                  ('12050501', '12030201', '12060101', '12090801', '12030101', '12060201', '12050202', '12040601',
+                   '12010101', '12050502', '12050201')
+              AND NOW_DEPT_CD LIKE '3%'
+              AND RTI_FL = 0
+            GROUP BY NOW_DEPT_CD
+            ORDER BY UF_GET_ORG_CODESET('D', NOW_DEPT_CD)			
+	</select>
+	
+	<select id="getSbjtList" parameterType="java.util.HashMap" resultType="dataMap">
+		WITH CURR AS(
+<!-- 		               SELECT -->
+<!-- 		               			B.SUBJECT_CD || '_' || B.DEPT_CD || '_' || B.YEAR || '_' || B.COM_GRADE || '_' || B.SMT AS DOC_ID -->
+<!-- 		                     ,	B.SUBJECT_CD -->
+<!-- 		                   	 ,  A.SUBJECT_NM -->
+<!-- 		                   	 ,  A.SUBJECT_ENM -->
+<!-- 		                     ,  C.COLG_CD  AS COLG_CD -->
+<!-- 		                     ,  C.COLG_NM  AS COLG_NM -->
+<!-- 		                     ,  CASE WHEN C.ORG_LVL = '3' THEN C.DEPT_CD ELSE C.UP_DEPT_CD END AS DEPT_CD -->
+<!-- 		                     ,  CASE WHEN C.ORG_LVL = '3' THEN C.DEPT_NM ELSE DEPT_CDNM(C.UP_DEPT_CD) END AS DEPT_NM -->
+<!-- 		                  	 ,  CASE WHEN (SELECT CATEGORY FROM SCO.V_AI_ORG WHERE DEPT_CD = C.UP_DEPT_CD) = '학과' THEN UP_DEPT_CD ELSE C.DEPT_CD END AS MAJOR_CD -->
+<!-- 		                   	 ,  CASE WHEN (SELECT CATEGORY FROM SCO.V_AI_ORG WHERE DEPT_CD = C.UP_DEPT_CD) = '학과' THEN  DEPT_CDNM(C.UP_DEPT_CD) ELSE  DEPT_CDNM(C.DEPT_CD) END AS MAJOR_NM -->
+<!-- 		                  	 ,  B.YEAR -->
+<!-- 		                  	 ,  B.COM_GRADE -->
+<!-- 		                  	 ,  B.SMT -->
+<!-- 		                   	 ,  UF_GET_SYS020TB(B.SMT) AS SMT_NM -->
+<!-- 		                     ,  ROUND(B.WTIME_NUM) AS WTIME_NUM -->
+<!-- 		                     ,  ROUND(B.PTIME_NUM) AS PTIME_NUM -->
+<!-- 		                	 ,  B.CDT_NUM -->
+<!-- 		                   	 ,  B.COMDIV_CODE -->
+<!-- 		                   	 ,  UF_GET_SYS020TB(B.COMDIV_CODE) AS COMDIV_CODE_NM -->
+<!-- 		                   	 ,  B.MNRCOM_DIV_CODE -->
+<!-- 		                   	 ,  UF_GET_SYS020TB(B.MNRCOM_DIV_CODE) AS MNRCOM_DIV_CODE_NM -->
+<!-- 		                   	 ,  B.FUSE_DEPT_CD -->
+<!-- 		                   	 ,  (SELECT DEPT_NM FROM SCO.V_AI_ORG WHERE DEPT_CD = B.FUSE_DEPT_CD) AS FUSE_DEPT_CD_NM -->
+<!-- 		              FROM -->
+<!-- 		                 SUF.SUF010TB A, -->
+<!-- 		                 SUF.SUF050TB B, -->
+<!-- 		                 SCO.V_AI_ORG C -->
+<!-- 		              WHERE  -->
+<!-- 		              	  A.ABO_YN IS NULL           폐기일자 NULL -->
+<!-- 		              AND A.SINBUN_CODE = 'UD340001' 학부생만 -->
+<!-- 		              AND A.SUBJECT_CD = B.SUBJECT_CD -->
+<!-- 	                  AND B.YEAR BETWEEN TO_CHAR(SYSDATE - (INTERVAL '5' YEAR), 'YYYY') AND TO_CHAR(SYSDATE, 'YYYY') -->
+<!-- 	                  AND B.COMDIV_CODE IN ('UE010098', 'UE010021', 'UE010022', 'UE010024', 'UE010011', 'UE010012') -->
+<!-- 	                  AND B.DEPT_CD = C.DEPT_CD -->
+<!-- 	                  AND C.COLG_CD IN ('301000', '309000', '310000', '308000') -->
+<!-- 	                  AND C.USE_FG = 'Y' -->
+<!-- 	                  AND ((C.ORG_LVL = '4')  OR (C.ORG_LVL = '3' AND C.CATEGORY != '학부')) -->
+
+
+						SELECT
+		                     A.SUBJECT_CD || '_' || CASE WHEN C.ORG_LVL = '3' THEN C.DEPT_CD ELSE C.UP_DEPT_CD END  || '_' || A.YEAR || '_' || A.GRADE || '_' || A.SMT AS DOC_ID,
+		                     A.SUBJECT_CD,
+		                     (SELECT UF_GET_SUBJECT_CODESET(A.SUBJECT_CD) FROM dual)            AS SUBJECT_NM,
+		                     (SELECT SUBJECT_ENM FROM SUF010TB WHERE SUBJECT_CD = A.SUBJECT_CD) AS SUBJECT_ENM,
+		                     C.COLG_CD                                                                               AS COLG_CD,
+		                     C.COLG_NM                                                                               AS COLG_NM,
+		                     CASE WHEN C.ORG_LVL = '3' THEN C.DEPT_CD ELSE C.UP_DEPT_CD END                          AS DEPT_CD,
+		                     CASE WHEN C.ORG_LVL = '3' THEN C.DEPT_NM ELSE DEPT_CDNM(C.UP_DEPT_CD) END               AS DEPT_NM,
+		                     CASE
+		                         WHEN (SELECT CATEGORY FROM SCO.V_AI_ORG WHERE DEPT_CD = C.UP_DEPT_CD) = '학과' THEN UP_DEPT_CD
+		                         ELSE C.DEPT_CD END                                                                  AS MAJOR_CD,
+		                     CASE
+		                         WHEN (SELECT CATEGORY FROM SCO.V_AI_ORG WHERE DEPT_CD = C.UP_DEPT_CD) = '학과'
+		                             THEN DEPT_CDNM(C.UP_DEPT_CD)
+		                         ELSE DEPT_CDNM(C.DEPT_CD) END                                                       AS MAJOR_NM,
+		                     A.YEAR,
+		                     A.GRADE AS COM_GRADE,
+		                     A.SMT,
+		                     UF_GET_SYS020TB(A.SMT)                                                                  AS SMT_NM,
+		                     ROUND(A.WTIME_NUM)                                                                      AS WTIME_NUM,
+		                     ROUND(A.PTIME_NUM)                                                                      AS PTIME_NUM,
+		                     A.CDT_NUM,
+		                     A.COMDIV_CODE,
+		                     UF_GET_SYS020TB(A.COMDIV_CODE)                                                          AS COMDIV_CODE_NM,
+		                     A.MNRCOM_DIV_CODE,
+		                     UF_GET_SYS020TB(A.MNRCOM_DIV_CODE)                                                      AS MNRCOM_DIV_CODE_NM
+		              FROM SUF.SUF100TB A,
+		                   SCO.V_AI_ORG C
+		              WHERE A.ABO_YN = 'N'
+		                AND A.SINBUN_CODE = 'UD340001'
+			            AND A.COMDIV_CODE IN ('UE010098', 'UE010021', 'UE010022', 'UE010024', 'UE010011', 'UE010012','UE010031')
+		                AND A.DEPT_CD = C.DEPT_CD
+		                AND C.COLG_CD IN ('301000', '309000', '310000', '308000')
+			            AND C.USE_FG = 'Y'
+			            AND ((C.ORG_LVL = '4')  OR (C.ORG_LVL = '3' AND C.CATEGORY != '학부'))
+		                AND SMT IN ('GH0210','GH0220')
+					)
+		SELECT
+			*
+		FROM 
+			CURR
+		WHERE 
+			 (SUBJECT_CD, YEAR, DEPT_CD) IN (SELECT SUBJECT_CD, MAX(YEAR), DEPT_CD FROM CURR GROUP BY SUBJECT_CD, DEPT_CD) <!-- 중복된 데이터는 가장 최근 년도만 가져온다 -->
+		<if test='KEYWORD != null and !KEYWORD.equals("")'>
+         AND (
+         	     TRIM(SUBJECT_NM) LIKE '%' || TRIM(#{KEYWORD}) || '%' 
+              OR TRIM(LOWER(SUBJECT_ENM)) LIKE '%' || TRIM(LOWER(#{KEYWORD}))  ||'%'
+              )
+         </if>
+         <if test='SEL_MJ_RANGE != null and !SEL_MJ_RANGE.equals("")'>    
+		 AND (
+		 	     COLG_CD = #{SEL_MJ_RANGE} 
+		 	  OR DEPT_CD = #{SEL_MJ_RANGE} 
+		 	  OR MAJOR_CD = #{SEL_MJ_RANGE}
+		 	  )
+		 </if>
+		 <if test='!CHK_SB_FG_LIST.isEmpty()'>
+		 AND COMDIV_CODE IN  
+		 	<foreach collection="CHK_SB_FG_LIST" item="chkSbFg" index="index" separator="," open="(" close=")">
+				#{chkSbFg}
+			</foreach>		
+		 </if>		
+            <!-- 찜목록 용 리스트 -->
+		 <if test='DOC_ID_LIST != null'>
+		  AND DOC_ID IN  
+		 	<foreach collection="DOC_ID_LIST" item="docId" index="index" separator="," open="(" close=")">
+				#{docId}
+			</foreach>		
+		 </if> 		  
+
+	</select>
+
+	<select id="getProfList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT EMP_NO,  
+		       EMP_NM,  
+		       TRIM(EMP_CNM) AS EMP_CNM,  
+		       TRIM(EMP_ENM) AS EMP_ENM,  
+		       NOW_DEPT_CD AS DEPT_CD,  
+		       (SELECT V_TEA_EMAIL FROM KFORU2018.V_TAD_TE_TEA_DEPT WHERE V_TEA_SN = (SELECT MAX(V_TEA_SN) FROM V_TAD_TE_TEA_DEPT WHERE V_TEA_EMPNO = EMP_NO)) AS EMAIL,
+		       UF_GET_ORG_CODESET('D', NOW_DEPT_CD) AS DEPT_NM,  
+		       (SELECT COLG_CD FROM SCO.V_AI_ORG ORG WHERE ORG.DEPT_CD = NOW_DEPT_CD) AS COLG_CD,  
+		       UF_GET_ORG_CODESET('B', NOW_DEPT_CD) AS COLG_NM,  
+		       NOW_JOBG_CD AS JOBG_CD,  
+		       (SELECT JOBG_NM FROM APS.APS920TB WHERE JOBG_CD = NOW_JOBG_CD) AS JOBG_NM,  
+		       RTI_FL  
+		FROM APS.APS010TB  
+		WHERE EMP_GB_CODE NOT IN ('PS011', 'PS016')  
+		  AND NOW_JOBG_CD NOT IN ('12050501', '12030201', '12060101', '12090801', '12030101', '12060201', '12050202', '12040601', '12010101', '12050502', '12050201')
+<!-- 		  박사후연구원, 교육연구사, 조교, 비전임산학협력중점교원, 교육연구관, 계약조교, 전임연구원(무기계약직), 겸임교원, 총장, 초빙연구원, 전임연구원 제외 -->
+		  AND RTI_FL = 0
+		  <if test='KEYWORD != null and !KEYWORD.equals("")'>  
+		  AND EMP_NM LIKE '%'||#{KEYWORD}||'%'
+		  </if>
+		  <if test='DEPT_CD != null and !DEPT_CD.equals("")'>
+		  AND NOW_DEPT_CD = #{DEPT_CD}
+		  </if>	  
+	</select>	
+
+
+</mapper>            
