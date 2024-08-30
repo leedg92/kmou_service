@@ -70,6 +70,7 @@ linear-gradient(to right, #0038FF 0%, #1C3D88 100%); border-radius:25px; backgro
 .m_chart_bx .mask {display:none;}
 .m_chart_bx .maskbx .grade .chart_box {filter:blur(5px); -webkit-filter:blur(5px);}
 .m_chart_bx .maskbx .mask {position:absolute;top:50%;left:0;transform:translate(0, -50%);width:50%;height: 37rem;background:rgba(255,255,255,0.7);border-radius:40px;border: none;display: block;}
+.m_chart_bx .maskbx .mask img {width:64px; margin:0 auto; padding-top:10rem;}
 .m_chart_bx .maskbx .mask h3 {font-size:2rem;font-weight:600;color:#444;margin-top:1rem;}
 .m_chart_bx .maskbx .mask .textbx {text-align:center;margin-top:2rem;}
 .m_chart_bx .maskbx .mask .textbx a {padding:.7rem 2.3rem;background:#fff;box-shadow:5px 5px 10px #888;color:#555;font-size:1.4rem;font-weight:500;display:inline-block;border-radius:1rem;transition:all 0.3s;}
@@ -664,9 +665,9 @@ letter-spacing:0; padding:1px 0;margin-right:3px; border-radius:25rem;color:#555
     .main_L_bottom .item h4.title {margin:0 auto;}
     .main_L_bottom .item_reco_nonSubj h4.title {margin:0 auto;}
     .main_L_bottom .item_reco_nonSubj h4.title::before {top:-4.5rem;left:-4.2rem;}
-    .main_L_bottom .item_reco_nonSubj h4.title span {margin-left:8rem;}
+    .main_L_bottom h4.title span {margin-left:8rem;}
     
-    .main_L_bottom .item_reco_subj h4.title::before {top:-3.8rem;}
+    .main_L_bottom .item_reco_subj h4.title::before {top:-3rem;left:-.2rem;width: 7.5rem;height: 6.5rem;background-size: contain;}
     
     .main_L_bottom .item_reco_nonSubj .box .nsjimg_bx {/*height:42%;*/}
     
@@ -686,7 +687,8 @@ letter-spacing:0; padding:1px 0;margin-right:3px; border-radius:25rem;color:#555
     .m_chart_bx .m_chart1 {flex-wrap:wrap;width:100%;gap:2rem;padding:0 2rem;}
     .m_chart_bx .m_chart1 .inbx {width:calc(50% - 2rem);}
     
-    .m_chart_bx.maskbx .mask h3 {margin-top:32%;}
+    .m_chart_bx .maskbx .mask img {padding-top:2rem;}
+    .m_chart_bx .maskbx .mask h3 {margin-top:1rem;}
 
 	.main_L .item_main .my_grad{margin-bottom:4rem!important;}
     
@@ -854,7 +856,7 @@ letter-spacing:0; padding:1px 0;margin-right:3px; border-radius:25rem;color:#555
     .m_chart_bx.maskbx .mask h3 {font-size:2.8rem;}
     .m_chart_bx .m_chart1 .inbx {height:23rem;}
     .m_chart_bx .maskbx .mask {height:24rem;}
-    .m_chart_bx .maskbx .mask h3 {margin-top:9rem;}
+    .m_chart_bx .maskbx .mask h3 {margin-top:1rem;}
     .m_chart_bx .m_chart2 .summ_info li h3 {font-size:1.7rem; display:inline-block; width:auto; margin-right:1.5rem;}
     .m_chart_bx .m_chart2 .summ_info > li {font-size:1.7rem;width:100%;}
     .m_chart_bx .m_chart2 .summ_info li:first-child i {font-size:1.8rem;}
@@ -876,7 +878,7 @@ letter-spacing:0; padding:1px 0;margin-right:3px; border-radius:25rem;color:#555
     
     .main_R .item .title{text-align: center;margin-bottom:1rem;}
     
-    .main_L .item, .main_L_bottom .item {margin:0;padding:20px 0;}
+    .main_L .item, .main_L_bottom .item {margin:0;padding:20px 0;margin-top:5rem;}
     
     .main_L_bottom .item .title{font-size:2.2rem; font-weight:bolder;}
     .main_L_bottom .item_reco_subj .go_hash{font-size:1.7rem;}

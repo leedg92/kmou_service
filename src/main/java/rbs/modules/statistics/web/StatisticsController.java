@@ -180,6 +180,8 @@ public class StatisticsController extends ModuleController {
 		int pageSize = JSONObjectUtil.getInt(settingInfo, "dset_list_block", propertiesService.getInt("PAGE_SIZE"));			// 페이징 크기
 		int page = StringUtil.getInt(request.getParameter("page"), 1);															// 현재 페이지 index
 
+		
+		
 		RbsPaginationInfo paginationInfo = new RbsPaginationInfo();
 		paginationInfo.setUnitBeginCount(listUnit);
 		paginationInfo.setUnitEndCount(listMaxUnit);
@@ -240,7 +242,7 @@ public class StatisticsController extends ModuleController {
 		}
 		
 		// 2.2 목록수
-    	totalCount = statisticsService.getSearchKeywordCount(param);
+    	totalCount = statisticsService.getSearchKeywordCount(param);    	
 		paginationInfo.setTotalRecordCount(totalCount);
     	
     	if(totalCount > 0) {

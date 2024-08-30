@@ -27,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import rbs.egovframework.Defines;
 import rbs.egovframework.LoginVO;
+import rbs.egovframework.SukangLoginVO;
 import rbs.egovframework.service.DataSecurityServiceImpl;
 import rbs.egovframework.util.PrivAuthUtil;
 import rbs.modules.member.service.MemberInfoService;
@@ -197,7 +198,11 @@ public class MemberJoinController extends MemberJoinComController{
 		
 		
 		/* 교양교과목 이수 현황 */
-		List<Object> userMinorReqList = memberInfoService.getMyMinorReq(param);
+		List<Object> userMinorReqList = null;
+		int chkMinorReq = memberInfoService.getChkMinorReq(param);
+		if(chkMinorReq > 0) {			
+			userMinorReqList = memberInfoService.getMyMinorReq(param);
+		}
 		model.addAttribute("USER_MINOR_REQ", (userMinorReqList == null) ? null : userMinorReqList); 
 		
 		

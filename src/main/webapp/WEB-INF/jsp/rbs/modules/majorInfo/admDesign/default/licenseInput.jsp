@@ -31,7 +31,6 @@
 		<c:set var="summary"><itui:tableSummary items="${items}" itemOrder="${itemOrder}" exceptIds="${exceptIds}"/> 입력표</c:set>
 		
 		<div class="btnbx_right">
-			<p>관련자격증</p>
 			<input type=button value="조회" id="refresh" class="btnTypeI"">
 			<input type="submit" class="btnTypeJ fn_btn_submit" value="저장" title="저장"/>
 		</div>		
@@ -56,8 +55,8 @@
 							> <c:out value="${dt.MAJOR_NM_KOR}"/>
 						</c:if>
 					</td>
-					<th>학년도</th>
-					<td>${dt.YEAR}</td>
+					<%-- <th>학년도</th>
+					<td>${dt.YEAR}</td> --%>
 				</tr>			
 			</tbody>
 		</table>

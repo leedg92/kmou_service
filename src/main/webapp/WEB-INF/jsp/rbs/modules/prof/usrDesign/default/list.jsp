@@ -131,6 +131,7 @@
                 <div class="prof_title_box title_box pb-3 mb-3">
 					<div class="prof_title_boxselect">
 						<select class="form-select rounded-pill" aria-label="select" id="orderBy" name="orderBy">
+							<option value="">정렬기능</option>
 							<option value="byName">이름순</option>
 							<option value="byMajor">전공순</option>
 						</select>

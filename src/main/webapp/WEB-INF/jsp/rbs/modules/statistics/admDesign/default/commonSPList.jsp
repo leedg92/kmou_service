@@ -3,11 +3,11 @@
 <div id="cms_board_article">
 	<div class="">
 		<ul class="tabTypeA tab li4">
-			<li class="fn_tab_view <c:if test='${module eq "site"}'>on</c:if>"><a id="tab1" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/siteList.do?mId=55" class="active">방문수</a></li>
-			<li class="fn_tab_view <c:if test='${module eq "page"}'>on</c:if>"><a id="tab2" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/pageList.do?mId=55" class="">페이지뷰</a></li>
-			<li class="fn_tab_view"><a id="tab3" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/sitePageList.do?mId=55" class="">방문당 페이지뷰</a></li>
-			<li class="fn_tab_view"><a id="tab4" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/menuList.do?mId=55" class="">메뉴별 접속자수</a></li>
-			<li class="fn_tab_view"><a id="tab5" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/userList.do?mId=55" class="">현재접속자</a></li>
+			<li class="fn_tab_view <c:if test='${module eq "site"}'>on</c:if>"><a id="tab1" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/siteList.do?mId=58" class="active">방문수</a></li>
+			<li class="fn_tab_view <c:if test='${module eq "page"}'>on</c:if>"><a id="tab2" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/pageList.do?mId=58" class="">페이지뷰</a></li>
+			<li class="fn_tab_view"><a id="tab3" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/sitePageList.do?mId=58" class="">방문당 페이지뷰</a></li>
+			<li class="fn_tab_view"><a id="tab4" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/menuList.do?mId=58" class="">메뉴별 접속자수</a></li>
+			<li class="fn_tab_view"><a id="tab5" href="${contextPath}/${crtSiteId}/menuContents/web/statistics/userList.do?mId=58" class="">현재접속자</a></li>
 		</ul>		
 	</div>
 	<!-- search -->

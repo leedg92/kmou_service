@@ -53,12 +53,12 @@
 	
 	<!-- 사이트 방문수 월/일/시간별 sum 조회 쿼리 : 1개 TABLE -->
 	<sql id="SITE_SUM_QUERY">
-		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(SUM(CON_CNT), 0)</trim> CONTACT_COUNT <include refid="SITE_DEFAULT_QUERY"/>
+		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(ROUND(SUM(CON_CNT)), 0)</trim> CONTACT_COUNT <include refid="SITE_DEFAULT_QUERY"/>
 	</sql>
 	
 	<!-- 사이트 방문수 년도별 sum 조회 쿼리 : BACKUP TABLE 포함 -->
 	<sql id="SITE_BACKUP_SUM_QUERYS">
-		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(SUM(CON_CNT), 0)</trim> CONTACT_COUNT FROM (
+		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(ROUND(SUM(CON_CNT)), 0)</trim> CONTACT_COUNT FROM (
 			SELECT <include refid="DATE_COLUMN"/>, CON_CNT FROM <include refid="CONTACT_TABLE_NAME"/> A 
 			<include refid="rbs.commonMapper.COM_SG_WHERE"/>
 			<if test="backupYearList != null">
@@ -125,12 +125,12 @@
 	
 	<!-- 페이지뷰 월/일/시간별 sum 조회 쿼리 : 1개 TABLE -->
 	<sql id="PAGE_SUM_QUERY">
-		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(SUM(CON_CNT), 0)</trim> CONTACT_COUNT <include refid="PAGE_DEFAULT_QUERY"/>
+		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(ROUND(SUM(CON_CNT)), 0)</trim> CONTACT_COUNT <include refid="PAGE_DEFAULT_QUERY"/>
 	</sql>
 	
 	<!-- 페이지뷰 년도별 sum 조회 쿼리 : BACKUP TABLE 포함 -->
 	<sql id="PAGE_BACKUP_SUM_QUERYS">
-		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(SUM(CON_CNT), 0)</trim> CONTACT_COUNT FROM (
+		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(ROUND(SUM(CON_CNT)), 0)</trim> CONTACT_COUNT FROM (
 			SELECT <include refid="DATE_COLUMN"/>, CON_CNT FROM <include refid="CONTACT_P_TABLE_NAME"/> A 
 			<include refid="rbs.commonMapper.COM_SG_WHERE"/>
 			<if test="backupYearList != null">
@@ -231,12 +231,12 @@
 	
 	<!-- 메뉴별 접속자수 sum 조회 쿼리 : 1개 TABLE  -->
 	<sql id="MENU_SUM_QUERY">
-		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(SUM(CON_CNT), 0)</trim> CONTACT_COUNT <include refid="MENU_DEFAULT_QUERY"/>
+		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(ROUND(SUM(CON_CNT)), 0)</trim> CONTACT_COUNT <include refid="MENU_DEFAULT_QUERY"/>
 	</sql>
 	
 	<!-- 메뉴별 접속자수  sum 조회 쿼리 : BACKUP TABLE 포함 -->
 	<sql id="MENU_BACKUP_SUM_QUERYS">
-		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(SUM(CON_CNT), 0)</trim> CONTACT_COUNT FROM (
+		<trim><include refid="rbs.commonDBMSMapper.nullFn"/>(ROUND(SUM(CON_CNT)), 0)</trim> CONTACT_COUNT FROM (
 			SELECT MENU_IDX<if test="siteId == 'ADM'">, MNG_SITE_ID, MNG_MENU_IDX</if>, CON_CNT FROM <include refid="CONTACT_M_TABLE_NAME"/>
 			 WHERE 1 = 1
 			<if test="searchDate1 != null"><![CDATA[ AND CONCAT(YEAR, '-', MONTH, '-', DAY) >=]]> #{searchDate1}</if>

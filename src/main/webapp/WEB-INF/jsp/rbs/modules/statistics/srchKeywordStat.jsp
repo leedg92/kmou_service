@@ -225,70 +225,7 @@ function setForm() {
 	}
 
 	try {
-		$.ajax({
-			beforeSend:function(request){request.setRequestHeader('Ajax', 'true');},
-			url:"${URL_SRCH_KEYWORD_STAT_FORM}",
-			async: true,
-			success:function(data){
-				univCodeList = data.univCodeList;
-				agmtCodeList = data.agmtCodeList;
-				univPartCodeList = data.univPartCodeList;
-				agmtPartCodeList = data.agmtPartCodeList;
-
-				$('#searchCamp').on('change', function(){
-
-					var codeList = $(this).val() == '0000587' ? univCodeList : $(this).val() == '0000601' ? agmtCodeList : null;
-
-					$('#searchUniv').empty();
-					$('#searchUniv').append('<option value="" selected>전체</option>');
-					$('#searchDept').empty();
-					$('#searchDept').append('<option value="" selected>전체</option>');
-					codeList.forEach(function(obj){
-						$('#searchUniv').append('<option value="'+obj.DEPT_CD+'">'+obj.DEPT_NM+'</option>');
-					});
-
-					campCodeStat = $(this).val();
-					univCodeStat = '';
-				});
-
-				$('#searchUniv').on('change', function(){
-
-					var codeList;
-
-					if (campCodeStat == '0000587') codeList = univPartCodeList.filter((x) => x.UP_DEPT_CD == $(this).val());
-					if (campCodeStat == '0000601') codeList = agmtPartCodeList.filter((x) => x.UP_DEPT_CD == $(this).val());
-
-					$('#searchDept').empty();
-					$('#searchDept').append('<option value="" selected>전체</option>');
-					codeList.forEach(function(obj){
-						$('#searchDept').append('<option value="'+obj.DEPT_CD+'">'+obj.DEPT_NM+'</option>');
-					});
-
-					univCodeStat = $(this).val();
-				});
-
-				if ('${param.searchCamp}' != '') {
-					$('#searchCamp').val('${param.searchCamp}');
-					var selectCamp = document.getElementById('searchCamp');
-					var event = new Event('change', { bubbles: true });
-					selectCamp.dispatchEvent(event);
-
-					if ('${param.searchUniv}' != '') {
-						$('#searchUniv').val('${param.searchUniv}');
-						var selectUniv = document.getElementById('searchUniv');
-						var event = new Event('change', { bubbles: true });
-						selectUniv.dispatchEvent(event);
-
-						if ('${param.searchDept}' != '') {
-							$('#searchDept').val('${param.searchDept}');
-						}
-					}
-				}
-			},
-			error: function(x, y, z){
-				console.log(x, y, z);
-			}
-		});
+		
 	} catch(e){
 		console.log(e);
 	}

@@ -26,4 +26,6 @@ public class MemberInfoRbsMapper extends RbsAbstractMapper{
         return super.update("rbs.modules.member.memberInfoRbsMapper.updateHashtag", param);
     }
 
+
+
 }

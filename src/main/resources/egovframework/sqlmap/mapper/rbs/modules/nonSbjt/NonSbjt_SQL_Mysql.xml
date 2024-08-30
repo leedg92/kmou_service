@@ -273,7 +273,7 @@
 		ORDER BY 
 		RECOMMENDED DESC
 		<choose>
-		    <when test="ORDER_BY == 'SIGNIN_END_RANK' or ORDER_BY == 'RECOMMEND'">    
+		    <when test="ORDER_BY == 'SIGNIN_END_RANK' or ORDER_BY == 'RECOMMEND' or ORDER_BY == 'DEFAULT'">    
 		    , signin_end_rank ASC, signin_end_date ASC
 		    </when>
 		    <when test="ORDER_BY == 'PARTICIPANT_RATE_RANK'">
@@ -675,7 +675,8 @@
 			*
 		FROM 			
 			im_eco_program_type_table
-		ORDER BY idx
+		WHERE type IN ('a01', 'a02', 'a03', 'a08', 'a09', 'a11', 'a12', 'a13', 'a14', 'a15', 'a16')
+		ORDER BY sort		
 	</select>
 	
 	<!-- 비교과 운영방식 -->

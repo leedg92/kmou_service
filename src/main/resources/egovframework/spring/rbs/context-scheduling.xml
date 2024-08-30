@@ -11,6 +11,13 @@
 		<property name="applicationContextJobDataKey" value="applicationContext"/>
     	<property name="durability" value="true" />
 	</bean>
+	
+	<!-- 학생설계전공 인터페이스 -->
+	<bean id="stdInfDetailBean" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+	    <property name="jobClass" value="rbs.egovframework.web.scheduling.StudConfirmInterface" />
+	    <property name="applicationContextJobDataKey" value="applicationContext"/>
+	    <property name="durability" value="true" />
+	</bean>
 
 	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="jobDetailBean" />
@@ -22,11 +29,19 @@
 		<property name="cronExpression" value="0 00 23 * * ?" />
 	</bean>
 	
+	<!-- 학생설계전공 인터페이스 -->
+	<bean id="cronTrigger3" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	    <property name="jobDetail" ref="stdInfDetailBean" />
+	    <property name="cronExpression" value="0 59 23 * * ?" />
+<!-- 		<property name="cronExpression" value="0/10 * * * * ?" /> -->
+	</bean>
+	
 	<bean id="scheduler" class="rbs.egovframework.web.scheduling.SchedulerFactoryBeanWidthShutdownDelay">
 		<property name="triggers">
 			<list>
 				<ref bean="cronTrigger" />
 				<ref bean="cronTrigger2" />
+				<ref bean="cronTrigger3" />
 			</list>
 		</property> 
 	</bean>

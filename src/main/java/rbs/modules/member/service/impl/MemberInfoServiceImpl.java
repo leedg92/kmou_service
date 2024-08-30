@@ -111,6 +111,11 @@ public class MemberInfoServiceImpl extends EgovAbstractServiceImpl implements Me
 	}
 	
 	@Override
+	public int getChkMinorReq(Map<String, Object> param) {
+		return memberInfoDAO.getChkMinorReq(param);
+	}
+	
+	@Override
 	public List<Object> getMyMinorReq(Map<String, Object> param) {
 		return memberInfoDAO.getMyMinorReq(param);
 	}
@@ -150,4 +155,7 @@ public class MemberInfoServiceImpl extends EgovAbstractServiceImpl implements Me
 		// TODO Auto-generated method stub
 		return memberInfoRbsDAO.hashtagDelete(param);
 	}
+
+
+
 }

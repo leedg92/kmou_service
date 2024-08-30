@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import com.woowonsoft.egovframework.form.DataForm;
 import com.woowonsoft.egovframework.form.DataMap;
 import com.woowonsoft.egovframework.form.ParamForm;
@@ -133,10 +135,11 @@ public interface MainService {
     /**
 	 * 해양대학교 종합정보시스템 회원 정보 조회(VO세팅)
 	 * @param parameterMap
+     * @param request 
 	 * @return
 	 * @throws Exception
 	 */
-	public LoginVO setUser(ParamForm parameterMap) throws Exception;
+	public LoginVO setUser(ParamForm parameterMap, HttpServletRequest request) throws Exception;
 	
 	/**
 	 * 취업률

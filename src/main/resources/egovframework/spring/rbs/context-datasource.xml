@@ -14,7 +14,7 @@
 	<!-- <alias name="dataSource-${Globals.DbType}" alias="rbs.dataSource"/> -->
 	<alias name="jndi-dataSource" alias="rbs.dataSource"/>
 	<alias name="martJndi-dataSource" alias="martdb.dataSource"/>
-	<alias name="martDevJndi-dataSource" alias="martdbdev.dataSource"/>
+	<alias name="martDevJndi-dataSource" alias="martdbDev.dataSource"/>
 	<alias name="oceanJndi-dataSource" alias="oceandb.dataSource"/>
 	
 	<!-- JNDI -->

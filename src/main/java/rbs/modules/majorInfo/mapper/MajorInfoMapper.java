@@ -25,6 +25,34 @@ public class MajorInfoMapper extends EgovAbstractMapper{
 	public List<Object> getList(Map<String, Object> param){
 		return (List<Object>)selectList("rbs.modules.majorInfo.majorInfoMapper.selectList", param);
     }
+	
+	/**
+	 * 주관 대학 목록
+	 * @param param
+	 * @return
+	 */
+	public List<Object> getCollegeList() {
+		return selectList("rbs.modules.majorInfo.majorInfoMapper.getCollegeList");
+	}
+	
+	/**
+	 * 주관 대학 - 학부(과) 목록
+	 * @param param
+	 * @return
+	 */
+	public List<Object> getDepartList(Map<String, Object> param) {
+		return selectList("rbs.modules.majorInfo.majorInfoMapper.getDepartList", param);
+	}
+	
+	/**
+	 * 주관 대학 - 학부(과) - 전공 목록
+	 * @param param
+	 * @return
+	 */
+	public List<Object> getMajorList(Map<String, Object> param) {
+		return selectList("rbs.modules.majorInfo.majorInfoMapper.getMajorList", param);
+	}
+	
 	/**
      * 등록된 정보를 데이터베이스에서 읽어와 화면에 출력
      * @param param 검색조건
@@ -177,6 +205,9 @@ public class MajorInfoMapper extends EgovAbstractMapper{
      */
 	public DataMap getModify(Map<String, Object> param) {
 		return (DataMap)selectOne("rbs.modules.majorInfo.majorInfoMapper.selectModify", param);
+	}
+	public DataMap getDeptModify(Map<String, Object> param) {
+		return (DataMap)selectOne("rbs.modules.majorInfo.majorInfoMapper.selectDeptModify", param);
 	}
 	public DataMap getModifyTrack(Map<String, Object> param) {
 		return (DataMap)selectOne("rbs.modules.majorInfo.majorInfoMapper.selectModifyTrack", param);
@@ -351,6 +382,9 @@ public class MajorInfoMapper extends EgovAbstractMapper{
     }
     public int updateMajor(Map<String, Object> param){
     	return super.update("rbs.modules.majorInfo.majorInfoMapper.updateMajor",param);
+    }
+    public int updateDept(Map<String, Object> param){
+    	return super.update("rbs.modules.majorInfo.majorInfoMapper.updateDept",param);
     }
     public int updateYear(Map<String, Object> param){
     	return super.update("rbs.modules.majorInfo.majorInfoMapper.updateYear",param);

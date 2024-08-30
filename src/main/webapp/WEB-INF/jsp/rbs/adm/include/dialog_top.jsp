@@ -28,7 +28,7 @@
 <body>
 <div id="wrapper">
 	<!-- container -->
-	<div id="container">
+	<div style="width:100%;">
 		<div id="contentsWrap">
 			<div id="content">
 			<c:if test="${param.hideTop != '1'}">

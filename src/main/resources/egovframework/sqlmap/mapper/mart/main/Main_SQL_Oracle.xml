@@ -666,6 +666,12 @@
 		ORDER BY 	APY_GRADE DESC , APY_SMT_NM DESC
 	</select>
 	
+	<!-- 메인 : 학생정보 : 교양필수현황 체크 --> 
+	<select id="selectChkMinorReq" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+		SELECT count(*) FROM DUT.DUT125TB
+		WHERE STUDENT_NO = #{STUDENT_NO}
+	</select>
+	
 	<!-- 메인 : 학생정보 : 교양필수현황 --> 
 	<select id="selectMyMinorReq" parameterType="java.util.HashMap" resultType="dataMap">
 <!-- 		SELECT DISTINCT  -->
@@ -1254,11 +1260,11 @@
 	<select id="selectMyReqCDT" parameterType="java.util.HashMap" resultType="dataMap">
 		WITH INFO AS (
 		    SELECT
-	             SUD010.COLL_CD
-	           , NVL(SUI070.APY_MAJOR_CD,SUI070.APY_DEPT_CD) AS DEPT_CD
+	             NVL(SUD030.AFT_COLL_CD,SUD010.COLL_CD) AS COLL_CD
+	           , NVL(NVL(SUD030.AFT_MAJOR_CD,SUD030.AFT_DEPT_CD),NVL(SUI070.APY_MAJOR_CD,SUI070.APY_DEPT_CD)) AS DEPT_CD
 	           , SUD010.STUDENT_NO
-	           , SUI070.APY_YEAR AS ENT_YEAR
-	           , 'GH0220' AS ENT_SMT
+	           , NVL(SUD030.YEAR,SUI070.APY_YEAR) AS ENT_YEAR
+	           , SUI070.SMT AS ENT_SMT
 	           , SUD010.SINBUN_CODE
 		    FROM
 		        SUD.SUD010TB SUD010, <!-- 학적 마스터 -->
@@ -1274,13 +1280,15 @@
 		        (SELECT
                       APY_YEAR,
                       APY_DEPT_CD,
-                      APY_MAJOR_CD
+                      APY_MAJOR_CD,
+                      SMT
                     FROM (
                       SELECT
                         APY_YEAR,
                         APY_DEPT_CD,
                         APY_MAJOR_CD,
-                        ROW_NUMBER() OVER (ORDER BY APY_YEAR DESC) AS rn
+                        SMT,
+                        ROW_NUMBER() OVER (ORDER BY APY_YEAR DESC, SMT DESC) AS rn
                       FROM
                         SUI.SUI070TB SUI070
                       WHERE
@@ -1358,22 +1366,34 @@
                 FULL OUTER JOIN DONE ON BASE.COMDIV_CODE = DONE.COMDIV_CODE
                 FULL OUTER JOIN TAKING ON COALESCE(BASE.COMDIV_CODE, DONE.COMDIV_CODE) = TAKING.COMDIV_CODE
         )
-        -- 전체 행 추가
-        SELECT
-            'ALL' AS GUBUN_CODE,
-            '전체' AS GUBUN,
-            NVL(TO_CHAR(SUM(TO_NUMBER(BASE_CDT))), '0') AS BASE_CDT,
-            NVL(TO_CHAR(SUM(TO_NUMBER(DONE_CDT))), '0') AS DONE_CDT,
-            NVL(TO_CHAR(SUM(TO_NUMBER(TAKING_CDT))), '0') AS TAKING_CDT
-        FROM RESULT
-        UNION ALL
-        SELECT
-            GUBUN_CODE,
-            GUBUN,
-            BASE_CDT,
-            DONE_CDT,
-            TAKING_CDT
-        FROM RESULT
+        <!-- 전체 행 추가 -->
+		SELECT * FROM (
+            SELECT
+                'ALL' AS GUBUN_CODE,
+                '전체' AS GUBUN,
+                NVL(TO_CHAR(SUM(TO_NUMBER(BASE_CDT))), '0') AS BASE_CDT,
+                NVL(TO_CHAR(SUM(TO_NUMBER(DONE_CDT))), '0') AS DONE_CDT,
+                NVL(TO_CHAR(SUM(TO_NUMBER(TAKING_CDT))), '0') AS TAKING_CDT
+            FROM RESULT
+            UNION ALL
+            SELECT
+                GUBUN_CODE,
+                GUBUN,
+                BASE_CDT,
+                DONE_CDT,
+                TAKING_CDT
+            FROM RESULT
+            )
+	    ORDER BY
+        CASE
+            WHEN GUBUN_CODE = 'ALL'      THEN 1
+            WHEN GUBUN_CODE = 'UE010011' THEN 2  <!-- 교양필수 -->
+            WHEN GUBUN_CODE = 'UE010012' THEN 3  <!-- 교양선택 -->
+            WHEN GUBUN_CODE = 'UE010024' THEN 4  <!-- 전공기초 -->
+            WHEN GUBUN_CODE = 'UE010021' THEN 5  <!-- 전공필수 -->
+            WHEN GUBUN_CODE = 'UE010022' THEN 6  <!-- 전공선택 -->
+            ELSE 6                               <!-- 기타 항목 -->
+        END
 	</select>
 	
 	<!-- 마이페이지 : 성적정보 : 누적성적조회 --> 
@@ -1632,6 +1652,7 @@
 		WHERE		target.ENT_YEAR = SUBSTR(#{STUDENT_NO}, 1, 4)
 				    AND target.DEPT_CD IN (#{DEPT_CD}, #{MAJOR_CD})
 				    AND (base.STUDENT_NO IS NULL OR base.STUDENT_NO = #{STUDENT_NO})
+		ORDER BY CERT_FIELD_CODE
 	</select>
 	
 	<!-- 마이페이지 : 성적정보 : 과목별성적조회 --> 

@@ -119,7 +119,7 @@
 			<c:forEach var="listDt" items="${LIST}" varStatus="i">
 				<tr>
 					<td scope="row" class="num ct"><c:out value="${listNo}"/></td>
-					<td scope="row" class="tlt lt"><c:out value="${listDt.KEYWORD}"/></td>
+					<td scope="row" class="tlt lt" style="text-align:center;"><c:out value="${listDt.KEYWORD}"/></td>
 					<td scope="row" class="graph">
 						<div class="graph_bg">
 							<p class="bar" style="width: ${listDt.PERS}%;"></p>
@@ -135,7 +135,7 @@
 
 	<!-- paging -->
 	<div class="paginate mgt15">
-		<pgui:pagination listUrl="${URL_SRCH_KEYWORD_STAT}${searchList}" pgInfo="${PAGINATIONINFO}" imgPath="${imgPath}" pageName="${elfn:getString(settingInfo.page_name, 'page')}"/>
+		<pgui:pagination listUrl="${URL_SRCH_KEYWORD_STAT}${searchList}" pgInfo="${PAGINATIONINFO}" usePaging="1" imgPath="${imgPath}" pageName="page"/>
 	</div>
 	<!-- //paging -->
 </div>

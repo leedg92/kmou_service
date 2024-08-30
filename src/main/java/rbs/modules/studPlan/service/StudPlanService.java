@@ -127,6 +127,9 @@ public interface StudPlanService {
 	public List<Object> getProfDepartList(Map<String, Object> param);
 	
 	public int deleteBookmarkBySdmCd(String sdmCd);
+	
+	//연계 - 학생설계전공 승인+전공코드 연계
+	public void interfaceStudPlanConfirmation() throws Exception;
 
 	
 

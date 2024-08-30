@@ -37,6 +37,7 @@ import egovframework.rte.fdl.property.EgovPropertyService;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import rbs.egovframework.LoginVO;
+import rbs.egovframework.SukangLoginVO;
 import rbs.modules.bookmark.service.BookmarkService;
 import rbs.modules.code.serviceOra.CodeOptnServiceOra;
 
@@ -116,7 +117,8 @@ public class BookmarkController extends ModuleController {
 		param.put("STUDENT_NO", memberId);
 		param.put("MENU_FG", menuFg);
 		List<Object> bookmarkList = null;
-		bookmarkList = bookmarkService.getBookmarkList(param);	
+		bookmarkList = bookmarkService.getBookmarkList(param);					
+		
 		mav.setView(jsonView);
 		mav.addObject("bookmarkList", bookmarkList.size() < 1 ? null : bookmarkList);
 
@@ -177,17 +179,22 @@ public class BookmarkController extends ModuleController {
 		int pageSize = 10;			//페이징 리스트의 사이즈(페이징을 1부터 몇까지 보여줄껀지)
 		int pageUnit = 6;			//한 페이지에 게시되는 게시물 건수(표 데이터 갯수)
 		int page = StringUtil.getInt(reqJsonObj.get("page").toString(), 1); // 현재 페이지 index
-		
+		int limit = 6;
+		int offset = (page - 1) * 6;
 		// 나의 찜 탭별 목록 증가수
 		if(StringUtil.isEquals(menuFg, "prof")) {
 			listUnit = 12;
 			listUnitStep = 12;
 			pageUnit = 12;
+			limit = 12;
+			offset = (page - 1) * 12;
 		} else if(StringUtil.isEquals(menuFg, "studPlan")) {
 			listUnit = 12;
 			listUnitStep = 12;
 			pageUnit = 12;
-		} 
+			limit = 12;
+			offset = (page - 1) * 12;
+		}
 		
 
 		paginationInfo.setUnitBeginCount(listUnit);
@@ -201,7 +208,8 @@ public class BookmarkController extends ModuleController {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("STUDENT_NO", memberId);
 		param.put("MENU_FG", menuFg);
-		
+		param.put("LIMIT", limit);
+		param.put("OFFSET", offset);
 		
 		// 2.2 목록수
     	int totalCount = bookmarkService.getBookmarkTypeCount(param);

@@ -27,6 +27,8 @@ import egovframework.rte.fdl.cmmn.EgovAbstractServiceImpl;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import rbs.egovframework.LoginVO;
+import rbs.modules.basket.mapper.BasketOraDevMapper;
+import rbs.modules.basket.mapper.BasketOraMapper;
 import rbs.usr.main.mapper.MainMapper;
 import rbs.usr.main.mapper.MainOceanMapper;
 import rbs.usr.main.mapper.MainRbsMapper;
@@ -45,6 +47,13 @@ public class MainServiceImpl extends EgovAbstractServiceImpl implements MainServ
 	
 	@Resource(name="usrMainRbsMapper")
 	private MainRbsMapper mainRbsDao;
+	
+	@Resource(name="basketOraMapper")
+	private BasketOraMapper basketOraDAO;
+	
+//	개발
+	@Resource(name="basketOraDevMapper")
+	private BasketOraDevMapper basketOraDevDAO;
 
 	@Override
 	public List<Object> getModuleList(String moduleId, int fnIdx, int limitNumber, String itemMasterCode){
@@ -289,11 +298,13 @@ public class MainServiceImpl extends EgovAbstractServiceImpl implements MainServ
 	}
 
 	@Override
-	public LoginVO setUser(ParamForm parameterMap) throws Exception {
-		Map<String, Object> param = new HashMap<String, Object>();
+	public LoginVO setUser(ParamForm parameterMap, HttpServletRequest request) throws Exception {
+		Map<String, Object> param = new HashMap<String, Object>();		
 		
+		//종합정보시스템 로그인
 		param.put("MEMBER_ID", parameterMap.getString("mbrId"));
 		param.put("MEMBER_PWD", parameterMap.getString("mbrPwd"));
+		
 		
 		return mainDao.setUser(param);
 	}

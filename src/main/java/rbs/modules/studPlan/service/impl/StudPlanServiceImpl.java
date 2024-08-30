@@ -52,7 +52,7 @@ public class StudPlanServiceImpl extends EgovAbstractServiceImpl implements Stud
 	 */
 	@Override
 	public List<Object> getCollegeList(Map<String, Object> param) throws Exception {
-		return studPlanMartDAO.getCollegeList(param);
+		return studPlanDAO.getCollegeList(param);
 	}
 	
 	/**
@@ -62,7 +62,7 @@ public class StudPlanServiceImpl extends EgovAbstractServiceImpl implements Stud
 	 */
 	@Override
 	public List<Object> getDepartList(Map<String, Object> param) throws Exception {
-		return studPlanMartDAO.getDepartList(param);
+		return studPlanDAO.getDepartList(param);
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class StudPlanServiceImpl extends EgovAbstractServiceImpl implements Stud
 	 */
 	@Override
 	public List<Object> getMajorList(Map<String, Object> param) throws Exception {
-		return studPlanMartDAO.getMajorList(param);
+		return studPlanDAO.getMajorList(param);
 	}
 
 	@Override
@@ -1090,6 +1090,31 @@ public class StudPlanServiceImpl extends EgovAbstractServiceImpl implements Stud
 	@Override
 	public int deleteBookmarkBySdmCd(String sdmCd) {
 		return studPlanDAO.deleteBookmarkBySdmCd(sdmCd);
+		
+	}
+	
+	/**
+	 * 학생설계전공 연계(승인+전공코드 연계)
+	 * @throws Exception
+	 */
+	@Override
+	public void interfaceStudPlanConfirmation() throws Exception {
+		List<Map<String, Object>> notConfirmedList = studPlanDAO.getNotConfirmedStudPlan();
+
+        if (!notConfirmedList.isEmpty()) {
+            List<Map<String, Object>> confirmedList = studPlanMartDAO.getConfirmedStudPlan(notConfirmedList);
+
+            if (!confirmedList.isEmpty()) {
+                for (Map<String, Object> confirmedItem : confirmedList) {
+                	Map<String, Object> param = new HashMap<>();
+                    param.put("SDM_CD",String.valueOf(confirmedItem.get("SDM_CD")));
+                    param.put("REVSN_NO",String.valueOf(confirmedItem.get("REVSN_NO")));
+                    param.put("SDM_DEPT_CD",String.valueOf(confirmedItem.get("SDM_DEPT_CD")));
+
+                	studPlanDAO.updateNotConfirmedStudPlan(param);
+                }
+            }
+        }
 		
 	}
 

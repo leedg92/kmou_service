@@ -189,10 +189,6 @@ public class NonSbjtController extends ModuleController {
                 }
                 param.put("RECOMMENDED_KEYS", keys);
                 param.put("RECOMMENDED_RANKS", ranks);
-                System.out.println(param);
-                System.out.println(param);
-                System.out.println(param);
-                System.out.println(param);
             }    		
     	}
     	
@@ -308,11 +304,6 @@ public class NonSbjtController extends ModuleController {
 		List<Object> userEssentialList = null;
 		userEssentialList = mainService.getCoreCompDiagnosis(param);
 //		JSONArray userEssentialJson = JSONArray.fromObject(userEssentialList);
-		
-		
-		/*나의 신청내역 조회 TODO: 논의 후 결정*/		
-		
-		/*상세일정 및 신청하기 TODO: 논의 후 결정*/
 		
 		
 		/*첨부파일 및 컨텐츠 내용*/
@@ -475,11 +466,6 @@ public class NonSbjtController extends ModuleController {
         
         JSONObject jsonResponse = (JSONObject) JSONSerializer.toJSON(response.toString());
         String token = jsonResponse.optString("token");
-        
-        System.out.println(token);
-        System.out.println(token);
-        System.out.println(token);
-        System.out.println(token);
         
         mav.addObject("success", true);
         mav.addObject("token", token);

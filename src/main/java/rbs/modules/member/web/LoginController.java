@@ -33,7 +33,9 @@ import com.woowonsoft.egovframework.util.UserDetailsHelper;
 import net.sf.json.JSONObject;
 import rbs.egovframework.Defines;
 import rbs.egovframework.LoginVO;
+import rbs.egovframework.SukangLoginVO;
 import rbs.egovframework.com.utl.slm.RbsHttpSessionBindingListener;
+import rbs.modules.basket.service.BasketService;
 import rbs.modules.member.service.MemberLogService;
 
 @Controller
@@ -42,6 +44,10 @@ public class LoginController extends LoginComController{
 	
 	@Resource(name = "memberLogService")
 	protected MemberLogService memberLogService;
+	
+	@Resource(name = "basketService")
+	private BasketService basketService;
+	
 	
 	
 	
@@ -112,9 +118,10 @@ public class LoginController extends LoginComController{
 			return RbsProperties.getProperty("Globals.fail" + ajaxPName + ".path");
 		}
 		// 1. 로그인 처리
-		LoginVO resultVO = mainService.setUser(parameterMap);
+		LoginVO resultVO = mainService.setUser(parameterMap, request);
 		
 		if (resultVO != null) {
+			
 
 				HttpSession session = request.getSession();
 				
@@ -122,6 +129,8 @@ public class LoginController extends LoginComController{
 				session.invalidate();
 				session = request.getSession(true);
 				session.setAttribute("preLoginVO", resultVO);
+				//수강신청 시스템 로그인(세션에 저장)
+				basketService.sukangLogin(parameterMap, request);
 				
 				// 중복 로그인 방지
 				RbsHttpSessionBindingListener listener = RbsHttpSessionBindingListener.INSTANCE;

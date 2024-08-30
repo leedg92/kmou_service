@@ -206,9 +206,9 @@
 
 /*footer*/
 footer {background:#212F49; color:#fff;}
-footer .footer_1 {background:#fff; border-top:1px solid #d9d9d9; padding:1.7rem 0;display: none !important;}
+footer .footer_1 {background:#fff; border-top:1px solid #d9d9d9; padding:1.7rem 0;}
 footer .footer_1 a {font-size:1.4rem;color:#555;margin:0 2.5rem;}
-footer ul li:first-child a{color:var(--pk_blue); font-weight:700;}
+footer .footer_1 a:hover{color:var(--pk_blue);}
 footer .footer_2 {max-width:1400px;padding:2.8rem 0;display:flex;justify-content:center;}
 footer .footer_2 .fl_img {width:20rem; height:4.2rem;}
 footer .footer_2 address {font-size:1.4rem; color:#fff;text-align:left;}
@@ -352,7 +352,9 @@ footer ol li{font-size:1.4rem; color:#fff;}
 	
 	.searchForm {top:calc(6.5rem + 1px);}
 	
-	footer .footer_1 a {margin:0 1rem;font-size:1.7rem;}
+    footer .footer_1 li {width:calc(100% / 3);}
+	footer .footer_1 {flex-wrap:wrap;justify-content:flex-start !important;padding:0;gap:0 !important;}
+	footer .footer_1 a {padding:1.4rem 1rem;font-size:1.7rem;width:100%;margin:0;border-bottom:1px dashed #e1e1e1;text-align:center;}
 	footer .footer_2{flex-direction:column;gap:1.5rem;align-items:center;}
 	footer .footer_2 address {text-align:center;font-size:1.7rem;}
 	footer .footer_2::before {margin-right:0; background-size:contain;}
@@ -392,6 +394,7 @@ footer ol li{font-size:1.4rem; color:#fff;}
     
     .brief_cont .aram_info i {margin-bottom:0;}
     .brief_cont .user_info a {padding-right:0;}
+    footer .footer_1 li {width:calc(100% / 2);}
     
 }
 

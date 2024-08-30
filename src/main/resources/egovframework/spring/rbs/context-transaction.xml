@@ -28,7 +28,7 @@
 	
 	<!-- 개발 -->
 	<bean id="martDevTxManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-		<property name="dataSource" ref="martdbdev.dataSource"/>
+		<property name="dataSource" ref="martdbDev.dataSource"/>
 	</bean>
 	  
 	<tx:advice id="martDevTxAdvice" transaction-manager="martDevTxManager">
@@ -59,6 +59,7 @@
 												  execution(* egovframework.rte.fdl.excel.impl.*Impl.*(..))"/>
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="requiredTx" />
 		<aop:advisor advice-ref="martTxAdvice" pointcut-ref="requiredTx" />
+		<aop:advisor advice-ref="martDevTxAdvice" pointcut-ref="requiredTx" />
 		<aop:advisor advice-ref="oceanTxAdvice" pointcut-ref="requiredTx" />
 	</aop:config>
 

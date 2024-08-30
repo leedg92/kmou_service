@@ -6,10 +6,14 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import com.woowonsoft.egovframework.form.DataMap;
+import com.woowonsoft.egovframework.form.ParamForm;
+
+import net.sf.json.JSONObject;
+import rbs.egovframework.SukangLoginVO;
 
 /**
- * 학업이수현황 service
- * @author 유경열
+ * 장바구니 service
+ * @author 이동근
  *
  */
 public interface BasketService {
@@ -72,10 +76,32 @@ public interface BasketService {
 	public List<Object> getPreApplSbjt(Map<String, Object> param) throws Exception;
 
 	/**
-	 * 예비수강신청 login(기존의 프로시저를 쿼리 연속실행으로 대체하여 사용)
-	 * @param memberIp 
-	 * @param STUDENT_NO
+	 * 예비수강신청 login
+	 * @param parameterMap 
+	 * @param request
 	 * */
-	public DataMap sukangLogin(String memberId, String memberIp) throws Exception;
+	public void sukangLogin(ParamForm parameterMap, HttpServletRequest request) throws Exception;
+
+	/**
+	 * 예비수강신청현황 순서변경
+	 * @param reqJsonObj 
+	 * @param memberId 
+	 * */
+	int updateOrder(JSONObject reqJsonObj, String memberId) throws Exception;
+
+	/**
+	 * 예비수강신청 - 신청
+	 * @param reqJsonObj 
+	 * @param request
+	 * */
+	public String sukangSin(HttpServletRequest request, JSONObject reqJsonObj) throws Exception;
+
+	/**
+	 * 예비수강신청 - 삭제
+	 * @param reqJsonObj 
+	 * @param request
+	 * */
+	public String sukangDel(HttpServletRequest request, JSONObject reqJsonObj) throws Exception;
+	
 	
 }

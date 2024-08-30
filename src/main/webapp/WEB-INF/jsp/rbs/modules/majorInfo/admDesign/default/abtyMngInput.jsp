@@ -1,81 +1,210 @@
 <%@ include file="../../../../include/commonTop.jsp"%>
 <%@ taglib prefix="elui" uri="/WEB-INF/tlds/el-tag.tld"%>
-<%@ taglib prefix="itui" tagdir="/WEB-INF/tags/item" %>
-<c:set var="inputFormId" value="fn_sampleInputForm"/>
+<%@ taglib prefix="itui" tagdir="/WEB-INF/tags/item"%>
+<%@ taglib prefix="pgui" tagdir="/WEB-INF/tags/pagination"%>
 <c:set var="mngAuth" value="${elfn:isAuth('MNG')}" />
 <c:set var="searchFormId" value="fn_codeMstrSearchForm" />
+<c:set var="listFormId" value="fn_codeMstrListForm" />
+<c:set var="inputFormId" value="fn-abtyRegi-submit" />
+<!-- <link rel="stylesheet" type="text/css" href="/RBISADM/css/bootstrap.css"> -->
+<!-- <link rel="stylesheet" type="text/css" href="/RBISADM/css/bootstrap.min.css"> -->
+<c:set var="headTitle" value="전공능력 관리" />
 
-<c:set var="headTitle" value="교과목 등록" />
 <c:if test="${!empty TOP_PAGE}">
 	<jsp:include page="${TOP_PAGE}" flush="false">
 		<jsp:param name="page_tit" value="${headTitle }" />
 		<jsp:param name="javascript_page"
-			value="${moduleJspRPath}/addMajorInput.jsp" />
+			value="${moduleJspRPath}/abtyMngList.jsp" />
 		<jsp:param name="searchFormId" value="${searchFormId}" />
 		<jsp:param name="listFormId" value="${listFormId}" />
 	</jsp:include>
 </c:if>
+<div id="cms_board_article">
 
-	<div id="cms_board_article">
-
-		
-		<form id="${inputFormId}" name="${inputFormId}" method="post" action="<c:out value="${URL_ABILITY_INPUT_PROC}"/>" target="submit_target" enctype="multipart/form-data">
-		<%-- table summary, 항목출력에 사용 --%>
-		<c:set var="exceptIdStr">제외할 항목id를 구분자(,)로 구분하여 입력(예:name,notice,subject,file,contents,listImg)</c:set>
-		<c:set var="exceptIds" value="${fn:split(exceptIdStr,',')}"/>
-		<%-- 
-			table summary값 setting - 테이블 사용하지 않는 경우는 필요 없음
-			디자인 문제로 제외한 항목(exceptIdStr에 추가했으나 table내에 추가되는 항목)은 수동으로 summary에 추가
-			예시)
-			<c:set var="summary"><itui:objectItemName itemInfo="${itemInfo}" itemId="subject"/>, <spring:message code="item.reginame1.name"/>, <spring:message code="item.regidate1.name"/>, <spring:message code="item.board.views.name"/>, <c:if test="${useFile}"><spring:message code="item.file.name"/>, </c:if><itui:tableSummary items="${items}" itemOrder="${itemOrder}" exceptIds="${exceptIds}"/><spring:message code="item.contents.name"/>을 제공하는 표</c:set>
-		--%>
-		<c:set var="summary"><itui:tableSummary items="${items}" itemOrder="${itemOrder}" exceptIds="${exceptIds}"/> 입력표</c:set>
-		
-		<div class="btnbx_right">
-			<a href="#;" onclick="window.open('${URL_ABTY_MNG_LIST}&dl=1', '_blank', 'width=1200, height=1200')"  class="btnTypeK fn_btn_write_open">
-				교과목 등록
-			</a>
-			<input type=button value="조회" id="refresh" class="btnTypeI"">
-			<input type="submit" class="btnTypeJ fn_btn_submit" value="저장" title="저장"/>
-		</div>		
-		
-		<%-- 2. 디자인에 맞게 필요한 항목만 출력하는 경우 --%>
-		<table class="tbWriteA" summary="${summary}">
+	
+	<a href="<c:out value="${URL_ABTY_MNG_DEL_PROC}"/>" title="삭제" class="btnTypeF fn_btn_delete">삭제</a>
+	<a href="#"  title="등록" class="btnTypeG fn_btn_write${inputWinFlag}" data-bs-toggle="modal" data-bs-target="syllabusModal">등록</a>
+	
+	<form id="${listFormId}" name="${listFormId}" method="post"
+		target="list_target">
+		<div style="padding-right:0.5%;">
+		<table id="tpSubContent" class="tbListA"
+			summary="<c:out value="${settingInfo.list_title}"/> 목록을 볼 수 있고 수정 링크를 통해서 수정페이지로 이동합니다.">
 			<caption>
-			글쓰기 서식
+				<c:out value="${settingInfo.list_title}" />
+				목록
 			</caption>
 			<colgroup>
-			<col style="width:150px;" />
-			<col />
+				<col width="5%" />
+				<col width="5%" />
+				<col width="10%" />
+				<col width="15%" />
+				<col />
+				<col width="5%" />
 			</colgroup>
-			<tbody>
+			<thead>
 				<tr>
-					<th>소속</th>
-					<td>
-						<input type="hidden" name="majorCd" value="${dt.MAJOR_CD}">
-						<input type="hidden" name="year" value="${dt.YEAR}">
-						<c:out value="${dt.COLG_NM}"/> > <c:out value="${dt.DEPT_NM}"/>							
-						<c:if test="${dt.DEPT_CD ne dt.MAJOR_CD}">
-							> <c:out value="${dt.MAJOR_NM_KOR}"/>
-						</c:if>
-					</td>
-					<th>학년도</th>
-					<td>${dt.YEAR}</td>
-				</tr>			
-			</tbody>
+					<c:if test="${isMajorInfo ne 'Y'}">
+						<th scope="col"><c:if test="${mngAuth}">
+								<input type="checkbox" id="selectAll" name="selectAll"
+									title="<spring:message code="item.select.all"/>" />
+							</c:if></th>
+					</c:if>
+					<th scope="col">No</th>
+					<th scope="col">관리</th>
+					<th scope="col">전공능력명</th>
+					<th scope="col">전공능력 정의</th>
+					<th scope="col">상위능력</th>
+					<!-- 마지막 th에 class="end" -->
+				</tr>
+			</thead>
 		</table>
-		<br>
-		<div>
-		<itui:abilityTag objDt="${dt}" objVal="${submitType}" itemInfo="${itemInfo}" pageContext="${pageContext}"/>
-  		</div>
-		<div class="btnCenter">
-			<input type=button value="목록"  class="btnTypeB fn_btn_jobCancel">			
 		</div>
-		</form>
-	</div>
-	<div id="footerWrap" style="bottom:auto; width:93%">
-		<div id="footer">
-			<p class="copyright"><c:out value="${siteInfo.site_copyright}"/></p>
+		<div class="scrollable-tbody">
+			<table id="tpSubContent" class="tbListA"
+				summary="<c:out value="${settingInfo.list_title}"/> 목록을 볼 수 있고 수정 링크를 통해서 수정페이지로 이동합니다.">
+				<colgroup>
+					<col width="5%" />
+					<col width="5%" />
+					<col width="10%" />
+					<col width="15%" />
+					<col />
+					<col width="5%" />
+				</colgroup>
+				
+				<tbody class="alignC">
+					<c:if test="${empty abtyList}">
+						<tr>
+							<td colspan="5" class="bllist"><spring:message
+									code="message.no.list" /></td>
+						</tr>
+					</c:if>
+					<c:set var="listIdxName" value="${settingInfo.idx_name}" />
+					<c:set var="listNo" value="${paginationInfo.firstRecordIndex + 1}" />
+					<c:forEach var="listDt" items="${abtyList}" varStatus="i">
+						<tr>
+
+							<td><c:if test="${mngAuth}">
+									<input type="checkbox" id="select" name="select"
+										title="<spring:message code="item.select"/>"
+										value="${listDt.ABTY_CD}" />
+								</c:if></td>
+							<td class="num">${listNo}</td>
+							<td><a href="#" class="btnTypeF fn_btn_modify open-modal02" data-value="${listDt.ABTY_CD}" data-major="${listDt.MAJOR_ABTY}" data-defn="${listDt.MAJOR_ABTY_DEFN}" data-parent="${listDt.PARENT_ABTY_NM}">수정</a></td>
+							<td>${listDt.MAJOR_ABTY}</td>
+							<td>${listDt.MAJOR_ABTY_DEFN}</td>
+							<td>${listDt.PARENT_ABTY_NM }</td>
+
+
+							<input type="hidden" name="YY" +${i.index} value="${listDt.YY}"></input>
+							<input type="hidden" name="OPEN_SUST_MJ_CD" +${i.index}
+								value="${listDt.OPEN_SUST_MJ_CD}"></input>
+							<input type="hidden" name="SHTM_CD" +${i.index}
+								value="${listDt.SHTM_CD}"></input>
+							<input type="hidden" name="SHTM_NM" +${i.index}
+								value="${listDt.SHTM_NM}"></input>
+							<input type="hidden" name="COURSE_NO" +${i.index}
+								value="${listDt.COURSE_NO}"></input>
+							<input type="hidden" name="OPEN_SHYR_FG" +${i.index}
+								value="${listDt.OPEN_SHYR_FG}"></input>
+							<input type="hidden" name="SHYR_NM" +${i.index}
+								value="${listDt.SHYR_NM}"></input>
+							<input type="hidden" name="SBJT_KOR_NM" +${i.index}
+								value="${listDt.SBJT_KOR_NM}"></input>
+							<input type="hidden" name="SBJT_ENG_NM" +${i.index}
+								value="${listDt.SBJT_ENG_NM}"></input>
+							<input type="hidden" name="SBJT_FG" +${i.index}
+								value="${listDt.SBJT_FG}"></input>
+							<input type="hidden" name="SBJT_NM" +${i.index}
+								value="${listDt.SBJT_NM}"></input>
+								
+							<input type="hidden" name="PNT" +${i.index}
+							value="${listDt.PNT}"></input>
+							<input type="hidden" name="THEO_TM_CNT" +${i.index}
+							value="${listDt.THEO_TM_CNT}"></input>
+							<input type="hidden" name="PRAC_TM_CNT" +${i.index}
+							value="${listDt.PRAC_TM_CNT}"></input>
+
+						</tr>
+						<c:set var="listNo" value="${listNo + 1}" />
+					</c:forEach>
+				</tbody>
+			</table>
 		</div>
-	</div>
-<%-- <c:if test="${!empty BOTTOM_PAGE}"><jsp:include page = "${BOTTOM_PAGE}" flush = "false"/></c:if> --%>
+	</form>
+
+</div>
+
+<div class="btnCenter">
+	<!-- <input type="submit" id="saveSub" class="btnTypeA fn_btn_submit" value="교과목 추가" title="교과목 추가" /> --> 
+		<a href="javascript:self.close();" title="닫기" class="btnTypeB back_to_list"> 닫기 </a>
+</div>
+
+
+	
+	
+	
+	<div class="modal fade modal-xl modal_syllabus" id="syllabusModal" tabindex="-1" aria-labelledby="syllabusModalLabel" aria-hidden="true">
+	<form id="${inputFormId}" name="${inputFormId}" method="post" action="<c:out value="${URL_ABTY_MNG_INPUT_PROC}"/>" target="submit_target" enctype="multipart/form-data">
+	<input type="hidden" name="majorCd" value="${param.majorCd }">
+	<input type="hidden" id="modi" name="modi" value="">
+	<input type="hidden" id="abtyCd" name="abtyCd" value="">
+    <div class="modal-dialog modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header bg-black">
+            <h1 class="modal-title fs-5 text-white" id="syllabusModalLabel">전공능력 등록</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                <img src="../../../images/ico_w_close.png" alt="닫기 아이콘"/>
+            </button>
+        </div>
+        <div class="modal-body">
+			<section class="mt-4">
+                <div class="modal-area">
+			<div id="overlay"></div>
+			<div class="loader"></div>
+			<div class="contents-box pl0">
+				<div class="basic-search-wrapper">
+					<div class="one-box">
+						<dl>
+							<dt>능력 명</dt>
+							<dd>
+						    	<input name="majorAbty" id="majorAbty" class="inputTxt" title="능력 명" style="width: 100%;height: 100%;border: 1px solid #dbdbdb;">	 	
+							</dd>
+						</dl>
+					</div>
+					<div class="one-box">
+						<dl>
+							<dt>능력 정의</dt>
+							<dd>
+								<textarea placeholder="능력 정의" class="inputTxt" name="majorAbtyDefn" id="majorAbtyDefn" style="width: 100%;height: 100%;border: 1px solid #dbdbdb;"></textarea>
+							</dd>
+						</dl>
+					</div>
+					<div class="one-box">
+						<dl>
+							<dt>상위전공능력</dt>
+							<dd>
+						    	<select class="select" name="parentAbty" id="parentAbty" title="상위전공능력" style="width: 100%;height: 100%;border: 1px solid #dbdbdb;">							
+									<option value="">상위 전공능력 지정</option>
+								</select>	 	
+							</dd>
+						</dl>
+					</div>
+					<div class="btnbx_right">
+						<button type="button" class="btnTypeJ fn-abtyRegi-submit">저장</button>
+						<button type="button" class="btnTypeI fn-abtyRegi-cancel">취소</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+            </section>
+        </div>
+      </div>
+    </div>
+    </form>
+  </div>
+	
+
+
+<c:if test="${!empty BOTTOM_PAGE}"><jsp:include	page="${BOTTOM_PAGE}" flush="false" /></c:if>

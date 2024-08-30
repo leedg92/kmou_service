@@ -147,21 +147,21 @@ function getLectureList(page, year, semi){
   					
   					varCon += '<ul class="cate d-flex flex-row gap-1 flex-wrap">\n';
   					if(item.COMDIV_CODE == 'UE010074'){
-  						varCon += '<li class="nati_navy">교양과목</li>\n';
+  						varCon += '<li class="styl_gray">교양과목</li>\n';
   	  				} else if(item.COMDIV_CODE == 'UE010011'){ 
-  	  					varCon += '<li class="nati_navy">교양필수</li>\n';
+  	  					varCon += '<li class="styl_lighb">교양필수</li>\n';
   	  				} else if(item.COMDIV_CODE == 'UE010012'){
-  	  					varCon += '<li class="nati_navy">교양선택</li>\n';
+  	  					varCon += '<li class="styl_gray">교양선택</li>\n';
   	  				} else if(item.COMDIV_CODE == 'UE010080'){
-  	  					varCon += '<li class="nati_navy">일반선택</li>\n';
+  	  					varCon += '<li class="general_selection">일반선택</li>\n';
   	  				} else if(item.COMDIV_CODE == 'UE010024'){
   	  					varCon += '<li class="nati_navy">전공기초</li>\n';
   	  				} else if(item.COMDIV_CODE == 'UE010021'){
-  	  					varCon += '<li class="nati_navy">전공필수</li>\n';
+  	  					varCon += '<li class="alon_red">전공필수</li>\n';
   	  				} else if(item.COMDIV_CODE == 'UE010022'){
-  	  					varCon += '<li class="nati_navy">전공선택</li>\n';
+  	  					varCon += '<li class="styl_skyb">전공선택</li>\n';
   	  				} else if(item.COMDIV_CODE == 'UE010031'){
-  	  					varCon += '<li class="nati_navy">교직</li>\n';
+  	  					varCon += '<li class="styl_gray">교직</li>\n';
   	  				}
   					varCon += '</ul>\n';
   					varCon += '<h5 class="fw-semibold ellip_2 my-3">' + subjectNm + '(' + subjectCd + ')' + '</h5>\n';
@@ -195,7 +195,7 @@ function getLectureList(page, year, semi){
   					varCon += `<a href="#" class="d-flex flex-column align-items-center gap-2" onclick="window.open('/web/sbjt/planView.do?mId=32&dl=1&SUBJECT_CD=\${subjectCd}&DEPT_CD=\${deptCd}&EMP_NO=\${empNo}&YEAR=\${year}&SMT=\${smt}&DIVCLS=\${divcls}','_blank', 'width=1000, height=500')">\n `;
   					/* varCon += `<a href="javascript:void(0);" class="d-flex flex-column align-items-center gap-2" onclick="getPlanView('\${empNo}', \${year}, '\${divcls}', '\${smt}');" data-bs-toggle="modal" data-bs-target="#plannerModal">\n `; */
   					varCon += '<i class="rounded-circle d-flex justify-content-center align-items-center"><img src="../images/ico_w_doc.png" alt="계획서아이콘"/></i>\n';
-  					varCon += '<span class="fw-semibold text-center">강의계획서</span>\n';
+  					varCon += '<span class="fw-semibold text-center">수업계획서</span>\n';
   					varCon += '</a>\n';
   					varCon += '</li>\n';
   					varCon += `<li class="col-3 vari_link inter_link" id="lecture_\${subjectCd}_\${deptCd}_\${year}_\${grade}_\${smt}_\${divcls}_\${empNo}">\n`;
@@ -590,7 +590,7 @@ function getLectureView(empNo, year, smt, divcls){
   	});
 }
 
-/* 강의계획서 보기 */
+/* 수업계획서 보기 */
 function getPlanView(empNo, year, divcls, smt){  
 	
 	var subjectCd = "${sbjtInfo.SUBJECT_CD}";
@@ -674,7 +674,7 @@ function getPlanView(empNo, year, divcls, smt){
   			var list = result.weekList;
   			var bookList = result.bookList;
   			
-  			/* 강의계획서  */
+  			/* 수업계획서  */
   			var dt = result.dt;
   			if(dt){
   				
@@ -1008,7 +1008,7 @@ function getPlanView(empNo, year, divcls, smt){
   			return false;
   		}, 
   		error:function(request,error){
-  			alert("강의계획서 실패");
+  			alert("수업계획서 실패");
   			/* fn_ajax.checkError(request); */
   			//alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
   		}

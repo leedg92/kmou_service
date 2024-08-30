@@ -49,12 +49,12 @@
 	
 	<!-- 개발 -->
 	<bean id="martDevSqlSession" class="org.mybatis.spring.SqlSessionFactoryBean">
-	  	<property name="dataSource" ref="martdbdev.dataSource" />
+	  	<property name="dataSource" ref="martdbDev.dataSource" />
 	  	<property name="configLocation" value="classpath:/egovframework/sqlmap/config/rbs/${Globals.DbType}/sql-mapper-config.xml"/>
 		<property name="mapperLocations">
 			<list>
-				<value>classpath:/egovframework/sqlmap/mapper/mart/**/*_SQL_Oracle.xml</value>
-				<value>classpath:/egovframework/sqlmap/mapper/rbs/**/*_SQL_${Globals.DbType}.xml</value>
+				<value>classpath:/egovframework/sqlmap/mapper/mart/**/BasketDev_SQL_Oracle.xml</value>
+				<value>classpath:/egovframework/sqlmap/mapper/rbs/**/*Dev_SQL_${Globals.DbType}.xml</value>
 				<value>classpath:/egovframework/sqlmap/mapper/mart/**/Common_SQL.xml</value>
 			</list>
 		</property>

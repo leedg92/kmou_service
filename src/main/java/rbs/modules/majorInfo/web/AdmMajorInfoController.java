@@ -11,9 +11,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.ObjectUtils;
@@ -25,11 +22,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
-
-import rbs.egovframework.LoginVO;
-import rbs.modules.code.serviceOra.CodeOptnServiceOra;
-import rbs.modules.majorInfo.service.MajorInfoService;
-import rbs.modules.sbjt.serviceOra.SbjtServiceOra;
 
 import com.woowonsoft.egovframework.annotation.ModuleAttr;
 import com.woowonsoft.egovframework.annotation.ModuleAuth;
@@ -55,6 +47,13 @@ import com.woowonsoft.egovframework.util.UserDetailsHelper;
 import com.woowonsoft.egovframework.web.ModuleController;
 
 import egovframework.rte.fdl.property.EgovPropertyService;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import rbs.egovframework.LoginVO;
+import rbs.modules.code.serviceOra.CodeOptnServiceOra;
+import rbs.modules.major.service.MajorService;
+import rbs.modules.majorInfo.service.MajorInfoService;
+import rbs.modules.sbjt.serviceOra.SbjtServiceOra;
 
 /**
  * 샘플모듈<br/>
@@ -72,6 +71,9 @@ public class AdmMajorInfoController extends ModuleController {
 	
 	@Resource(name = "sbjtServiceOra")
 	protected SbjtServiceOra sbjtServiceOra;
+	
+	@Resource(name = "majorService")
+	private MajorService majorService;
 	
 	@Resource(name = "propertiesService")
 	protected EgovPropertyService propertiesService;
@@ -124,7 +126,7 @@ public class AdmMajorInfoController extends ModuleController {
 		String univ = request.getParameter("UNIV");
 		
 		param.put("univ", univ);
-		list = sbjtServiceOra.getDepartList(param);
+		list = majorInfoService.getDepartList(param);
 		
 		model.addAttribute("departList", list);
 		
@@ -145,7 +147,7 @@ public class AdmMajorInfoController extends ModuleController {
 		
 		
 		param.put("depart", depart);
-		list = sbjtServiceOra.getMajorList(param);
+		list = majorInfoService.getMajorList(param);
 		
 		model.addAttribute("majorList", list);
 		
@@ -208,8 +210,19 @@ public class AdmMajorInfoController extends ModuleController {
 		//부서정보 가져오기
 		//String deptCd = loginVO.getDeptCd();
 
+		String univ = request.getParameter("college1");
+		String depart = request.getParameter("college2");
+		String major = request.getParameter("college3");
 		
-		
+		if(univ != null && !"".equals(univ)) {
+			searchList.add(new DTForm("A.COLG_CD", univ));
+		}
+		if(depart != null && !"".equals(depart)) {
+			searchList.add(new DTForm("A.DEPT_CD", depart));
+		}
+		if(major != null && !"".equals(major)) {
+			searchList.add(new DTForm("A.MAJOR_CD", major));
+		}
 		// 2.1 검색조건
 
 		// 항목설정
@@ -230,7 +243,6 @@ public class AdmMajorInfoController extends ModuleController {
 			model.addAttribute("isSearchList", new Boolean(true));
 		}
 		
-		System.out.println("itemInfoSearchList : " + itemInfoSearchList);
 		
 		// 탭코드
 		String cateTabItemId = JSONObjectUtil.getString(settingInfo, "dset_cate_tab_id");
@@ -305,6 +317,7 @@ public class AdmMajorInfoController extends ModuleController {
     	model.addAttribute("searchOptnHashMap", searchOptnHashMap);									// 항목코드
 		model.addAttribute("optnHashMap", optnHashMap);
 		model.addAttribute("userTypeIdx", userTypeIdx);
+		model.addAttribute("collegeList", majorInfoService.getCollegeList());
 		
     	// 4. 기본경로
     	fn_setCommonPath(attrVO);
@@ -369,6 +382,23 @@ public class AdmMajorInfoController extends ModuleController {
 		//String deptCd = loginVO.getDeptCd();
 
 		
+		String majorNm = request.getParameter("is_majorNmKor");
+		String univ = request.getParameter("college1");
+		String depart = request.getParameter("college2");
+		String major = request.getParameter("college3");
+		
+		if(majorNm != null && !"".equals(majorNm)) {
+			param.put("MAJOR_NM", "%" + majorNm + "%");
+		}
+		if(univ != null && !"".equals(univ)) {
+			param.put("COLG", univ);
+		}
+		if(depart != null && !"".equals(depart)) {
+			param.put("DEPART", depart);
+		}
+		if(major != null && !"".equals(major)) {
+			param.put("MAJOR", major);
+		}
 		
 		// 2.1 검색조건
 
@@ -465,12 +495,286 @@ public class AdmMajorInfoController extends ModuleController {
     	model.addAttribute("searchOptnHashMap", searchOptnHashMap);									// 항목코드
 		model.addAttribute("optnHashMap", optnHashMap);
 		model.addAttribute("userTypeIdx", userTypeIdx);
+		model.addAttribute("collegeList", majorInfoService.getCollegeList());
 		
     	// 4. 기본경로
     	fn_setCommonPath(attrVO);
     	
 		return getViewPath("/deptList");
 	}	
+	
+	/**
+	 * 등록
+	 * @param request
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@ModuleAuth(name="WRT")
+	@RequestMapping(value = "/deptInput.do")
+	public String deptInput(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model) throws Exception {
+		JSONObject itemInfo = attrVO.getItemInfo();
+		
+		
+		// 1. 속성 setting
+		// 1.1 항목설정
+		String submitType = "writeDept";
+		model.addAttribute("optnHashMap", getOptionHashMap(submitType, itemInfo));
+		model.addAttribute("submitType", submitType);
+		model.addAttribute("collegeList", sbjtServiceOra.getCollegeList());
+		model.addAttribute("departList", sbjtServiceOra.getDepartList(null));
+		model.addAttribute("URL_SUBMITPROC", request.getAttribute("URL_INPUTPROC"));
+
+    	// 2. 기본경로
+    	fn_setCommonPath(attrVO);
+
+    	// 3. form action
+    	
+    	Map<String, Object> codeParam = new HashMap<String, Object>();
+    	
+    	
+		return getViewPath("/deptInput");
+	}
+	
+	/**
+	 * 수정 : 관리권한 없는 경우 - 자신이 등록한 글만 수정
+	 * @param mode
+	 * @param request
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@ModuleAuth(name={"WRT"})
+	@RequestMapping(value = "/deptInput.do", params="mode")
+	public String deptInput(@RequestParam(value="mode") String mode, @ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model) throws Exception {
+		int fnIdx = attrVO.getFnIdx();
+		JSONObject settingInfo = attrVO.getSettingInfo();
+		JSONObject itemInfo = attrVO.getItemInfo();
+
+		
+		// 1. 필수 parameter 검사
+		// 1.1 필수 key parameter 검사
+//		int keyIdx = StringUtil.getInt(request.getParameter(JSONObjectUtil.getString(settingInfo, "idx_name")), 0);
+		String keyMajorIdx = StringUtil.getString(request.getParameter("DEPT_CD"));
+		//int keyYearIdx = StringUtil.getInt(request.getParameter("year"));
+		System.out.println(request.getParameter("DEPT_CD"));
+		System.out.println(request.getParameter("year"));
+		System.out.println(mode);
+//		int keyStatisticIdx = StringUtil.getInt(request.getParameter(JSONObjectUtil.getString(settingInfo, "idx_statistic_name")), 0);
+		
+		// 1.2 수정모드 여부 검사
+		boolean isModify = (StringUtil.isEquals(mode, "m"))?true:false;
+
+		if(keyMajorIdx == null || !isModify) {
+			System.out.println("여기왔니");
+			return RbsProperties.getProperty("Globals.error.400.path");
+		}
+		
+		/*if(keyMajorIdx == null || keyYearIdx <= 0 || !isModify) {
+			System.out.println("여기왔니");
+			return RbsProperties.getProperty("Globals.error.400.path");
+		}*/
+		
+		// 2. DB
+//		String idxColumnName = JSONObjectUtil.getString(settingInfo, "idx_column");		// key column명 이거 안쓸거임..
+		String idxMajorColumnName = JSONObjectUtil.getString(settingInfo, "idx_major_column");		// key column명
+		String idxYearColumnName = JSONObjectUtil.getString(settingInfo, "idx_year_column");		// key column명
+//		String idxStatisticColumnName = JSONObjectUtil.getString(settingInfo, "idx_statistic_column");		// key column명
+		
+		
+		DataMap dt = null;
+		Map<String, Object> param = new HashMap<String, Object>();
+		List<DTForm> searchList = new ArrayList<DTForm>();
+
+		
+		// 2.1 수정권한 체크
+		Boolean isMngAuth = isMngProcAuth(settingInfo, fnIdx, keyMajorIdx); // keyIdx > keyMajorIdx
+		if(!isMngAuth) {
+			// 수정권한 없는 경우
+			model.addAttribute("message", MessageUtil.getAlert(rbsMessageSource.getMessage("message.no.auth")));
+			return RbsProperties.getProperty("Globals.fail.path");
+		}
+		
+
+		//searchList.add(new DTForm("A.DEPT_CD" , keyMajorIdx));
+		
+		//param.put("searchList", searchList);
+		
+		param.put("DEPT_CD", keyMajorIdx);
+		
+		// 2.2 상세정보
+		dt = majorInfoService.getDeptModify(fnIdx, param);
+		if(dt == null) {
+			// 해당글이 없는 경우
+			model.addAttribute("message", MessageUtil.getAlert(rbsMessageSource.getMessage("message.no.contents")));
+			return RbsProperties.getProperty("Globals.fail.path");
+		}
+		
+		// 3 속성 setting
+		// 3.1 항목설정
+		String submitType = "writeDept";
+		JSONObject items = JSONObjectUtil.getJSONObject(itemInfo, "items");
+		JSONArray itemOrder = JSONObjectUtil.getJSONArray(itemInfo, submitType + "_order");
+
+		// 3.2 속성 setting
+		model.addAttribute("dt", dt);
+//		model.addAttribute("multiFileHashMap", majorInfoService.getMultiFileHashMap(fnIdx, keyIdx, settingInfo, items, itemOrder));	// multi file 목록
+//		model.addAttribute("multiDataHashMap", majorInfoService.getMultiHashMap(fnIdx, keyIdx, items, itemOrder));		// multi data 목록
+		model.addAttribute("optnHashMap", CodeHelper.getItemOptnHashMap(items, itemOrder));		// 항목코드
+		model.addAttribute("submitType", submitType);											// 페이지구분
+		
+		String majorIdx = StringUtil.getString(request.getParameter("DEPT_CD"));
+		String yearIdx = StringUtil.getString(request.getParameter("year"));
+		
+		// 4. 기본경로
+//    	fn_setCommonPath(attrVO);
+    	fn_setCommonPath(attrVO, majorIdx, yearIdx);
+    	
+    	Map<String, Object> codeParam = new HashMap<String, Object>();
+    	//List<Object> haksaCode = codeOptnServiceOra.getHaksaAllCode(codeParam);
+    	//model.addAttribute("haksaCode", haksaCode);
+    	
+    	// 5. form action
+    	model.addAttribute("URL_SUBMITPROC", request.getAttribute("URL_DEPT_INPUT_PROC"));
+		
+    	return getViewPath("/deptInput");
+	}
+	
+	/**
+	 * 수정처리 : 관리권한 없는 경우 - 자신이 등록한 글만 수정
+	 * @param mode
+	 * @param parameterMap
+	 * @param request
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@ModuleAuth(name={"WRT"})
+	@RequestMapping(method=RequestMethod.POST, value = "/deptInputProc.do", params="mode")
+	public String deptInputProc(@RequestParam(value="mode") String mode, @ParamMap ParamForm parameterMap, @ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model) throws Exception {
+		boolean isAjax = attrVO.isAjax();
+		JSONObject settingInfo = attrVO.getSettingInfo();
+		JSONObject itemInfo = attrVO.getItemInfo();
+		String ajaxPName = attrVO.getAjaxPName();
+		String uploadModulePath = attrVO.getUploadModulePath();
+		uploadModulePath = "major" + File.separator + "1";
+		int fnIdx = attrVO.getFnIdx();
+		boolean isAdmMode = attrVO.isAdmMode();
+		
+		//##############
+		//##############
+		
+		// 1. 필수 parameter 검사
+		// 1.1 필수 key parameter 검사
+//		int keyIdx = StringUtil.getInt(request.getParameter(JSONObjectUtil.getString(settingInfo, "idx_name")), 0);
+		String keyMajorIdx = StringUtil.getString(request.getParameter("deptCd"));
+		//int keyYearIdx = StringUtil.getInt(request.getParameter(JSONObjectUtil.getString(settingInfo, "idx_year_name")), 0);
+		String isDelete = StringUtil.getString(request.getParameter("useFg"));
+		String deptLevel = StringUtil.getString(request.getParameter("deptLevel"));
+		if(StringUtil.isEquals(isDelete, "0")) {
+			isDelete = "1";
+		}else {
+			isDelete = "0";
+		}
+		
+		Enumeration<String> paramKeys = request.getParameterNames();
+		while (paramKeys.hasMoreElements()) {
+		     String key = paramKeys.nextElement();
+		     System.out.println(key+":"+request.getParameter(key));
+		}
+		
+		// 1.2 수정모드 여부 검사
+		boolean isModify = (StringUtil.isEquals(mode, "m"))?true:false;
+
+		if(keyMajorIdx == null || !isModify) {
+			System.out.println("여기왔니");
+			return RbsProperties.getProperty("Globals.error.400" + ajaxPName + ".path");
+		}
+
+		// 2. DB
+		// 2.1 상세정보 - 해당글이 없는 경우 return
+		String idxMajorColumnName = JSONObjectUtil.getString(settingInfo, "idx_major_column");		// key column명
+		String idxYearColumnName = JSONObjectUtil.getString(settingInfo, "idx_year_column");		// key column명
+		
+		DataMap dt = null;
+		Map<String, Object> param = new HashMap<String, Object>();
+		List<DTForm> searchList = new ArrayList<DTForm>();
+		
+		
+		if(StringUtil.isEquals(deptLevel, "2")) {
+			searchList.add(new DTForm("COLG_CD", keyMajorIdx));
+		}
+		if(StringUtil.isEquals(deptLevel, "3")) {
+			searchList.add(new DTForm("UP_CD", keyMajorIdx));
+		}
+		if(StringUtil.isEquals(deptLevel, "4")) {
+			searchList.add(new DTForm("DEPT_CD", keyMajorIdx));
+		}
+		//searchList.add(new DTForm("A." + idxYearColumnName, keyYearIdx));
+		param.put("searchList", searchList);
+		param.put("DEPT_CD", keyMajorIdx);
+		dt = majorInfoService.getDeptModify(fnIdx, param);
+		if(dt == null) {
+			// 해당글이 없는 경우
+			model.addAttribute("message", MessageUtil.getAlert(isAjax, rbsMessageSource.getMessage("message.no.contents")));
+			return RbsProperties.getProperty("Globals.fail" + ajaxPName + ".path");
+		}
+		
+		
+		// 2.2 전체관리/완전삭제 권한 체크 - 수정권한 없는 경우 return
+//		Boolean isMngAuth = isMngProcAuth(settingInfo, fnIdx, keyMajorIdx);
+//		if(!isMngAuth) {
+//			// 수정권한 없는 경우
+//			model.addAttribute("message", MessageUtil.getAlert(isAjax, rbsMessageSource.getMessage("message.no.auth")));
+//			return RbsProperties.getProperty("Globals.fail" + ajaxPName + ".path");
+//		}
+		
+		// 3. 필수입력 체크
+		// 3.1 항목설정
+		String submitType = "modify";		// 항목 order명
+		String inputFlag = "modify";		// 항목설정 중 write_type, modify_type 구분
+		JSONObject items = JSONObjectUtil.getJSONObject(itemInfo, "items");
+		JSONArray itemOrder = JSONObjectUtil.getJSONArray(itemInfo, submitType + "proc_order");
+		JSONArray itemYearOrder = JSONObjectUtil.getJSONArray(itemInfo, submitType + "Yearproc_order");
+		JSONArray itemStatisticOrder = JSONObjectUtil.getJSONArray(itemInfo, submitType + "Statisticproc_order");
+		parameterMap.put("_itemInputTypeFlag", submitType);
+		
+		param.put("DEPT_CD", keyMajorIdx);
+		param.put("ISDELETE", isDelete);
+		param.put("DEPT_LEVEL", deptLevel);
+		// 3.2 필수입력 체크
+		String errorMessage = FormValidatorUtil.getErrorMessage(ajaxPName, parameterMap, moduleValidator, new Object[]{isAdmMode, inputFlag, items, itemOrder, settingInfo});
+		if(!StringUtil.isEmpty(errorMessage)) {
+			model.addAttribute("message", errorMessage);
+			return RbsProperties.getProperty("Globals.fail" + ajaxPName + ".path");
+		}
+		
+		// 4. DB
+    	int result = majorInfoService.deptUpdate(uploadModulePath, fnIdx, param, request.getRemoteAddr(), parameterMap, settingInfo, items, itemOrder);
+//    	result = majorInfoService.updateYear(uploadModulePath, fnIdx, keyMajorIdx, keyYearIdx, request.getRemoteAddr(), parameterMap, settingInfo, items, itemYearOrder);
+    	
+    	
+    	if(result > 0) {
+    		// 4.1 저장 성공
+    		
+			String majorIdx = StringUtil.getString(request.getParameter("mjCd"));
+			String yearIdx = StringUtil.getString(request.getParameter("year"));
+			
+			// 4. 기본경로
+			fn_setCommonPath(attrVO, majorIdx, yearIdx);
+			System.out.println(StringUtil.getString(request.getAttribute("URL_INPUT")));
+//			model.addAttribute("message", MessageUtil.getAlertAddWindow(isAjax, rbsMessageSource.getMessage("message.insert"), "fn_procWReload();"));
+			model.addAttribute("message", MessageUtil.getAlertAddWindow(isAjax, rbsMessageSource.getMessage("message.insert"), "fn_procAction(\"" + PathUtil.getAddProtocolToPagePath("deptList.do?mId=68") + "\", " + StringUtil.getInt(request.getParameter("mdl")) + ");"));
+			return RbsProperties.getProperty("Globals.message" + ajaxPName + ".path");
+    	} else if(result == -1) {
+    		// 4.2 파일업로드 오류
+			String fileFailView = getFileFailViewPath(request);
+			if(!StringUtil.isEmpty(fileFailView)) return fileFailView;
+    	}
+		// 4.3 저장 실패
+		model.addAttribute("message", MessageUtil.getAlert(isAjax, rbsMessageSource.getMessage("message.no.insert")));
+		return RbsProperties.getProperty("Globals.fail" + ajaxPName + ".path");
+	}
 	
 	/**
 	 * 목록조회
@@ -566,6 +870,10 @@ public class AdmMajorInfoController extends ModuleController {
 		
 		param.put("MAJOR_CD", keyMajorIdx);
 		//param.put("YEAR", keyYearIdx);
+		
+		List<Object> fieldList = majorInfoService.getFieldList(param);
+		
+		model.addAttribute("fieldList",fieldList);
 		
 
 		// 3.2 속성 setting
@@ -741,7 +1049,7 @@ public class AdmMajorInfoController extends ModuleController {
 		List<DTForm> searchList = new ArrayList<DTForm>();
 		
 		searchList.add(new DTForm("A." + idxMajorColumnName, keyMajorIdx));
-		searchList.add(new DTForm("A." + idxYearColumnName, keyYearIdx));
+		//searchList.add(new DTForm("A." + idxYearColumnName, keyYearIdx));
 		
 		param.put("searchList", searchList);
 
@@ -1933,18 +2241,19 @@ public class AdmMajorInfoController extends ModuleController {
 			param.put("SMT", reuslt.getString("SMT"));
 			param.put("SUBJECT_CD", reuslt.getString("SUBJECT_CD"));
 			param.put("SUBJECT_NM", reuslt.getString("SUBJECT_NM"));
-			param.put("DEPT_CD", reuslt.getString("DEPT_CD"));
-			param.put("DEPT_NM", reuslt.getString("DEPT_NM"));
-			param.put("COMDIV_CODE", reuslt.getString("COMDIV_CODE"));
-			param.put("COMDIV_CODE_NM", reuslt.getString("COMDIV_CODE_NM"));
 			param.put("COM_GRADE", reuslt.getString("COM_GRADE"));
 			param.put("CDT_NUM", reuslt.getString("CDT_NUM"));
-			param.put("WTIME_NUM", reuslt.getString("WTIME_NUM"));
-			param.put("PTIME_NUM", reuslt.getString("PTIME_NUM"));
+			param.put("DEPT_CD", reuslt.getString("DEPT_CD"));
+			param.put("DEPT_NM", reuslt.getString("DEPT_NM"));
 			param.put("REGI_ID", loginVO.getMemberId());
 			param.put("REGI_IP", request.getRemoteAddr());
 			param.put("LAST_MODI_ID", loginVO.getMemberId());
 			param.put("LAST_MODI_IP", request.getRemoteAddr());
+			//param.put("COMDIV_CODE", reuslt.getString("COMDIV_CODE"));
+			//param.put("COMDIV_CODE_NM", reuslt.getString("COMDIV_CODE_NM"));
+			
+			//param.put("WTIME_NUM", reuslt.getString("WTIME_NUM"));
+			//param.put("PTIME_NUM", reuslt.getString("PTIME_NUM"));
 			
 			// 중복 체크하는 구문 제작
 			
@@ -2130,7 +2439,7 @@ public class AdmMajorInfoController extends ModuleController {
 		
 		// 1. 필수 parameter 검사
 		// 1.1 필수 key parameter 검사
-		String majorIdx = StringUtil.getString(request.getParameter("mjCd"));
+		String majorIdx = StringUtil.getString(request.getParameter("majorCd"));
 		String yearIdx = StringUtil.getString(request.getParameter("year"));
 		
 		
@@ -2166,71 +2475,30 @@ public class AdmMajorInfoController extends ModuleController {
 		
 		// 2. DB
 		
-		DataMap basicInfoList = null;
-		List<Object> courMajorInfoList = null;
-		List<Object> abilityInfoList = null;
-		List<Object> microInfoList = null;
-		List<Object> microSbjtInfoList = null;
-		List<Object> rcmdCultInfoList = null;
 		Map<String, Object> param = new HashMap<String, Object>();
-		List<DTForm> searchList = new ArrayList<DTForm>();
-
+		param.put("MAJOR_CD", majorIdx);
 		
-		searchList.add(new DTForm("A.MJ_CD", majorIdx));
-		searchList.add(new DTForm("A.YY", yearIdx));
-		param.put("YY",yearIdx);
-		param.put("MJ_CD",majorIdx);
+		// 전공 상세-학부(과)
+		model.addAttribute("info", param);
 		
-		param.put("searchList", searchList);
+		// 전공 상세-기본정보
+		model.addAttribute("majorInfo", majorService.getView(param) != null ? majorService.getView(param) : null);
 		
-		// 2.2 상세정보
-		basicInfoList = majorInfoService.getModify(fnIdx, param);
-		abilityInfoList = majorInfoService.getAbilityList(fnIdx, param);
-		courMajorInfoList = majorInfoService.getFrontCourMajorList(fnIdx, param);
-		rcmdCultInfoList = majorInfoService.getFrontRcmdCultList(fnIdx, param);
+		// 전공 상세-인재상 + 전공능력
+		model.addAttribute("majorTalent", majorService.getMajorAbty(param) != null ? majorService.getMajorAbty(param) : null);
 		
-		microInfoList = majorInfoService.getMicroMajorList(param);
+		// 전공 상세- 전공능력 + 하위역량 정의
+		model.addAttribute("checkAbty", majorService.checkAbty(param)); // 하위역량 존재 체크 
+		model.addAttribute("majorAbty", majorService.getMajorAbtyDef(param) != null ? majorService.getMajorAbtyDef(param) : null);
 		
-		//마이크로전공 mcmCode listify
-		List<String> mcmCodeList = new ArrayList<String>();
+		// 전공 상세-교육과정
+		model.addAttribute("majorSbjt", majorService.getMajorSbjtList(param) != null ? majorService.getMajorSbjtList(param) : null);
+		//majorServiceOra.getNewMajorList();
 		
-		if(!ObjectUtils.isEmpty(microInfoList)) {
-			for(int i = 0; i < microInfoList.size(); i++) {
-				Map<String, Object> temp = (Map<String, Object>) microInfoList.get(i);
-				if(temp != null) {				
-					String mcmCode =  (String) temp.get("MCM_CODE");
-					mcmCodeList.add(mcmCode);
-				}
-			}
-			param.put("mcmCodeList",mcmCodeList);			
-			microSbjtInfoList = majorInfoService.getMicroMajorSubjectList(param);
-			
-			
-			model.addAttribute("microInfoList", microInfoList);
-			model.addAttribute("microSbjtInfoList", microSbjtInfoList);
-		}							 								
-    	
+		// 4. 기본경로
+		fn_setCommonPath(attrVO);
 		
-		// 3 속성 setting
-		// 3.1 항목설정
-		String submitType = "modify";
-		JSONObject items = JSONObjectUtil.getJSONObject(itemInfo, "items");
-		JSONArray itemOrder = JSONObjectUtil.getJSONArray(itemInfo, submitType + "_order");
-
-		// 3.2 속성 setting
-		model.addAttribute("paginationInfo", paginationInfo);										// 페이징정보
-		model.addAttribute("basicInfoList", basicInfoList);
-		model.addAttribute("courMajorInfoList", courMajorInfoList);
-		model.addAttribute("rcmdCultInfoList", rcmdCultInfoList);
-		model.addAttribute("abilityInfoList", abilityInfoList);		
-		model.addAttribute("optnHashMap", CodeHelper.getItemOptnHashMap(items, itemOrder));		// 항목코드
-		model.addAttribute("submitType", submitType);											// 페이지구분
-		
-    	
-    	// 4. 기본경로
-    	fn_setCommonPath(attrVO);
-    	
-    	return getViewPath("/preview");
+		return getViewPath("/preview");
 	}
 	
 	/**
@@ -2564,19 +2832,6 @@ public class AdmMajorInfoController extends ModuleController {
     	// 3. form action
     	
     	Map<String, Object> codeParam = new HashMap<String, Object>();
-//    	List<Object> haksaCode = codeOptnServiceOra.getHaksaAllCode(codeParam);
-//    	List<Object> haksaContrCode = codeOptnServiceOra.getHaksaAllContrCode(codeParam);
-//    	List<Object> haksaClsfCode = codeOptnServiceOra.getHaksaAllClsfCode(codeParam);
-//    	List<Object> haksaColgCode = codeOptnServiceOra.getHaksaAllColgCode(codeParam);
-//    	List<Object> haksaContrColgCode = codeOptnServiceOra.getHaksaAllContrColgCode(codeParam);
-//    	List<Object> haksaEtcCode = codeOptnServiceOra.getHaksaAllEtcCode(codeParam);
-//    	model.addAttribute("haksaCode", haksaCode);
-//    	model.addAttribute("haksaContrCode", haksaContrCode);
-//    	model.addAttribute("haksaClsfCode", haksaClsfCode);
-//    	model.addAttribute("haksaColgCode", haksaColgCode);
-//    	model.addAttribute("haksaContrColgCode", haksaContrColgCode);
-//    	model.addAttribute("haksaEtcCode", haksaEtcCode);
-    	
     	
     	
 		return getViewPath("/input");
@@ -3139,6 +3394,9 @@ public class AdmMajorInfoController extends ModuleController {
 		String viewName = "view.do";
 		String inputName = "input.do";
 		String inputProcName = "inputProc.do";
+		String deptInputName = "deptInput.do";
+		String deptModifyName = "deptInput.do";
+		String deptInputProcName = "deptInputProc.do";
 		String trackInputName = "trackInput.do";
 		String trackInputProcName = "trackInputProc.do";
 		String jobInputName = "jobInput.do";
@@ -3184,6 +3442,10 @@ public class AdmMajorInfoController extends ModuleController {
 		jobListName += baseQueryString;
 		inputName += baseQueryString;
 		inputProcName += baseQueryString;
+		deptInputName += baseQueryString;
+		deptModifyName += (baseQueryString + "&mode=m");
+		deptInputProcName += baseQueryString;
+		deptInputName += baseQueryString;
 		trackInputName += baseQueryString;
 		trackInputProcName += baseQueryString;
 		jobInputName += baseQueryString;
@@ -3205,6 +3467,9 @@ public class AdmMajorInfoController extends ModuleController {
 		request.setAttribute("URL_ABILITY_LIST", abilityListName);
 		request.setAttribute("URL_INPUT", inputName);
 		request.setAttribute("URL_INPUT_PROC", inputProcName);
+		request.setAttribute("URL_DEPT_INPUT", deptInputName);
+		request.setAttribute("URL_DEPT_MODI", deptModifyName);
+		request.setAttribute("URL_DEPT_INPUT_PROC", deptInputProcName);
 		request.setAttribute("URL_TRACK_INPUT", trackInputName);
 		request.setAttribute("URL_TRACK_INPUT_PROC", trackInputProcName);
 		request.setAttribute("URL_JOB_INPUT", jobInputName);
@@ -3261,6 +3526,9 @@ public class AdmMajorInfoController extends ModuleController {
 		String inputName = "input.do";
 		String modifyName = "input.do";
 		String inputProcName = "inputProc.do";
+		String deptInputName = "deptInput.do";
+		String deptModifyName = "deptInput.do";
+		String deptInputProcName = "deptInputProc.do";
 		String trackInputName = "trackInput.do";
 		String trackInputProcName = "trackInputProc.do";
 		String trackModifyProcName = "trackInputProc.do";
@@ -3315,6 +3583,9 @@ public class AdmMajorInfoController extends ModuleController {
 		inputName += baseQueryString;
 		modifyName += (baseQueryString + "&mode=m&majorCd=" + majorIdx + "&year=" + yearIdx);
 		inputProcName += baseQueryString;
+		deptInputName += baseQueryString;
+		deptInputProcName += baseQueryString;
+		deptModifyName += (baseQueryString + "&mode=m&majorCd=" + majorIdx) ;
 		trackInputName += (baseQueryString + "&majorIdx=" + majorIdx + "&yearIdx=" + yearIdx);
 		trackInputProcName += (baseQueryString + "&majorIdx=" + majorIdx + "&yearIdx=" + yearIdx);
 		trackModifyProcName += (baseQueryString + "&majorIdx=" + majorIdx + "&yearIdx=" + yearIdx + "&mode=m");
@@ -3349,9 +3620,8 @@ public class AdmMajorInfoController extends ModuleController {
 		
 		//주관대학 3차 셀렉트 박스 
 		request.setAttribute("URL_DEPARTLIST", "DepartAjax.json" + baseQueryString);
-		request.setAttribute("URL_MAJORLIST", "MajorAjax.json" + baseQueryString );
-		
-		
+		request.setAttribute("URL_MAJORLIST", "MajorAjax.json" + baseQueryString );	
+	
 //		request.setAttribute("URL_TRACK_LIST", trackListName);
 		request.setAttribute("URL_MAJOR_LIST", majorListName);
 		request.setAttribute("URL_COUR_MAJOR_INPUT_PROC", majorInputName);
@@ -3359,6 +3629,9 @@ public class AdmMajorInfoController extends ModuleController {
 		request.setAttribute("URL_INPUT", inputName);
 		request.setAttribute("URL_MODIFY", modifyName);
 		request.setAttribute("URL_INPUT_PROC", inputProcName);
+		request.setAttribute("URL_DEPT_INPUT", deptInputName);
+		request.setAttribute("URL_DEPT_INPUT_PROC", deptInputProcName);
+		request.setAttribute("URL_DEPT_MODI", deptModifyName);
 		request.setAttribute("URL_TRACK_INPUT", trackInputName);
 		request.setAttribute("URL_TRACK_INPUT_PROC", trackInputProcName);
 		request.setAttribute("URL_TRACK_MODIFY_PROC", trackModifyProcName);

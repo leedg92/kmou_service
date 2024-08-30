@@ -77,6 +77,12 @@ public interface StudPlanAdmService {
 	 * @return
 	 */
 	public int lastSupplementComplete(JSONObject rawJsonObj, HttpServletRequest request) throws Exception;
+	/**
+	 * 종합정보 시스템 연계(데이터 전송)
+	 * @param param
+	 * @return
+	 */
+	public int sendStudPlanToAHS010TB(JSONObject rawJsonObj) throws Exception;
 
 	
 

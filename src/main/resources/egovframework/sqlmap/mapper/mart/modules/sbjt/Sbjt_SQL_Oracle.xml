@@ -158,6 +158,9 @@
                     , SUF100.SINBUN_CODE                                                                   AS SINBUN_CD
                     , UF_GET_COMMON_CODESET(SUF100.SINBUN_CODE)                                            AS SINBUN_NM
                     , ORG.DEPT_CD
+                    , ORG.UP_DEPT_CD
+                    , DEPT_CDNM(ORG.UP_DEPT_CD) AS UP_DEPT_NM
+                    , ORG.ORG_LVL
                     , ORG.DEPT_NM
                     , ORG.COLG_CD
                     , ORG.COLG_NM
@@ -188,6 +191,7 @@
                     , NVL(ABO_YN, 'N')                                                                     AS ABO_YN
                     , SUBJ_DESC
                     , MAIN_ABI_NM
+                    , ROW_NUMBER() OVER (PARTITION BY SUF100.YEAR, SUF100.SMT, SUF100.SUBJECT_CD, SUF100.GRADE ORDER BY SUF100.DIVCLS ASC) AS RNK
                      <if test="coreCount != 0">
                     , SUB_ABI_NM
                     </if>
@@ -260,7 +264,8 @@
                                       AND SUF335.SUBJECT_CD = SUF100.SUBJECT_CD
                                       AND SUF335.DIVCLS = SUF100.DIVCLS
                             
-               WHERE 1 = 1
+               WHERE SUF100.DEPT_CD NOT LIKE '2%'
+               AND SUF100.ABO_YN  = 'N' 
                	<if test="endDate != '' and endDate != null">AND  SUF100.YEAR <![CDATA[<=]]> #{endDate}</if>
 				<if test="startDate != null and startDate != null">AND  SUF100.YEAR <![CDATA[>=]]> #{startDate}</if>
 				<choose>
@@ -272,9 +277,9 @@
 					<otherwise>ORDER BY SUBJECT_NM ASC, YEAR DESC, SMT_CD DESC</otherwise>
 				</choose>
                ) R
-		WHERE 1 = 1
+		WHERE RNK = 1
 		<if test="university != ''">AND  COLG_CD = #{university}</if>
-		<if test="department != ''">AND  DEPT_CD = #{department}</if>
+		<if test="department != ''">AND  DEPT_CD LIKE #{department}</if>
 		<if test="major != ''">AND  MAJOR_CD = #{major}</if>
 		<!-- <if test="year != ''">AND  YEAR = #{year}</if> -->
 		<if test="semester != ''">AND  SMT_CD = #{semester}</if>
@@ -448,6 +453,7 @@
                     , NVL(ABO_YN, 'N')                                                                     AS ABO_YN
                     , SUBJ_DESC
                     , MAIN_ABI_NM
+                    , ROW_NUMBER() OVER (PARTITION BY SUF100.YEAR, SUF100.SMT, SUF100.SUBJECT_CD, SUF100.GRADE ORDER BY SUF100.DIVCLS ASC) AS RNK
                     <if test="coreCount != 0">
                     , SUB_ABI_NM
                     </if>
@@ -517,11 +523,12 @@
                                       AND SUF335.SUBJECT_CD = SUF100.SUBJECT_CD
                                       AND SUF335.DIVCLS = SUF100.DIVCLS
                          
-               WHERE 1 = 1
+               WHERE SUF100.DEPT_CD NOT LIKE '2%'
+               AND SUF100.ABO_YN  = 'N' 
                	<if test="endDate != '' and endDate != null">AND  SUF100.YEAR <![CDATA[<=]]> #{endDate}</if>
 				<if test="startDate != null and startDate != null">AND  SUF100.YEAR <![CDATA[>=]]> #{startDate}</if>
                )
-		WHERE 1=1
+		WHERE RNK = 1
 		<if test="university != ''">AND  COLG_CD = #{university}</if>
 		<if test="department != ''">AND  DEPT_CD = #{department}</if>
 		<if test="major != ''">AND  MAJOR_CD = #{major}</if>
@@ -781,12 +788,12 @@
 				                                      WHERE 	YEAR = #{year}
 				                                      AND 		SUBJECT_CD = #{subjectCd}
 				                                      <choose>
-				                                      	<when test="majorCd == null"> AND DEPT_CD = #{deptCd}</when>
+				                                      	<when test="majorCd == null or majorCd == ''"> AND DEPT_CD = #{deptCd}</when>
 				                                      	<otherwise>AND DEPT_CD = #{majorCd}</otherwise>
 				                                      </choose>
 				                                      )
 				                <choose>
-                                	<when test="majorCd == null"> AND DEPT_CD = #{deptCd}</when>
+                                	<when test="majorCd == null or majorCd == ''"> AND DEPT_CD = #{deptCd}</when>
                                 	<otherwise>AND DEPT_CD = #{majorCd}</otherwise>
                                 </choose>
 				                AND 		SMT = #{smtCd}

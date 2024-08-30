@@ -18,24 +18,25 @@
 	<!-- search -->
 	<c:if test="${userTypeIdx ne '45' && userTypeIdx ne '46'}">
 	<div class="tbMSearch">
-		<form name="${searchFormId}" id="${searchFormId}" method="get"  action="<c:out value="${URL_DEFAULT_LIST}"/>">
+		<form name="${searchFormId}" id="${searchFormId}" method="post"  action="<c:out value="${URL_DEFAULT_LIST}"/>">
 			<input type="hidden" name="mId" value="${queryString.mId}">
 			<fieldset>				
 				<dl>
 					<dt>소속 </dt>
 					<dd style="width:50%">
-						<select name="is_colgCd" id="s_colgCd" class="select" title="대학" >
-							<option value="">전체</option>
+						<select name="college1" id="college1" class="select" title="대학" >
+							<option value="" selected>대학</option>
+                            <c:forEach var="listDt" items="${collegeList }">
+                            	<option value="${listDt.COLG_CD }" <c:if test="${param.univ == listDt.COLG_CD }">selected</c:if>>${listDt.COLG_NM }</option>
+                            </c:forEach>
 						</select>
-						<select name="is_fcltSustCd" id="s_fcltSustCd" class="select" title="학부/학과" >
-							<option value="">전체</option>
-						</select>
-						<select name="is_mjCd" id="s_mjCd" class="select" title="전공">
-							<option value="">전체</option>
-						</select>					
-
-
-<%-- 					<itui:objectSelectClassCustom itemId="mjCd" itemInfo="${itemInfo}" optnHashMap="${mjCdList}"/> --%>
+                        <select name="college2" class="form-select" id="college2" disabled>
+                            <option value="" selected>학부(과)</option>
+                        </select>
+                    
+                        <select name="college3" class="form-select" id="college3" disabled>
+                            <option value="" selected>전공</option>
+                        </select>
 
 					</dd>
 					<itui:searchFormItemIn itemListSearch="${itemInfo.list_search}" searchOptnHashMap="${searchOptnHashMap}" isUseRadio="${isUseRadio}" isUseMoreItem="${isUseMoreItem}"/>	
@@ -90,7 +91,7 @@
 					<%-- <td><c:out value="${listDt.YY }">년</c:out></td> --%>
 					<td>
 					<c:if test="${mngAuth || wrtAuth && listDt.AUTH_MNG == '1'}">
-						<a href="#;" onclick="window.open('${URL_PREVIEW}&${listMajorIdxName}=${listDt.MJ_CD}&${listYearIdxName}=${listDt.YY}', '_blank', 'width=2000, height=2000')"><c:out value="${listDt.KOR_NM}"/>
+						<a href="#;" onclick="window.open('${URL_PREVIEW}&${listMajorIdxName}=${listDt.MAJOR_CD}&${listYearIdxName}=${listDt.YY}', '_blank', 'width=2000, height=2000')"><c:out value="${listDt.KOR_NM}"/>
 							<c:out value="${listDt.COLG_NM}"/> > <c:out value="${listDt.DEPT_NM}"/>							
 							<c:if test="${listDt.DEPT_CD ne listDt.MAJOR_CD}">
 								 > <c:out value="${listDt.MAJOR_NM_KOR}"/>
@@ -117,7 +118,7 @@
 		
 		<!-- paging -->
 		<div class="paginate mgt15">
-			<pgui:pagination listUrl="${URL_PAGE_LIST}" pgInfo="${paginationInfo}" imgPath="${imgPath}" pageName="${elfn:getString(settingInfo.page_name, 'page')}"/>
+			<pgui:pagination listUrl="${URL_PAGE_LIST}&college1=${param.college1 }&college2=${param.college2 }&college3=${param.college3 }&is_majorNmKor=${param.is_majorNmKor }" pgInfo="${paginationInfo}" imgPath="${imgPath}" pageName="${elfn:getString(settingInfo.page_name, 'page')}"/>
 		</div>
 		<!-- //paging -->
 	</div>

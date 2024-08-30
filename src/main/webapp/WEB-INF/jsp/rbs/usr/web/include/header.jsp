@@ -274,9 +274,7 @@
                         </span>
                     </button>
                     <ul class="position-absolute bg-white myinfo_wrap" id="myList" style="max-height:600px; overflow-y:auto; overflow-x:hidden; display:none;">
-                 		<c:if test="${loginVO.usertypeIdx eq '5' }">
-                    	<li><a href="<%=MenuUtil.getMenuUrl(5) %>">내정보보기</a></li>
-		            	</c:if>
+
 		            	<c:if test="${loginVO.usertypeIdx ne '5' }">
 		            	<li><a href="/RBISADM">관리자페이지 이동</a></li>
 		            	</c:if>

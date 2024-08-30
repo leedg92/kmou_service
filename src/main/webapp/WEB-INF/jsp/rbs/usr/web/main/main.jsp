@@ -173,7 +173,7 @@
                       </div>
 				</div>
 				<div class="mask">
-					<img src="../images/lock.png" style="width:64px; margin:0 auto; padding-top:10rem;" />
+					<img src="../images/lock.png" alt=" ">
 					<h3>학업정보 보호 브라우징이 잠겨 있음</h3>
 					<p class="textbx"><a href="#">잠금 <b>해제</b></a></p>
 				</div>
@@ -420,7 +420,7 @@
                    </div>
                    
                    <div class="item_reco_etc">
-	                   <a href="https://cts.kmou.ac.kr/" title="[새창]OceanCTS" target="_blank" class="go_hash">오션 CTS 바로가기</a>
+	                   <a href="javascript:" onclick="goOceanCts('https://cts.kmou.ac.kr/')" title="[새창]OceanCTS" target="_blank" class="go_hash">오션 CTS 바로가기</a>
 	                   <a title="추천방식" class="vote_method btn-example" href="#layer2">추천방식</a>
 	                   <div class="recomm_btn">
 	                       <input type="checkbox" class="checkbox" id="chkPeriod" value="0"/>

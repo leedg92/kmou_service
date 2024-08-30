@@ -50,17 +50,16 @@ $(function(){
 		var abtyDf = $(this).attr("data-defn");
 		var abtyPr = $(this).attr("data-parent");
 		
-		$(".mask").fadeIn(150, function() {
+		console.log("majorAbty " + majorAbty + "majorAbtyDefn " + majorAbtyDefn + "parentAbty " + parentAbty);
+		console.log(parentAbty);
+		$("#modi").val("m");
+		
+		$("#abtyCd").val(abtyCd);
+		$("#majorAbty").val(abtyMj);
+		$("#majorAbtyDefn").val(abtyDf);
+		$("#parentAbty").val(abtyPr).prop("selected", true);
         	
-			$("#modi").val("m");
-			
-			$("#abtyCd").val(abtyCd);
-			$("#majorAbty").val(abtyMj);
-			$("#majorAbtyDefn").val(abtyDf);
-			$("#parentAbty").val(abtyPr).prop("selected", true);
         	
-        	$("#modal-action01").show();
-        });
     });
 	
 	// 모달창 닫기

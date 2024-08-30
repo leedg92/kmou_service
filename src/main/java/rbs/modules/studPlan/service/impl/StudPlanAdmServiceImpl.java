@@ -167,6 +167,34 @@ public class StudPlanAdmServiceImpl extends EgovAbstractServiceImpl implements S
 	    
 	    return studPlanAdmDAO.lastSupplementComplete(param);
 	}
+
+	@Override
+	public int sendStudPlanToAHS010TB(JSONObject rawJsonObj) throws Exception {
+	    Map<String, Object> param = new HashMap<>();
+	    
+	    
+	    param.put("SDM_CD", rawJsonObj.getString("SDM_CD"));
+	    param.put("REVSN_NO", rawJsonObj.getString("REVSN_NO"));
+	    
+	    Map<String, Object> studAplyInfmt = studPlanAdmDAO.getStudAplyInfmt(param);
+	    List<Map<String, Object>> studSbjtInfmt = studPlanAdmDAO.getStudSbjtInfmt(param);
+	    
+	    int result = 0;
+	    
+	    //신청정보(마스터) insert
+	    result += studPlanMartDAO.sendStudPlanToAHS010TB(studAplyInfmt);
+	    System.out.println(result);
+	    if(result > 0) {
+	        for (Map<String, Object> sbjt : studSbjtInfmt) {
+	        	System.out.println(sbjt);
+		    	//교과목 insert
+	        	result += studPlanMartDAO.sendStudPlanToAHS020TB(sbjt);
+	        }	 	    	
+	    }
+	    
+	    
+		return result;
+	}
 	
 
 

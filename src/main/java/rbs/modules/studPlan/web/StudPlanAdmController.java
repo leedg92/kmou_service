@@ -762,8 +762,9 @@ public class StudPlanAdmController extends ModuleController {
 		try {
 			
 			//기본정보 insert
-			int aplyInfmtResult = studPlanAdmService.lastSupplementComplete(rawJsonObj, request);			
-
+			int aplyInfmtResult = studPlanAdmService.lastSupplementComplete(rawJsonObj, request);
+			
+			int sendStudPlanToAHS010TB = studPlanAdmService.sendStudPlanToAHS010TB(rawJsonObj);
 			
 			model.addAttribute("RESULT",  "DONE" );
 			model.addAttribute("RTN_MSG",  "정상적으로 수정마감되었습니다. 해당 학생설계전공은 종합정보시스템으로 전송되고 이후 전공/교육과정에 등록됩니다.");

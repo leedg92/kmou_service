@@ -2,6 +2,41 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="rbs.modules.studPlan.studPlanMapper">
+
+	<select id="getCollegeList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 		COLG_CD AS DEPT_CD	, COLG_NM AS DEPT_NM
+			FROM 		DEPT_INFO
+			WHERE 		ISDELETE = '0'
+			AND DEPT_LEVEL = '2'	
+			ORDER BY 	COLG_CD
+			
+	</select>
+	
+	<select id="getDepartList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 		DEPT_CD, DEPT_NM
+			FROM 		DEPT_INFO
+			WHERE 		ISDELETE = '0'
+			AND DEPT_LEVEL = '3'
+			<if test='UNIV != null and !UNIV.equals("")'>
+			AND UP_CD = #{UNIV}
+			</if>
+			ORDER BY 	COLG_CD, DEPT_CD
+			
+	</select>
+	
+	<select id="getMajorList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 		DEPT_CD, DEPT_NM
+			FROM 		DEPT_INFO
+			WHERE		ISDELETE = '0'
+			AND DEPT_LEVEL = '4'
+			<if test='DEPART != null and !DEPART.equals("")'>
+			AND 		UP_CD = #{DEPART}
+			</if>
+			ORDER BY 	DEPT_CD ASC
+	</select>
+	
+	
+
 	
 	<select id="getNextSdmCd" parameterType="java.lang.String" resultType="java.lang.String">
 			SELECT
@@ -890,5 +925,34 @@
 		WHERE 
 			DOC_ID = #{sdmCd}	
 	</delete>	
+	
+			
+	<select id="getNotConfirmedStudPlan" resultType="dataMap">
+		SELECT 
+			SDM_CD,
+			REVSN_NO 
+		FROM 
+			UNI_SDM_APLY_INFMT
+		WHERE 
+			SDM_DEPT_CD IS NULL
+		AND STATUS = 100
+	</select>	
+	
+	<update id="updateNotConfirmedStudPlan" parameterType="java.util.HashMap">
+		UPDATE 
+			uni_sdm_aply_infmt
+		SET 
+		   	SDM_DEPT_CD = #{SDM_DEPT_CD},
+		   	LAST_MODI_ID = 'BATCH',
+		   	LAST_MODI_DATE = NOW(),
+		   	LAST_MODI_IP = NULL
+		WHERE 
+		    SDM_CD = #{SDM_CD} 
+		AND REVSN_NO = #{REVSN_NO}
+		AND SDM_DEPT_CD IS NULL
+		AND STATUS = '100'
+	</update>
+	
+	
 	
 </mapper>            

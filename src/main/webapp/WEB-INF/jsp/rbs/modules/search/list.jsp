@@ -77,9 +77,26 @@ function majorView(majorCD){
 	form.submit();
 }
 
-
 $(function(){
 	renderNonSbjtResults();
+	// 교과목 찜
+	getBookmarkList('sbjt').then(data => {		
+		data.forEach(function(bookmark) {
+			$("#"+bookmark.docId).addClass("on_red");
+ 		});
+	});
+	// 전공 찜
+	getBookmarkList('major').then(data => {	
+		data.forEach(function(bookmark) {
+			$("#"+bookmark.docId).addClass("on_red");
+ 		});
+	});
+	// 교수 찜
+	getBookmarkList('prof').then(data => {	
+		data.forEach(function(bookmark) {
+			$("#"+bookmark.docId).addClass("on_red");
+ 		});
+	});
 })
 
 
@@ -177,6 +194,36 @@ function renderNonSbjtResults() {
     $nonSbjtResult.append(nonMajorWrap);
 }
 
+
+
+//찜 등록/삭제
+function likeChange(docId, type){
+	if(!$("#"+docId).hasClass("on_red")){
+		$.ajax({
+			url: '/web/bookmark/insertBookmark.do?mId=37&menuFg=' + type,
+			contentType:'application/json',	
+			type: 'POST',
+			data: JSON.stringify({ 
+			    docId : docId
+			}),
+			success: function(data){
+				$("#"+docId).addClass("on_red");
+			}
+		});
+	} else{
+		$.ajax({
+			url: '/web/bookmark/deleteBookmark.do?mId=37&menuFg=' + type,
+			contentType:'application/json',	
+			type: 'POST',
+			data: JSON.stringify({ 
+			    docId : docId
+			}),
+			success: function(data){
+				$("#"+docId).removeClass("on_red");
+			}
+		});
+	}
+}
 
 
 function getBookmarkList(menuFg){

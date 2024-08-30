@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ import net.sf.json.JSONObject;
 import rbs.egovframework.LoginVO;
 import rbs.egovframework.util.ApiUtil;
 import rbs.modules.code.serviceOra.CodeOptnServiceOra;
+import rbs.modules.majorInfo.service.MajorInfoService;
 import rbs.modules.prof.service.ProfService;
 import rbs.modules.sbjt.web.SbjtController;
 import rbs.modules.search.service.SearchService;
@@ -79,6 +81,9 @@ public class ProfController extends ModuleController {
 
 	@Resource(name="codeOptnServiceOra")
 	protected CodeOptnServiceOra codeOptnServiceOra;
+	
+	@Resource(name = "majorInfoService")
+	protected MajorInfoService majorInfoService;
 	
 	
 	/**
@@ -130,7 +135,7 @@ public class ProfController extends ModuleController {
 		//System.out.println(">>>>>>>>>>>>>>>>>>userInfo : " + userInfo);
 		
 		
-		model.addAttribute("collegeList", profService.getCollegeList());
+		model.addAttribute("collegeList", majorInfoService.getCollegeList());
 		
     	// 4. 기본 경로
     	fn_setCommonPath(attrVO);
@@ -261,9 +266,21 @@ public class ProfController extends ModuleController {
 		// 년도 설정
 		String majorYear = request.getParameter("majorYear");
 		Date today = new Date();
-		String strToday = DateUtil.getDateFormat(today, "yyyy");
 		
-		if (StringUtil.isEmpty(majorYear)) majorYear = strToday;
+		// Calendar 인스턴스를 현재 날짜로 설정
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(today);
+
+        // n년 전으로 설정
+        calendar.add(Calendar.YEAR, -10);
+        
+        // n년 전의 날짜 가져오기
+        Date yearsAgo = calendar.getTime();
+        
+        String strToday = DateUtil.getDateFormat(today, "yyyy");
+		String agoYear = DateUtil.getDateFormat(yearsAgo, "yyyy");
+		
+		//if (StringUtil.isEmpty(majorYear)) majorYear = strToday;
 		
 		// 2. DB
 		
@@ -294,6 +311,10 @@ public class ProfController extends ModuleController {
 				sortMap.put("field", "DEPT_NM");
 				sortMap.put("order", "ASC");
 				sortList.add(sortMap);
+			} else {
+				sortMap.put("sortType", "scoreSort");
+				sortMap.put("order", "DESC");
+				sortList.add(sortMap);
 			} 
 			
 			
@@ -301,8 +322,8 @@ public class ProfController extends ModuleController {
 			reqJsonObj.put("page_num", page-1);						//요청 페이지 번호
 			reqJsonObj.put("page_per", pageUnit);					//페이지당 목록 수
 			reqJsonObj.put("sort", sortList);						//정렬
-			reqJsonObj.put("start_date", majorYear);				//시작날짜
-			reqJsonObj.put("end_date", majorYear);					//종료날짜
+			reqJsonObj.put("start_date", agoYear);					//시작날짜
+			reqJsonObj.put("end_date", strToday);					//종료날짜
 			reqJsonObj.put("university", univ);						//대학코드   309000
 			reqJsonObj.put("department", depart);					//학과코드   309050
 			reqJsonObj.put("major", major);							//전공코드   309050
@@ -341,7 +362,6 @@ public class ProfController extends ModuleController {
 				e.printStackTrace();
 			}
 			JSONObject responseJson = JSONObject.fromObject(responseData);
-			logger.debug("responseJson========>"+responseJson);
 			
 	        // JSON 객체 생성
 			//JSONObject reqJsonObj2 = JSONObject.fromObject(responseData);
@@ -380,6 +400,7 @@ public class ProfController extends ModuleController {
 	            professorMap.put("colg_nm", professorJson.getString("COLG_NM"));
 	            professorMap.put("empNm", professorJson.getString("EMP_NM"));
 	            professorMap.put("labRum", professorJson.getString("LABRUM"));
+	            professorMap.put("location", professorJson.getString("LOCATION"));
 	            
 	
 	            professors.add(professorMap);
@@ -390,7 +411,7 @@ public class ProfController extends ModuleController {
 		}
 		
 		List<?> collegeList = null;
-		collegeList = profService.getCollegeList();
+		collegeList = majorInfoService.getCollegeList();
 		model.addAttribute("collegeList", collegeList);
 		
     	// 4. 기본 경로
@@ -413,7 +434,7 @@ public class ProfController extends ModuleController {
 		
 		
 		param.put("univ", univ);
-		list = profService.getDepartList(param);
+		list = majorInfoService.getDepartList(param);
 		
 		model.addAttribute("departList", list);
 		
@@ -434,7 +455,7 @@ public class ProfController extends ModuleController {
 		
 		
 		param.put("depart", depart);
-		list = profService.getMajorList(param);
+		list = majorInfoService.getMajorList(param);
 		
 		model.addAttribute("majorList", list);
 		

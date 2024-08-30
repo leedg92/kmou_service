@@ -48,6 +48,7 @@
 			AND COLG_CD IS NOT NULL
 			ORDER BY DEPT_NM ASC
 	</select>
+ 
 	
 	<select id="getProfDepartList" parameterType="java.util.HashMap" resultType="dataMap">
             SELECT
@@ -202,7 +203,72 @@
 		  <if test='DEPT_CD != null and !DEPT_CD.equals("")'>
 		  AND NOW_DEPT_CD = #{DEPT_CD}
 		  </if>	  
-	</select>	
+	</select>
+
+	<!-- AI시스템에서 최종 승인시 전공코드 채번을 위한 전송(신청정보 - 마스터) -->
+	<insert id="sendStudPlanToAHS010TB" parameterType="java.util.HashMap">
+	    INSERT INTO AHS010TB (
+	        SDM_CD, REVSN_NO, APLY_STUDENT_NO, APLY_STUDENT_NM, APLY_YEAR, APLY_STM,
+	        SDM_KOR_NM, SDM_ENG_NM, AWD_DEGR_KOR_NM, AWD_DEGR_ENG_NM, SBJT_DGN_RNG_FG,
+	        GUID_PROF_STAFF_NO, CNSLT_PROF, CONC_JOB_KOR, CONC_JOB_ENG, CONC_STUD_FLD_KOR,
+	        CONC_STUD_FLD_ENG, DMND_BASE_LRN_ABTY_KOR, DMND_BASE_LRN_ABTY_ENG, ETC_CTNT,
+	        IDEAL_STU_KOR, IDEAL_STU_ENG, APLY_RESN_KOR, APLY_RESN_ENG, CPTN_PLAN_KOR,
+	        CPTN_PLAN_ENG, CHG_CTNT, SDM_CHG_RESN, APLY_FG, STATUS, CNSLT_APLY_DT,
+	        CNSLT_CLS_DT, APLDOC_SUBM_DT, GUID_PROF_TRET_DT, EDU_CENTER_JUDG_DT,
+	        EDU_CENTER_JUDG_OPIN, DEPART_JUDG_DT, DEPART_JUDG_OPIN, AFFAIR_COMMITTEE_JUDG_DT,
+	        AFFAIR_COMMITTEE_JUDG_OPIN, SDM_DEPT_CD, RJT_DT, RJT_RESN, USE_YN,
+	        APLDOC_SUBM_INF_TRNSM_DT, SUST_ACCP_INF_RECP_DT, HDOFCE_ACCP_INF_TRNSM_DT,
+	        HDOFCE_ACCP_INF_RECP_DT, ISDELETE, REGI_ID, REGI_DATE, REGI_IP, LAST_MODI_ID,
+	        LAST_MODI_DATE, LAST_MODI_IP, CNSLT_PROF_NM, SBJT_DGN_RNG_FG_NM, GUID_PROF_STAFF_NM
+	    ) VALUES (
+	        #{SDM_CD}, #{REVSN_NO}, #{APLY_STUDENT_NO}, #{APLY_STUDENT_NM}, #{APLY_YEAR}, #{APLY_STM},
+	        #{SDM_KOR_NM}, #{SDM_ENG_NM}, #{AWD_DEGR_KOR_NM}, #{AWD_DEGR_ENG_NM}, #{SBJT_DGN_RNG_FG},
+	        #{GUID_PROF_STAFF_NO}, #{CNSLT_PROF}, #{CONC_JOB_KOR}, #{CONC_JOB_ENG}, #{CONC_STUD_FLD_KOR},
+	        #{CONC_STUD_FLD_ENG}, #{DMND_BASE_LRN_ABTY_KOR}, #{DMND_BASE_LRN_ABTY_ENG}, #{ETC_CTNT},
+	        #{IDEAL_STU_KOR}, #{IDEAL_STU_ENG}, #{APLY_RESN_KOR}, #{APLY_RESN_ENG}, #{CPTN_PLAN_KOR},
+	        #{CPTN_PLAN_ENG}, #{CHG_CTNT}, #{SDM_CHG_RESN}, #{APLY_FG}, #{STATUS}, #{CNSLT_APLY_DT},
+	        #{CNSLT_CLS_DT}, #{APLDOC_SUBM_DT}, #{GUID_PROF_TRET_DT}, #{EDU_CENTER_JUDG_DT},
+	        #{EDU_CENTER_JUDG_OPIN}, #{DEPART_JUDG_DT}, #{DEPART_JUDG_OPIN}, #{AFFAIR_COMMITTEE_JUDG_DT},
+	        #{AFFAIR_COMMITTEE_JUDG_OPIN}, #{SDM_DEPT_CD}, #{RJT_DT}, #{RJT_RESN}, #{USE_YN},
+	        #{APLDOC_SUBM_INF_TRNSM_DT}, #{SUST_ACCP_INF_RECP_DT}, #{HDOFCE_ACCP_INF_TRNSM_DT},
+	        #{HDOFCE_ACCP_INF_RECP_DT}, #{ISDELETE}, #{REGI_ID}, #{REGI_DATE}, #{REGI_IP}, #{LAST_MODI_ID},
+	        #{LAST_MODI_DATE}, #{LAST_MODI_IP}, #{CNSLT_PROF_NM}, #{SBJT_DGN_RNG_FG_NM}, #{GUID_PROF_STAFF_NM}
+	    )
+	</insert>
+	
+	<!-- AI시스템에서 최종 승인시 전공코드 채번을 위한 전송(교육과정) -->	
+	<insert id="sendStudPlanToAHS020TB" parameterType="java.util.HashMap">
+	    INSERT INTO AHS020TB (
+		    YEAR, SMT, DEPT_CD, COM_GRADE, SUBJECT_CD, SINBUN_CODE, COMDIV_CODE,
+		    DEG_GB_CODE, MNRCOM_DIV_CODE, CDT_NUM, WTIME_NUM, PTIME_NUM,
+		    SISU, 
+		    COM_CNT, 
+		    SELECT_NO, CREATE_UID, CREATE_IP,
+		    JOB_UID, JOB_IP, JOB_PRG_ID, FUSE_DEPT_CD, FUSE_DOMAIN_CD, MAJOR_GB_CODE
+		) VALUES (
+		    #{YEAR}, #{SMT}, #{DEPT_CD}, #{COM_GRADE}, #{SUBJECT_CD}, 'UD340001', #{COMDIV_CODE},
+		    'GD010001, NULL, #{CDT_NUM}, #{WTIME_NUM}, #{PTIME_NUM},
+		    (SELECT SISU FROM SUF.SUF050TB WHERE SUBJECT_CD = #{SUBJECT_CD} AND YEAR = #{YEAR}), 
+		    (SELECT COM_CNT FROM SUF.SUF050TB WHERE SUBJECT_CD = #{SUBJECT_CD} AND YEAR = #{YEAR}),
+		     NULL, 'AISYSTEM', 'AISYSTEM',
+		    NULL, NULL, NULL, '000000', NULL, 'UE360005'
+		)
+	</insert>	
+	
+	<!-- 학생설계전공 연계(전공코드가 채번된 학생설계전공 가져오기) -->
+	<select id="getConfirmedStudPlan" parameterType="java.util.List" resultType="dataMap">
+	    SELECT
+	        SDM_CD,
+	        REVSN_NO,
+	        SDM_DEPT_CD
+	    FROM AIHAKSA24.AHS010TB
+	    WHERE (SDM_CD, REVSN_NO) IN
+	    <foreach item="item" collection="list" open="(" separator="," close=")">
+	        (#{item.SDM_CD}, #{item.REVSN_NO})
+	    </foreach>
+	    AND SDM_DEPT_CD IS NOT NULL
+	</select>
+	
 
 
 </mapper>            
