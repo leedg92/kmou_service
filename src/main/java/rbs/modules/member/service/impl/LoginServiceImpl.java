@@ -231,7 +231,6 @@ public class LoginServiceImpl extends EgovAbstractServiceImpl implements LoginSe
 	public void loginProc(LoginVO resultVO) {
         HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.currentRequestAttributes()).getRequest();
         HttpSession session = request.getSession();
-		session.invalidate();
 		session = request.getSession(true);
 		// 2-1. 로그인 정보를 세션에 저장
 		session.setAttribute("loginVO", resultVO);

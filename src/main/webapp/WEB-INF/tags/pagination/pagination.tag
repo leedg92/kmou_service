@@ -29,7 +29,7 @@
 	</c:otherwise>
 	</c:choose>
 <li class="page-item page-first"><a href="<c:out value="${defaultListUrl}${firstPageNo}"/>" class="page-link" title="first"><span class="blind">first</span><img src="<c:out value="${contextPath}/${crtSiteId}/images/arr_2x_gray.png"/>" alt="처음으로 화살표" /></a></li>
-<li class="page-item page-prev"><a href="<c:out value="${defaultListUrl}${prevPageNo}"/>" class="page-link" title="prev"><span class="blind">prev</span><img src="<c:out value="${contextPath}/${crtSiteId}/images/arr_bottom_gray.png"/>" alt="이전으로 화살표" /></a></li>
+<li class="page-item page-prev"><a href="<c:out value="${defaultListUrl}${prevPageNo}"/>" class="page-link" title="prev"><span class="blind">prev</span><img src="<c:out value="${contextPath}/${crtSiteId}/images/arr_left_gray.png"/>" alt="이전으로 화살표" /></a></li>
 </c:if>
 <c:forEach var="pageNo" begin="${firstPageNoOnPageList}" end="${lastPageNoOnPageList}">
 <c:choose>
@@ -46,7 +46,7 @@
 		<c:set var="nextPageNo" value="${lastPageNo}"/>
 	</c:otherwise>
 	</c:choose>    
-<li class="page-item page-next"><a href="<c:out value="${defaultListUrl}${nextPageNo}"/>" class="page-link" title="next"><span class="blind">next</span><img src="<c:out value="${contextPath}/${crtSiteId}/images/arr_bottom_gray.png"/>" alt="다음으로 화살표" /></a></li>
+<li class="page-item page-next"><a href="<c:out value="${defaultListUrl}${nextPageNo}"/>" class="page-link" title="next"><span class="blind">next</span><img src="<c:out value="${contextPath}/${crtSiteId}/images/arr_left_gray.png"/>" alt="다음으로 화살표" /></a></li>
 <li class="page-item page-last"><a href="<c:out value="${defaultListUrl}${lastPageNo}"/>" class="page-link" title="last"><span class="blind">last</span><img src="<c:out value="${contextPath}/${crtSiteId}/images/arr_2x_gray.png"/>" alt="이전으로 화살표" /></a></li>
 </c:if>
 </c:if>

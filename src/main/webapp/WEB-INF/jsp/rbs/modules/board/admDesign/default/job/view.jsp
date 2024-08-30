@@ -81,8 +81,8 @@
 				</tr>
 			</tbody>
 		</table>
-		<div class="noti-btn-line">
-			<a href="<c:out value="${URL_LIST}"/>" title="목록" class="btn_st">목록</a>
+		<div class="btnTopFull">
+			<div class="right"><a href="<c:out value="${URL_LIST}"/>" title="목록" class="btnTypeA fn_btn_write">목록</a></div>
         </div>
 		<!-- ul class="goArticle">
            	<c:forEach var="listDt" items="${list }" varStatus="i">

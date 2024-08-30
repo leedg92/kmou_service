@@ -67,6 +67,8 @@
 			AND MENU_FG = #{MENU_FG} 
 		</if>
 			AND STD_NO = #{STUDENT_NO}
+		<if test="LIMIT != null">LIMIT #{LIMIT}</if>
+		<if test="OFFSET != null">OFFSET #{OFFSET}</if>
 	</select>
 	
 	<!-- 찜확인(목록) -->

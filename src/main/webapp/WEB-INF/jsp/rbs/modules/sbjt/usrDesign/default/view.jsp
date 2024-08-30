@@ -89,20 +89,24 @@
                                     <td class="border-end m_half">${sbjtInfo.CLASS_NM }</td>
                                     <th scope="row" class="border-end m_half">개설여부</th>
                                     <td class="border-end m_half">${sbjtInfo.ABO_YN }</td>
-                                    <th scope="row" class="border-end m_half">KCU</th>
-                                    <td class="border-end m_half">${sbjtInfo.SDU_YN }</td>
+                                    <%-- <th scope="row" class="border-end m_half">KCU</th>
+                                    <td class="border-end m_half">${sbjtInfo.SDU_YN }</td> --%>
                                     <th scope="row" class="border-end word_keep m_half">학내가상강좌</th>
-                                    <td class=" m_half">${sbjtInfo.CYB_YN }</td>
+                                    <td class="border-end m_half">${sbjtInfo.CYB_YN }</td>
+                                    <th scope="row" class="border-end word_keep m_half">융합전공</th>
+                                    <td class="m_half">${sbjtInfo.LECPLN_FUSE_FL }</td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" class="border-end m_half">융합전공</th>
-                                    <td class="border-end m_half">${sbjtInfo.LECPLN_FUSE_FL }</td>
+                                   <%--  <th scope="row" class="border-end m_half">융합전공</th>
+                                    <td class="border-end m_half">${sbjtInfo.LECPLN_FUSE_FL }</td> --%>
                                     <th scope="row" class="border-end m_half">연계전공</th>
                                     <td class="border-end m_half">${sbjtInfo.LECPLN_LINK_FL }</td>
                                     <th scope="row" class="border-end m_half">마이크로디그리</th>
                                     <td class="border-end m_half">${sbjtInfo.LECPLN_MICRO_FL }</td>
                                     <th scope="row" class="border-end word_keep m_half">나노디그리</th>
-                                    <td class=" m_half">${sbjtInfo.LECPLN_NANO_FL }</td>
+                                    <td class="border-end m_half">${sbjtInfo.LECPLN_NANO_FL }</td>
+                                    <th scope="row" class="border-end word_keep m_half"></th>
+                                    <td class="m_half"></td>
                                 </tr>
                                 <tr>
                                     <th scope="row" class="border-end">교과목 개요</th>
@@ -113,12 +117,21 @@
                                     <td colspan="7">${sbjtInfo.METHOD}</td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" class="border-end"><c:if test="${empty coreInfo.ABI_NAME}">핵심역량</c:if>${coreInfo.ABI_NAME }</th>
-                                    <td colspan="3">
-                                    <c:if test="${empty coreInfo.ABI_NM_LIST}">등록된 데이터가 없습니다.</c:if>${coreInfo.ABI_NM_LIST }</td>
-                                    <th scope="row" class="border-end"><c:if test="${empty abiInfo.ABI_NAME}">전공능력</c:if>${abiInfo.ABI_NAME }</th>
-                                    <td colspan="3">
-                                    <c:if test="${empty abiInfo.ABI_NM_LIST}">등록된 데이터가 없습니다.</c:if>${abiInfo.ABI_NM_LIST }</td>
+                                	<c:choose>
+                                		<c:when test="${sbjtInfo.DEPT_CD != '446000' }">
+                                			<th scope="row" class="border-end"><c:if test="${empty coreInfo.ABI_NAME}">핵심역량</c:if>${coreInfo.ABI_NAME }</th>
+		                                    <td colspan="3">
+		                                    <c:if test="${empty coreInfo.ABI_NM_LIST}">등록된 데이터가 없습니다.</c:if>${coreInfo.ABI_NM_LIST }</td>
+		                                    <th scope="row" class="border-end"><c:if test="${empty abiInfo.ABI_NAME}">전공능력</c:if>${abiInfo.ABI_NAME }</th>
+		                                    <td colspan="3">
+		                                    <c:if test="${empty abiInfo.ABI_NM_LIST}">등록된 데이터가 없습니다.</c:if>${abiInfo.ABI_NM_LIST }</td>
+                                		</c:when>
+                                		<c:otherwise>
+                                			<th scope="row" class="border-end"><c:if test="${empty coreInfo.ABI_NAME}">핵심역량</c:if>${coreInfo.ABI_NAME }</th>
+                                    		<td colspan="7">
+                                    		<c:if test="${empty coreInfo.ABI_NM_LIST}">등록된 데이터가 없습니다.</c:if>${coreInfo.ABI_NM_LIST }</td>
+                                		</c:otherwise>
+                                	</c:choose>
                                 </tr>
 
                             </tbody>

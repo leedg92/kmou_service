@@ -35,15 +35,23 @@ import com.woowonsoft.egovframework.util.PathUtil;
 import com.woowonsoft.egovframework.util.StringUtil;
 import com.woowonsoft.egovframework.web.ModuleController;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import rbs.egovframework.LoginVO;
 import rbs.modules.basket.service.BasketService;
 import rbs.modules.code.serviceOra.CodeOptnServiceOra;
 
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 /**
- * 학업이수현황 Controller
- * @author	유경열
- * @since	2024.01.14
+ * 장바구니 Controller
+ * @author	이동근
+ * @since	2024.08.29
  */
 @Controller
 @ModuleMapping(moduleId="basket")
@@ -209,6 +217,75 @@ public class BasketController extends ModuleController {
 	}
 
 	/**
+	 * 예비수강신청 순서변경
+	 * 
+	 */
+	@RequestMapping(value = "/updateOrder.do", method = RequestMethod.POST)
+	public ModelAndView updateOrder(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model, @RequestBody String rawBody) throws Exception {
+		ModelAndView mav = new ModelAndView("jsonView");
+		try {
+			JSONObject reqJsonObj = JSONObject.fromObject(rawBody);
+			
+			
+
+			HttpSession session = request.getSession(true); 
+			LoginVO loginVO = (LoginVO)session.getAttribute("loginVO");
+			String memberId = loginVO.getMemberId();
+			
+			basketService.updateOrder(reqJsonObj, memberId);
+			
+			mav.setView(jsonView);
+			mav.addObject("result", "DONE");
+		} catch(Exception e) {
+			mav.setView(jsonView);
+			mav.addObject("result", "FAIL");				
+			mav.addObject("error", e.getClass().getName());
+			e.printStackTrace();
+		}
+		
+		return mav;
+	}
+	
+	
+	/**
+	* 예비수강신청 - 신청(프로시저 호출)
+	* 
+	*/
+	@RequestMapping(value = "/sukangSin.do", method = RequestMethod.POST)
+	public ModelAndView sukangSin(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model, @RequestBody String rawBody) throws Exception {
+		ModelAndView mav = new ModelAndView("jsonView");
+		JSONObject reqJsonObj = JSONObject.fromObject(rawBody);
+		
+		String resultMsg = basketService.sukangSin(request, reqJsonObj);
+		
+		System.out.println(resultMsg);
+		
+		mav.setView(jsonView);
+		mav.addObject("resultMsg", resultMsg);
+		
+		return mav;
+	}
+	
+	/**
+	 * 예비수강신청 - 삭제(프로시저 호출)
+	 * 
+	 */
+	@RequestMapping(value = "/sukangDel.do", method = RequestMethod.POST)
+	public ModelAndView sukangDel(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model, @RequestBody String rawBody) throws Exception {
+		ModelAndView mav = new ModelAndView("jsonView");
+		JSONObject reqJsonObj = JSONObject.fromObject(rawBody);
+		
+		String resultMsg = basketService.sukangDel(request, reqJsonObj);
+		
+		System.out.println(resultMsg);
+		
+		mav.setView(jsonView);
+		mav.addObject("resultMsg", resultMsg);
+		
+		return mav;
+	}
+	
+	/**
 	 * 장바구니 등록
 	 * 
 	 */
@@ -315,27 +392,7 @@ public class BasketController extends ModuleController {
 		return mav;
 	}
 	
-	
-	/**
-	 * 예비수강신청 개인정보 가져오기(해양대학교의 login프로시저를 쿼리로 변환하여 사용한다.)
-	 * 
-	 */
-	@RequestMapping(value = "/sukangLogin.do", method = RequestMethod.POST)
-	public ModelAndView sukangLogin(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model) throws Exception {
-		ModelAndView mav = new ModelAndView("jsonView");
-		
-		HttpSession session = request.getSession(true); 
-		LoginVO loginVO = (LoginVO)session.getAttribute("loginVO");
-		String memberId = loginVO.getMemberId();
-		String memberIp = request.getRemoteAddr();
-		
-		DataMap dt = basketService.sukangLogin(memberId, memberIp);
-		
-		mav.setView(jsonView);
-		mav.addObject("dt", dt);
-		
-		return mav;
-	}
+
 
 	
 	/**
@@ -414,4 +471,6 @@ public class BasketController extends ModuleController {
 		}
 		return result;
 	}
+	
+
 }

@@ -41,7 +41,7 @@
 	
 	<!-- 교수 리스트 최초 조회 -->
 	<select id="getInitProfList" parameterType="java.util.HashMap" resultMap="profResultMap">
-		SELECT *
+		<!-- SELECT *
 		FROM (SELECT ROWNUM SEQ_NO, T.*
 			FROM (
 				SELECT 		base.EMP_NO 
@@ -91,35 +91,20 @@
 			<otherwise>
 				ORDER BY EMP_NM ASC
 			</otherwise>
-		</choose>
+		</choose> -->
 		
-		<!-- SELECT *
+		SELECT *
 		FROM (SELECT ROWNUM SEQ_NO, T.*
 						FROM (SELECT EMP_NO
 			     , EMP_NM
-			     , TRIM(EMP_CNM)                        AS EMP_CNM
-			     , TRIM(EMP_ENM)                        AS EMP_ENM
 			     , NOW_DEPT_CD                          AS DEPT_CD
 			     , UF_GET_ORG_CODESET('D', NOW_DEPT_CD) AS DEPT_NM
-			     , (SELECT COLG_CD
-			        FROM SCO.V_AI_ORG ORG
-			        WHERE ORG.DEPT_CD = NOW_DEPT_CD)    AS COLG_CD
 			     , UF_GET_ORG_CODESET('B', NOW_DEPT_CD) AS COLG_NM
-			     , NOW_JOBG_CD                          AS JOBG_CD
-			     , (SELECT JOBG_NM
-			        FROM APS.APS920TB
-			        WHERE JOBG_CD = NOW_JOBG_CD)        AS JOBG_NM
-			     , TEA_MAJOR
-			     , TEA_LOCATION
-			     , TEA_LABRUM
-			     , TEA_LABRUM_INTRO
-			     , TEA_TLPHON
-			     , TEA_EMAIL
-			     , TEA_MAIN
-			     , TEA_CAREER
+			     , TEA_LOCATION AS LOCATION
+			     , TEA_TLPHON AS TEL_NO
+			     , TEA_EMAIL AS EMAIL
 			     , TEA_RSRCH_REALM
 			     , TEA_FILE_PATH
-			     , RTI_FL
 			FROM (SELECT * FROM APS.APS010TB WHERE NOW_NRALI_CD IN ('120201','120202','120203') AND RTI_FL = 0) APS010
 			         LEFT JOIN (SELECT V_TEA_EMPNO                                                           AS TEA_EMPNO
 			                         , TRIM(V_TEA_NAME)                                                      AS TEA_NAME
@@ -170,24 +155,19 @@
 			<otherwise>
 				ORDER BY EMP_NM ASC
 			</otherwise>
-		</choose> -->
+		</choose>
 	</select>
 	
 	<!-- 교수 총 건수 -->
 	<select id="getInitProfListCount" parameterType="java.util.HashMap" resultType="dataMap">
-		<!-- SELECT COUNT(1) AS TOTAL_COUNT
+		SELECT COUNT(1) AS TOTAL_COUNT
 		FROM (SELECT * FROM APS.APS010TB WHERE NOW_NRALI_CD IN ('120201','120202','120203') AND RTI_FL = 0) APS010
 		         LEFT JOIN (SELECT V_TEA_EMPNO                                                           AS TEA_EMPNO
 		                         , TRIM(V_TEA_NAME)                                                      AS TEA_NAME
 		                         , V_TEA_MAJOR    AS TEA_MAJOR
-		                         , V_TEA_LOCATION  AS TEA_LOCATION
 		                         , V_TEA_TLPHON   AS TEA_TLPHON
 		                         , V_TEA_EMAIL        AS TEA_EMAIL
 		                         , V_TEA_LABRUM   AS TEA_LABRUM
-		                         , V_TEA_LABRUM_INTRO AS TEA_LABRUM_INTRO
-		                         , V_TEA_MAIN        AS TEA_MAIN
-		                         , V_TEA_CAREER      AS TEA_CAREER
-		                         , V_TEA_RSRCH_REALM  AS TEA_RSRCH_REALM
 		                         , V_TEA_FAX       AS TEA_FAX
 		                         , V_TEA_FILE_PATH                                                       AS TEA_FILE_PATH
 		                         , COALESCE(V_TEA_RGSDE, TO_DATE('1970-01-01', 'YYYY-MM-DD'))            AS TEA_RGSDE
@@ -203,8 +183,8 @@
 		</if>
 		<if test="department != ''">
 		AND  APS010.NOW_DEPT_CD = #{department}
-		</if> -->
-		SELECT COUNT(*) AS TOTAL_COUNT
+		</if>
+		<!-- SELECT COUNT(*) AS TOTAL_COUNT
 		FROM (
 				SELECT 		base.EMP_NO 
 							, base.EMP_NM 
@@ -227,7 +207,7 @@
 							AND  base.NOW_DEPT_CD = #{department}
 							</if>
 			) T 
-		WHERE T.RN =1
+		WHERE T.RN =1 -->
 	</select>
 	
 	<select id="selectList" parameterType="java.util.HashMap" resultType="dataMap">
@@ -403,6 +383,7 @@
 			    AND 		COLL_CD LIKE '3%'
 			    AND 		A.YEAR <![CDATA[<=]]> #{year}
 			    AND 		A.YEAR <![CDATA[>=]]> #{agoYear}
+			    AND	  	 A.SUBJECT_NM NOT LIKE '%설계및상담%'
 			    ORDER BY 	A.YEAR DESC, A.SUBJECT_NM ASC
 			)
 			
@@ -440,6 +421,7 @@
 				AND 		COLL_CD LIKE '3%'
 				AND A.YEAR <![CDATA[<=]]> #{year}
 				AND A.YEAR <![CDATA[>=]]> #{agoYear}
+				 AND	  	 A.SUBJECT_NM NOT LIKE '%설계및상담%'
 				ORDER BY A.DEPT_CD, A.YEAR DESC
 				)
 	</select>

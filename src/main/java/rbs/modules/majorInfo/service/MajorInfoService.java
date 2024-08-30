@@ -60,7 +60,26 @@ public interface MajorInfoService {
 	public List<Object> getHaksaRcmdCultList(int fnIdx, Map<String, Object> param);
 	public List<Object> insertAddMajorList(int fnIdx, Map<String, Object> param);
 	
+	/**
+	 * 주관 대학 리스트
+	 * @author 석수빈
+	 * @return
+	 */
+	public List<Object> getCollegeList() throws Exception;
 	
+	/**
+	 * 주관 대학 - 학부(과) 리스트
+	 * @author 석수빈
+	 * @return
+	 */
+	public List<Object> getDepartList(Map<String, Object> param) throws Exception;
+	
+	/**
+	 * 주관 대학 - 학부(과) - 전공 리스트
+	 * @author 석수빈
+	 * @return
+	 */
+	public List<Object> getMajorList(Map<String, Object> param) throws Exception;
 	
 	/**
 	 * 새로운 학과/학부 등록
@@ -128,6 +147,7 @@ public interface MajorInfoService {
 	 * @return
 	 */
 	public DataMap getModify(int fnIdx, Map<String, Object> param);
+	public DataMap getDeptModify(int fnIdx, Map<String, Object> param);
 	public DataMap getModifyTrack(int fnIdx, Map<String, Object> param);
 	public DataMap getModifyAbility(int fnIdx, Map<String, Object> param);
 	
@@ -179,6 +199,7 @@ public interface MajorInfoService {
 	 * @throws Exception
 	 */
 	public int update(String uploadModulePath, int fnIdx, Map<String,Object> param, String regiIp, ParamForm parameterMap, JSONObject settingInfo, JSONObject items, JSONArray itemOrder) throws Exception;
+	public int deptUpdate(String uploadModulePath, int fnIdx, Map<String,Object> param, String regiIp, ParamForm parameterMap, JSONObject settingInfo, JSONObject items, JSONArray itemOrder) throws Exception;
 	public int updateYear(String uploadModulePath, int fnIdx, int keyMajorIdx, int keyYearIdx, String regiIp, ParamForm parameterMap, JSONObject settingInfo, JSONObject items, JSONArray itemOrder) throws Exception;
 	public int updateStatistic(String uploadModulePath, int fnIdx, int keyMajorIdx, int keyYearIdx, String regiIp, ParamForm parameterMap, JSONObject settingInfo, JSONObject items, JSONArray itemOrder) throws Exception;
 	public int updateTrack(String uploadModulePath, int fnIdx, int keyMajorIdx, int keyYearIdx, int keyTrackIdx, String regiIp, ParamForm parameterMap, JSONObject settingInfo, JSONObject items, JSONArray itemOrder) throws Exception;

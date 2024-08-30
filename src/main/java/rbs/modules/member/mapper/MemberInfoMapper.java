@@ -54,6 +54,9 @@ public class MemberInfoMapper extends MartAbstractMapper{
 		return (List<Object>)selectList("mart.main.mainDataOracleMapper.selectMyMajorReq", param);
 	}
 	
+	public int getChkMinorReq(Map<String, Object> param) {
+		return (Integer)selectOne("mart.main.mainDataOracleMapper.selectChkMinorReq", param);
+	}
 	public List<Object> getMyMinorReq(Map<String, Object> param){
 		return (List<Object>)selectList("mart.main.mainDataOracleMapper.selectMyMinorReq", param);
 	}
@@ -69,6 +72,8 @@ public class MemberInfoMapper extends MartAbstractMapper{
 	public List<Object> getMyRecordHistory(Map<String, Object> param){
 		return (List<Object>)selectList("mart.main.mainDataOracleMapper.selectMyRecordHistory", param);
 	}
+
+
 
 
 }

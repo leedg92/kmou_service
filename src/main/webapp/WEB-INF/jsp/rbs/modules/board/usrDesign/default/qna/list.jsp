@@ -45,7 +45,7 @@
 			</div>
 			<div class="resultCount">총 <strong>${paginationInfo.totalRecordCount}</strong>건</div>
 			<div class="view_written d-flex justify-content-end my-3">
-				<form name="srchForm" method="post" action="/web/board/list.do?mId=42">
+				<form name="srchForm" method="post" action="/web/board/list.do?mId=41">
 					<input type="hidden" name="mId" value="42">
 					<fieldset class="BD_srch">
 						<div>

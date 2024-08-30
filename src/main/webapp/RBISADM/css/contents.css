@@ -72,7 +72,7 @@
 .tbViewA > tbody > tr > td {height:27px; padding:10px; line-height:18px; vertical-align:middle; border-top:1px solid var(--colorset-border1); background:var(--colorset-bgc);}
 .tbViewA > tbody > tr:first-child > th, .tbViewA > tbody > tr:first-child > td {border-top:0;}
 
-.tbViewA > thead > tr > th {padding:10px;font-weight:normal;color:#535353;text-align:left;vertical-align:middle;border-top:1px solid #e1e1e1;background:#fbfbfb;}
+.tbViewA > thead > tr > th {padding:10px;font-weight:normal;color:#535353;text-align:left;vertical-align:middle;border-top:1px solid #e1e1e1;background:#F6F9FF;}
 .tbViewA > thead > tr > th.viewTlt {font-size:15px;color:#333;font-weight:bold; text-align:center;border-bottom:1px solid #e1e1e1;}
 .tbViewA > thead > tr > th span {font-weight:bold; margin-top:-4px;}
 .tbViewA > thead > tr > th img {margin-right:13px;}

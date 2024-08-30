@@ -79,6 +79,36 @@ public class MajorInfoServiceImpl extends EgovAbstractServiceImpl implements Maj
     }
     
     /**
+	 * 주관대학 목록
+	 * @param param
+	 * @return
+	 */
+	@Override
+	public List<Object> getCollegeList() {
+		return majorInfoDAO.getCollegeList();
+	}
+	
+	/**
+	 * 주관 대학 - 학부(과) 목록
+	 * @param param
+	 * @return
+	 */
+	@Override
+	public List<Object> getDepartList(Map<String, Object> param) {
+		return majorInfoDAO.getDepartList(param);
+	}
+	
+	/**
+	 * 주관 대학 - 학부(과) - 전공 목록
+	 * @param param
+	 * @return
+	 */
+	@Override
+	public List<Object> getMajorList(Map<String, Object> param) {
+		return majorInfoDAO.getMajorList(param);
+	}
+    
+    /**
      * 트랙 목록 수
      * @param fnIdx
      * @param param
@@ -186,7 +216,6 @@ public class MajorInfoServiceImpl extends EgovAbstractServiceImpl implements Maj
 	
 	public List<Object> insertAddMajorList(int fnIdx, Map<String, Object> param) {
 		param.put("fnIdx", fnIdx);
-		System.out.println("여기 실행되나요.");
 		return majorInfoDAO.insertAddMajorList(param);
 	}
 	
@@ -279,6 +308,13 @@ public class MajorInfoServiceImpl extends EgovAbstractServiceImpl implements Maj
 	public DataMap getModify(int fnIdx, Map<String, Object> param) {
     	param.put("fnIdx", fnIdx);
 		DataMap viewDAO = majorInfoDAO.getModify(param);
+		return viewDAO;
+	}
+	
+	@Override
+	public DataMap getDeptModify(int fnIdx, Map<String, Object> param) {
+    	param.put("fnIdx", fnIdx);
+		DataMap viewDAO = majorInfoDAO.getDeptModify(param);
 		return viewDAO;
 	}
 	
@@ -1591,6 +1627,69 @@ public class MajorInfoServiceImpl extends EgovAbstractServiceImpl implements Maj
 		return result;
 	}
 	
+	/**
+	 * 수정처리 : 화면에 조회된 정보를 수정하여 항목의 정합성을 체크하고 수정된 데이터를 데이터베이스에 반영
+	 * @param uploadModulePath
+	 * @param fnIdx
+	 * @param keyIdx
+	 * @param regiIp
+	 * @param parameterMap
+	 * @param settingInfo
+	 * @param items
+	 * @param itemOrder
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public int deptUpdate(String uploadModulePath, int fnIdx, Map<String,Object> param, String regiIp, ParamForm parameterMap, JSONObject settingInfo, JSONObject items, JSONArray itemOrder) throws Exception {
+		if(JSONObjectUtil.isEmpty(items) || JSONObjectUtil.isEmpty(itemOrder)) return -1; 
+			
+		List<DTForm> dataList = new ArrayList<DTForm>();							// 저장항목
+		String level = "";
+		if(param.get("DEPT_LEVEL") != null) {
+			level = (String) param.get("DEPT_LEVEL");
+		}
+		
+    	
+		// 1. 검색조건 setting
+
+		// 2. 항목설정으로 저장항목 setting
+		String fileRealPath = RbsProperties.getProperty("Globals.upload.file.path") + File.separator + uploadModulePath;
+		HashMap<String, Object> dataMap = ModuleUtil.getItemInfoDataMap(fileRealPath, parameterMap, settingInfo, items, itemOrder);
+		if(dataMap == null || dataMap.size() == 0) return -1;
+		
+		// 2.1 저장항목
+		List itemDataList = StringUtil.getList(dataMap.get("dataList"));
+		if(itemDataList != null) dataList.addAll(itemDataList);
+
+		// 2.2 등록자 정보
+		LoginVO loginVO = (LoginVO) UserDetailsHelper.getAuthenticatedUser();	// 로그인 사용자 정보
+		String loginMemberIdx = null;
+		String loginMemberId = null;
+		String loginMemberName = null;
+		String resprCfmYn = (String) parameterMap.get("resprCfmYn");
+		if(loginVO != null) {
+			loginMemberIdx = loginVO.getMemberIdx();
+			loginMemberId = loginVO.getMemberId();
+			loginMemberName = loginVO.getMemberName();
+		}
+		
+    	dataList.add(new DTForm("LAST_MODI_ID", loginMemberId));
+    	dataList.add(new DTForm("LAST_MODI_IP", regiIp));
+    	dataList.add(new DTForm("RESPR_CFM_YN", resprCfmYn));
+
+    	
+    	param.put("dataList", dataList);
+    	param.put("fnIdx", fnIdx);
+
+    	// 3. DB 저장
+    	// 3.1 기본 정보 테이블
+		int result = majorInfoDAO.updateDept(param);
+		
+		return result;
+	}
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public int updateCourMajor(String keyMajorIdx, int keyYearIdx, String uploadModulePath, int fnIdx, HashMap<String,Object> param, String logInIp, ParamForm parameterMap, JSONObject settingInfo, JSONObject items, JSONArray itemOrder) throws Exception {
@@ -1622,38 +1721,41 @@ public class MajorInfoServiceImpl extends EgovAbstractServiceImpl implements Maj
 		int dtLength = StringUtil.getInt(parameterMap.get("dtLength"));		
 		int insertMajorCour = 0;
 		
-		param.put("YY", keyYearIdx);
-		param.put("MJ_CD", keyMajorIdx);
-		param.put("OPEN_SUST_MJ_CD", keyMajorIdx);	
+		
+		param.put("MAJOR_CD", keyMajorIdx);
+		/*param.put("OPEN_SUST_MJ_CD", keyMajorIdx);*/	
 		// delete 쿼리 실행
 		majorInfoDAO.deleteMajorCour(param);
 		System.out.println("parameterMap L::::" + parameterMap);
 		System.out.println("dtLength ::::" + dtLength);
 		for(int i = 0; i <= dtLength; i++) {
 			
-			if (parameterMap.get("courseNo" + i) != null && parameterMap.get("field" + i) != null ) {
+			if (parameterMap.get("subjectCd" + i) != null && parameterMap.get("field" + i) != null ) {
 				
-				
-				searchList.add(new DTForm("MJ_CD", keyMajorIdx));
-				searchList.add(new DTForm("YY", keyYearIdx));			
-				searchList.add(new DTForm("COURSE_NO", StringUtil.getString(parameterMap.get("courseNo" + i))));
+				System.out.println("삭제후 인서트 진입 성공");
+				searchList.add(new DTForm("MAJOR_CD", keyMajorIdx));
+							
+				searchList.add(new DTForm("SUBJECT_CD", StringUtil.getString(parameterMap.get("subjectCd" + i))));
 	
-				param.put("COURSE_NO", StringUtil.getString(parameterMap.get("courseNo" + i)));
+				param.put("SUBJECT_CD", StringUtil.getString(parameterMap.get("subjectCd" + i)));
 				
-				String ord = (String) parameterMap.get("ord" + i);
-				String sbjtFg = (String) parameterMap.get("sbjtFg" + i);				
-				String shyrFg = (String) parameterMap.get("shyrFg" + i);
-				String shtmCd = (String) parameterMap.get("shtmCd" + i);
-				String sbjtNmKor = StringUtil.getString(parameterMap.get("sbjtNmKor"+ i));
-				String courseNo = (String) parameterMap.get("courseNo" + i);				
-				String field = (String) parameterMap.get("field" + i);
+				
+				String comdivCd = (String) parameterMap.get("comdivCd" + i);				
+				String grade = (String) parameterMap.get("grade" + i);
+				String openDept = (String) parameterMap.get("openDept" + i);
+				String subjectNm = StringUtil.getString(parameterMap.get("subjectNm"+ i));
+				String subjectCd = (String) parameterMap.get("subjectCd" + i);				
+				String field = (String) parameterMap.get("fieldNm" + i);
+				String fieldCd = (String) parameterMap.get("field" + i);
+				
 				String regiDate = (String) parameterMap.get("regiDate" + i);
 				String regiId = (String) parameterMap.get("regiId" + i);
 				String regiIp = (String) parameterMap.get("regiIp" + i);
-				String pnt = (String) parameterMap.get("pnt" + i);
-				String theoTmCnt = (String) parameterMap.get("theoTmCnt" + i);
-				String pracTmCnt = (String) parameterMap.get("pracTmCnt" + i);
-				String sbjtNmEng = (String) parameterMap.get("sbjtNmEng" + i);
+				
+				String year = (String) parameterMap.get("year" + i);
+				String smt = (String) parameterMap.get("smt" + i);
+				String cdtNum = (String) parameterMap.get("cdtNum" + i);
+				/*String sbjtNmEng = (String) parameterMap.get("sbjtNmEng" + i);*/
 				
 				// REGI, LAST_MODI 항목 setting
 				if(regiDate == null || regiId == null || regiIp == null) {
@@ -1668,26 +1770,28 @@ public class MajorInfoServiceImpl extends EgovAbstractServiceImpl implements Maj
 				dataList.add(new DTForm("LAST_MODI_ID", loginMemberId));
 				dataList.add(new DTForm("LAST_MODI_IP", regiIp));
 								
-				dataList.add(new DTForm("MJ_CD", keyMajorIdx));
-				dataList.add(new DTForm("YY", keyYearIdx));;
-				dataList.add(new DTForm("ORD", i+1));
-				dataList.add(new DTForm("SBJT_FG", sbjtFg));
+				dataList.add(new DTForm("MAJOR_CD", keyMajorIdx));
 				
-				dataList.add(new DTForm("SHYR_FG", shyrFg));
-				dataList.add(new DTForm("SHTM_CD", shtmCd));
-				dataList.add(new DTForm("SBJT_NM_KOR", sbjtNmKor));
-				dataList.add(new DTForm("COURSE_NO", courseNo));
+				
+				//dataList.add(new DTForm("COMDIV_CODE", comdivCd));
+				
+				dataList.add(new DTForm("GRADE", grade));
+				//dataList.add(new DTForm("OPEN_DEPT", openDept));
+				dataList.add(new DTForm("SUBJECT_NM", subjectNm));
+				dataList.add(new DTForm("SUBJECT_CD", subjectCd));
 				dataList.add(new DTForm("FIELD", field));
-				dataList.add(new DTForm("PNT", pnt));
-				dataList.add(new DTForm("THEO_TM_CNT", theoTmCnt));
-				dataList.add(new DTForm("PRAC_TM_CNT", pracTmCnt));
-				dataList.add(new DTForm("SBJT_NM_ENG", sbjtNmEng));
+				dataList.add(new DTForm("FIELD_CD", fieldCd));
+				dataList.add(new DTForm("YEAR", year));
+				dataList.add(new DTForm("SMT", smt));
+				dataList.add(new DTForm("CDT_NUM", cdtNum));
+				/*dataList.add(new DTForm("SINBUN_CODE", sinbunCd));*/
 				dataList.add(new DTForm("ISDELETE", 0));
 				
 				param.put("dataList", dataList);
 				
-				 insertMajorCour = majorInfoDAO.insertMajorCour(param);
+				insertMajorCour = majorInfoDAO.insertMajorCour(param);
 				
+				System.out.println("인서트 후 실패");
 				searchList.clear();
 				dataList.clear();
 			}

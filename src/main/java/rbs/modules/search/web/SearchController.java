@@ -117,7 +117,7 @@ public class SearchController extends ModuleController {
 	@ModuleAuth(name="LST")
 	@RequestMapping(value="/total.do")
 	public String list(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model) throws Exception {
-		
+		logger.debug("****************subject**********apiStart****************");
 		DataForm queryString = attrVO.getQueryString();
 		boolean isAdmMode = attrVO.isAdmMode(); // 관리자면 true, 사용자면 false
 		int fnIdx = attrVO.getFnIdx();
@@ -144,7 +144,7 @@ public class SearchController extends ModuleController {
 		// Calendar 인스턴스를 현재 날짜로 설정
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(today);
-        calendar.add(Calendar.YEAR, -3);
+        calendar.add(Calendar.YEAR, -0);
         
         Date yearAgo = calendar.getTime();
         
@@ -169,18 +169,17 @@ public class SearchController extends ModuleController {
 		HashMap<String, String> sortMap1 = new HashMap<String, String>();
 		HashMap<String, String> sortMap2 = new HashMap<String, String>();
 		HashMap<String, String> sortMap3 = new HashMap<String, String>();
-		sortMap1.put("sortType", "fieldSort");
-		sortMap1.put("field", "SUBJECT_NM");
-		sortMap1.put("order", "ASC");
-		sortMap2.put("sortType", "fieldSort");
+		sortMap1.put("sortType", "scoreSort");
+		sortMap1.put("order", "DESC");
+		/*sortMap2.put("sortType", "fieldSort");
 		sortMap2.put("field", "YEAR");
 		sortMap2.put("order", "DESC");
 		sortMap3.put("sortType", "fieldSort");
 		sortMap3.put("field", "SMT_CD");
-		sortMap3.put("order", "DESC");
+		sortMap3.put("order", "DESC");*/
 		sortList.add(sortMap1);
-		sortList.add(sortMap2);
-		sortList.add(sortMap3);
+		/*sortList.add(sortMap2);
+		sortList.add(sortMap3);*/
 		
 		reqJsonObj.put("keyword", top_search); // 통합 검색
 		reqJsonObj.put("page_num", 0); 		  // 요청 페이지 번호
@@ -203,8 +202,6 @@ public class SearchController extends ModuleController {
 		
 		JSONObject responseJson = JSONObject.fromObject(responseData);
 		
-		logger.debug("responseJson========>" + responseJson);
-		
 		// 전체 갯수 설정
 		int sbjtCount = 0;
 		
@@ -218,13 +215,11 @@ public class SearchController extends ModuleController {
 		List<Map<String, String>> sbjtList = new ArrayList<>();
 		
 		JSONArray sbjtArray = responseJson.getJSONObject("data").getJSONArray("result");
-		logger.debug("responseJson========>" + sbjtArray);
 		if (sbjtCount > 0) {
 			
 			// 화면에 뿌려줄 데이터 세팅
 			for (Object sbjtObj : sbjtArray ) {
 				JSONObject sbjtJobj = (JSONObject) sbjtObj;
-				logger.debug("document========>" + sbjtJobj);
 				Map<String, String> map = new HashMap<>();
 				
 				map.put("year", sbjtJobj.getString("YEAR"));
@@ -250,7 +245,7 @@ public class SearchController extends ModuleController {
 				map.put("majorNm", sbjtJobj.getString("MAJOR_NM"));
 				map.put("grade", sbjtJobj.getString("GRADE"));
 				map.put("id", sbjtJobj.getString("id"));
-				map.put("subjDescKor", sbjtJobj.getString("SUBJ_DESC_KOR"));
+				map.put("subjDescKor", sbjtJobj.getString("SUBJ_DESC"));
 				map.put("subjDescEng", sbjtJobj.getString("SUBJ_DESC_ENG"));
 				map.put("sisu", sbjtJobj.getString("SISU"));
 				map.put("comdivNm", sbjtJobj.getString("COMDIV_NM"));
@@ -311,8 +306,6 @@ public class SearchController extends ModuleController {
 		responseJson = null;
 		responseJson = JSONObject.fromObject(responseData);
 		
-		logger.debug("responseJson========>" + responseJson);
-		
 		// 전체 갯수 설정
 		int nonSbjtCount = 0;
 		JSONObject jsonResponseData = null;
@@ -347,7 +340,6 @@ public class SearchController extends ModuleController {
 		// 비교과 통합 검색
 		
 		JSONArray nonSbjtArray = responseJson.getJSONObject("data").getJSONArray("result");
-		logger.debug("nonSbjtArray========>" + nonSbjtArray);
 		if (nonSbjtCount > 0) {
 			
 			//전체 갯수 설정
@@ -456,13 +448,23 @@ public class SearchController extends ModuleController {
 		 */
 		logger.debug("****************major**********apiStart****************");
 		
+		sortList = new ArrayList<HashMap<String, String>>();
+		sortMap1 = new HashMap<String, String>();
+		
+		sortMap1.put("sortType", "scoreSort");
+		sortMap1.put("order", "DESC");
+		
+		/*sortMap1.put("sortType", "fieldSort");
+		sortMap1.put("field", "MAJOR_NM_KOR");
+		sortMap1.put("order", "ASC");*/
+		sortList.add(sortMap1);
+		
 		// Set Params
 		reqJsonObj = new JSONObject();		
 		reqJsonObj.put("keyword", top_search); // 통합 검색
 		reqJsonObj.put("page_num", 0); 		  // 요청 페이지 번호
 		reqJsonObj.put("page_per", 4); 		  // 페이지당 목록 수
-		reqJsonObj.put("start_date", majorYear);  // 시작날짜
-		reqJsonObj.put("end_date", majorYear); 	  // 종료날짜
+		reqJsonObj.put("sort", sortList);		//정렬
 		
 		// Call API
 		responseData = null;		
@@ -519,6 +521,16 @@ public class SearchController extends ModuleController {
 		 */
 		logger.debug("****************professor**********apiStart****************");
 		
+		sortList = new ArrayList<HashMap<String, String>>();
+		sortMap1 = new HashMap<String, String>();
+		
+		sortMap1.put("sortType", "scoreSort");
+		sortMap1.put("order", "DESC");
+		/*sortMap1.put("sortType", "fieldSort");
+		sortMap1.put("field", "EMP_NM");
+		sortMap1.put("order", "ASC");*/
+		sortList.add(sortMap1);
+		
 		// 교수 API 호출 파라미터
 		reqJsonObj = new JSONObject();
 		reqJsonObj.put("keyword", top_search); // 통합 검색
@@ -526,7 +538,8 @@ public class SearchController extends ModuleController {
 		reqJsonObj.put("page_per", 3); 		  // 페이지당 목록 수
 		reqJsonObj.put("start_date", majorYear);  // 시작날짜
 		reqJsonObj.put("end_date", majorYear); 	  // 종료날짜
-        
+		reqJsonObj.put("sort", sortList);		//정렬
+		
 		// 교수 API 호출
 		responseData = null;
 		
@@ -541,8 +554,6 @@ public class SearchController extends ModuleController {
 		responseJson = null;
 		responseJson = JSONObject.fromObject(responseData);
 		
-		logger.debug("responseJson========>" + responseJson);
-		
 		// 전체 갯수 설정
 		int profCount = 0;
 		
@@ -556,13 +567,11 @@ public class SearchController extends ModuleController {
 		List<Map<String, String>> profList = new ArrayList<>();
 		
 		JSONArray profArray = responseJson.getJSONObject("data").getJSONArray("result");
-		logger.debug("profArray========>" + profArray);
 		if (profCount > 0) {
 			
 			// 화면에 뿌려줄 데이터 세팅
 			for (Object profObj : profArray ) {
 				JSONObject profJobj = (JSONObject) profObj;
-				logger.debug("profJobj========>" + profJobj);
 				Map<String, String> map = new HashMap<>();
 					
 				map.put("tlphon", profJobj.getString("TLPHON"));

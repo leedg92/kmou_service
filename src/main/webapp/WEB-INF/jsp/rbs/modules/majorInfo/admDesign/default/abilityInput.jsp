@@ -58,8 +58,8 @@
 							> <c:out value="${dt.MAJOR_NM_KOR}"/>
 						</c:if>
 					</td>
-					<th>학년도</th>
-					<td>${dt.YEAR}</td>
+					<%-- <th>학년도</th>
+					<td>${dt.YEAR}</td> --%>
 				</tr>			
 			</tbody>
 		</table>

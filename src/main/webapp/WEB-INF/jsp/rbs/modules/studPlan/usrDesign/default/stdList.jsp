@@ -29,22 +29,22 @@
 			<!--내 설계전공-->
 			<section class="plan_section my_plan pb-5">
 				<h5 class="fw-bolder pb-2 mb-3 d-flex flex-row justify-content-between align-items-center">
-					<!-- 변경가능한 학생설계전공이 있는지 체크 -->
-					<c:set var="isChange" value="N"/>
-					<c:forEach items="${MY_LIST }" var="myList">
-						<c:if test="${!empty myList.SDM_DEPT_CD and myList.IS_CHG_YN eq 'Y'}">
-							<c:set var="lastSdmCd" value="${myList.SDM_CD }"/>
-							<c:set var="lastRevsn" value="${myList.REVSN_NO }"/>
-							<c:set var="isChange" value="Y"/>			
-						</c:if>			
-					</c:forEach>
+					<!-- 변경가능한 학생설계전공이 있는지 체크(사용하지 않는듯하여 주석 - 요청시 주석 해제) -->
+<%-- 					<c:set var="isChange" value="N"/> --%>
+<%-- 					<c:forEach items="${MY_LIST }" var="myList"> --%>
+<%-- 						<c:if test="${!empty myList.SDM_DEPT_CD and myList.IS_CHG_YN eq 'Y'}"> --%>
+<%-- 							<c:set var="lastSdmCd" value="${myList.SDM_CD }"/> --%>
+<%-- 							<c:set var="lastRevsn" value="${myList.REVSN_NO }"/> --%>
+<%-- 							<c:set var="isChange" value="Y"/>			 --%>
+<%-- 						</c:if>			 --%>
+<%-- 					</c:forEach> --%>
 					내 설계전공
-					<c:if test="${isChange eq 'N' }">
+<%-- 					<c:if test="${isChange eq 'N' }"> --%>
 					<a href="#" title="신규등록하기" class="new_plan" onclick="javascript:frmNewInput.submit();">신규등록하기</a>
-					</c:if>
-					<c:if test="${isChange eq 'Y' }">
-					<a href="#" onclick="changeInput('${lastSdmCd}','${lastRevsn }');" title="변경등록하기" class="new_plan">변경등록하기</a>
-					</c:if>
+<%-- 					</c:if> --%>
+<%-- 					<c:if test="${isChange eq 'Y' }"> --%>
+<%-- 					<a href="#" onclick="changeInput('${lastSdmCd}','${lastRevsn }');" title="변경등록하기" class="new_plan">변경등록하기</a> --%>
+<%-- 					</c:if> --%>
 				</h5>
 				<div class="box_wrap ">
 					<c:forEach items="${MY_LIST }" var="myList">

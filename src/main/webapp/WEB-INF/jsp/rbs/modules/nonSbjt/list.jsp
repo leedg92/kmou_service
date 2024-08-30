@@ -96,6 +96,11 @@ function gatherJsonData(){
 	        }];	  	        	        
 	        searchVals["student_no"] = orderBy == "RECOMMEND" ? studentNo : "";
 	        
+	    }else if(orderBy == 'DEFAULT'){
+	        searchVals["sort"] = [{
+	        	"sortType":"scoreSort",
+	        	"order":"DESC"
+	        }];	 
 	    }else{	    		    	
 	        searchVals["sort"] = [{
 	            "field": orderBy,

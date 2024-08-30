@@ -363,4 +363,25 @@ public class StudPlanMapper extends RbsAbstractMapper{
 		
 	}
 
+	public List<Map<String, Object>> getNotConfirmedStudPlan() {
+		return selectList("rbs.modules.studPlan.studPlanMapper.getNotConfirmedStudPlan");
+	}
+
+
+	public int updateNotConfirmedStudPlan(Map<String, Object> param) {
+		return update("rbs.modules.studPlan.studPlanMapper.updateNotConfirmedStudPlan", param);
+	}
+
+	public List<Object> getCollegeList(Map<String, Object> param) {
+		return selectList("rbs.modules.studPlan.studPlanMapper.getCollegeList", param);
+	}
+
+	public List<Object> getDepartList(Map<String, Object> param) {
+		return selectList("rbs.modules.studPlan.studPlanMapper.getDepartList", param);
+	}
+
+	public List<Object> getMajorList(Map<String, Object> param) {
+		return selectList("rbs.modules.studPlan.studPlanMapper.getMajorList", param);
+	}
+
 }

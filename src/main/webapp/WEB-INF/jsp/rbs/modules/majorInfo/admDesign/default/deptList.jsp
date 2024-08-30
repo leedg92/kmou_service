@@ -18,21 +18,25 @@
 	<!-- search -->
 	<c:if test="${userTypeIdx ne '45' && userTypeIdx ne '46'}">
 	<div class="tbMSearch">
-		<form name="${searchFormId}" id="${searchFormId}" method="get"  action="<c:out value="${URL_DEFAULT_LIST}"/>">
+		<form name="${searchFormId}" id="${searchFormId}" method="post"  action="<c:out value="deptList.do?mId=68"/>">
 			<input type="hidden" name="mId" value="${queryString.mId}">
 			<fieldset>				
 				<dl>
 					<dt>소속 </dt>
 					<dd style="width:50%">
-						<select name="is_colgCd" id="s_colgCd" class="select" title="대학" >
-							<option value="">전체</option>
+						<select name="college1" id="college1" class="select" title="대학" >
+							<option value="" selected>대학</option>
+                            <c:forEach var="listDt" items="${collegeList }">
+                            	<option value="${listDt.COLG_CD }" <c:if test="${param.univ == listDt.COLG_CD }">selected</c:if>>${listDt.COLG_NM }</option>
+                            </c:forEach>
 						</select>
-						<select name="is_fcltSustCd" id="s_fcltSustCd" class="select" title="학부/학과" >
-							<option value="">전체</option>
-						</select>
-						<select name="is_mjCd" id="s_mjCd" class="select" title="전공">
-							<option value="">전체</option>
-						</select>
+                        <select name="college2" class="form-select" id="college2" disabled>
+                            <option value="" selected>학부(과)</option>
+                        </select>
+                    
+                        <select name="college3" class="form-select" id="college3" disabled>
+                            <option value="" selected>전공</option>
+                        </select>
 					</dd>
 					<itui:searchFormItemIn itemListSearch="${itemInfo.list_search}" searchOptnHashMap="${searchOptnHashMap}" isUseRadio="${isUseRadio}" isUseMoreItem="${isUseMoreItem}"/>	
 				</dl>
@@ -46,7 +50,7 @@
 	<!-- //search -->
 		
 	<div class="btnTopFull">
-		<div class="right"><a class="btnTFW fn_btn_write" href="<c:out value="${URL_INPUT}"/>" title="추가" class="btnTW fn_btn_write${inputWinFlag}">등록</a></div>
+		<%-- <div class="right"><a class="btnTFW fn_btn_write" href="deptInput.do?mId=68" title="추가" class="btnTW fn_btn_write${inputWinFlag}">등록</a></div> --%>
 	</div>
 	
 	<form id="${listFormId}" name="${listFormId}" method="post" action="${URL_INPUT}&mode=m" target="list_target">
@@ -106,7 +110,7 @@
 						</c:choose>
 					</td>
 					<td class="num">
-						<a href="javascript:void(0)" onclick='location.href="<c:out value="${URL_MODIFY}"/>&${listDeptName}=${listDt.DEPT_CD}"' class="btnTypeF fn_btn_modify">수정</a>
+						<a href="javascript:void(0)" onclick='location.href="<c:out value="${URL_DEPT_MODI}"/>&${listDeptName}=${listDt.DEPT_CD}"' class="btnTypeF fn_btn_modify">수정</a>
 					</td>
 					<td class="date"><fmt:formatDate pattern="yyyy-MM-dd" value="${listDt.LAST_MODI_DATE}"/></td>
 				</tr>
@@ -118,7 +122,7 @@
 		
 		<!-- paging -->
 		<div class="paginate mgt15">
-			<pgui:pagination listUrl="${URL_PAGE_LIST}" pgInfo="${paginationInfo}" imgPath="${imgPath}" pageName="${elfn:getString(settingInfo.page_name, 'page')}"/>
+			<pgui:pagination listUrl="deptList.do?mId=68&college1=${param.college1 }&college2=${param.college2 }&college3=${param.college3 }&is_majorNmKor=${param.is_majorNmKor }" pgInfo="${paginationInfo}" imgPath="${imgPath}" pageName="${elfn:getString(settingInfo.page_name, 'page')}"/>
 		</div>
 		<!-- //paging -->
 	</div>

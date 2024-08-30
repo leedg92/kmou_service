@@ -27,9 +27,9 @@
       <div class="modal-content">
         <div class="modal-body">
             <section class="mt-4">
-                <h2 class="d-flex justify-content-between align-items-center mb-3">강의계획서<br></h2>
+                <h2 class="d-flex justify-content-between align-items-center mb-3">수업계획서<br></h2>
                 <table class="table">
-                    <caption class="blind">강의계획서</caption>
+                    <caption class="blind">수업계획서</caption>
                     <colgroup>
                         <col width="10%">
                         <col width="15%">

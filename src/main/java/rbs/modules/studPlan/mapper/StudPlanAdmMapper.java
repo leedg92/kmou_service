@@ -126,6 +126,14 @@ public class StudPlanAdmMapper extends RbsAbstractMapper{
 	public int lastSupplementComplete(Map<String, Object> param) {
 		return update("rbs.modules.studPlan.studPlanAdmMapper.lastSupplementComplete", param);
 	}
+
+	public Map<String, Object> getStudAplyInfmt(Map<String, Object> param) {
+		return selectOne("rbs.modules.studPlan.studPlanAdmMapper.getStudAplyInfmt", param);
+	}
+
+	public List<Map<String, Object>> getStudSbjtInfmt(Map<String, Object> param) {
+		return selectList("rbs.modules.studPlan.studPlanAdmMapper.getStudSbjtInfmt", param);
+	}
 	
     
 

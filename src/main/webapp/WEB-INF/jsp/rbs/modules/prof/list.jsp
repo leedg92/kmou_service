@@ -225,13 +225,13 @@ function getInitProfList(page){
 			$.each(list, function(i, item){
 				var empKey = item.EMP_NO;
 				var empNm = (typeof(item.EMP_NM) == 'undefined' || item.EMP_NM == "") ? '-' : item.EMP_NM;
-				var imagePath = (typeof(item.V_TEA_FILE_PATH) == 'undefined' || item.V_TEA_FILE_PATH == "") ? '' : item.V_TEA_FILE_PATH;
+				var imagePath = (typeof(item.TEA_FILE_PATH) == 'undefined' || item.TEA_FILE_PATH == "") ? '' : item.TEA_FILE_PATH;
 				var colgNm = (typeof(item.COLG_NM) == 'undefined' || item.COLG_NM == "") ? '-' : item.COLG_NM;
 				var deptNm = (typeof(item.DEPT_NM) == 'undefined' || item.DEPT_NM == "") ? '-' : item.DEPT_NM;
 				
 				var email = (typeof(item.EMAIL) == 'undefined' || item.EMAIL == "") ? '-' : item.EMAIL;
 				var telNo = (typeof(item.TEL_NO) == 'undefined' || item.TEL_NO == "") ? '-' : item.TEL_NO;
-				var research = (typeof(item.V_TEA_RSRCH_REALM) == 'undefined' || item.V_TEA_RSRCH_REALM == "") ? '-' : item.V_TEA_RSRCH_REALM;
+				var research = (typeof(item.TEA_RSRCH_REALM) == 'undefined' || item.TEA_RSRCH_REALM == "") ? '-' : item.TEA_RSRCH_REALM;
 				var location = (typeof(item.LOCATION) == 'undefined' || item.LOCATION == "") ? '-' : item.LOCATION;
 				
 				imagePath = (imagePath != '') ? "https://www.kmou.ac.kr/" + imagePath : '../images/profile.png'; 
@@ -248,11 +248,10 @@ function getInitProfList(page){
 		    	}
 				
 				
- 				var varCon = '<div class="item border">\n';
- 				
+ 				var varCon = `<div class="item border" onclick="profView('\${empKey}')" style="cursor:pointer;">\n`;
  				varCon += '<div id="' + id + '" class="like_container ' + onRed + '">\n';
  				varCon += '<div class="link_cnt text-end">\n';
- 				varCon += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="likeChange(\''+ id + '\', \'prof\')">\n';
+ 				varCon += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="event.stopPropagation();likeChange(\''+ id + '\', \'prof\')">\n';
  				varCon += '<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.08.01 4.53.01 6.07s.64 3 1.79 4.09l7.8 7.39a.62.62 0 0 0 .83 0l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Z" style="fill:#fff;stroke-width:0"/>\n';
  				varCon += '<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.07.01 4.53.01 6.07s.63 3 1.79 4.09 7.8 7.39 7.8 7.39c.11.1.26.16.41.16.15 0 .3-.06.41-.16l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Zm-.83 7.39-7.39 7-7.39-7c-.93-.89-1.44-2.06-1.44-3.3s.51-2.42 1.44-3.3c.94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.48 1.37.23.22.6.22.83 0 .94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.49 1.37 1.92 1.82 1.92 4.78 0 6.6Z" style="stroke-width:0;fill:#ff0202"/></svg>\n';
  				varCon += '</div>\n';
@@ -412,11 +411,11 @@ function getProfList(page){
 		    	}
 				
 				
- 				var varCon = '<div class="item border">\n';
+ 				var varCon = `<div class="item border" onclick="profView('\${empKey}')" style="cursor:pointer;">\n`;
  				
  				varCon += '<div id="' + id + '" class="like_container ' + onRed + '">\n';
  				varCon += '<div class="link_cnt text-end">\n';
- 				varCon += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="likeChange(\''+ id + '\', \'prof\')">\n';
+ 				varCon += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="event.stopPropagation();likeChange(\''+ id + '\', \'prof\')">\n';
  				varCon += '<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.08.01 4.53.01 6.07s.64 3 1.79 4.09l7.8 7.39a.62.62 0 0 0 .83 0l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Z" style="fill:#fff;stroke-width:0"/>\n';
  				varCon += '<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.07.01 4.53.01 6.07s.63 3 1.79 4.09 7.8 7.39 7.8 7.39c.11.1.26.16.41.16.15 0 .3-.06.41-.16l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Zm-.83 7.39-7.39 7-7.39-7c-.93-.89-1.44-2.06-1.44-3.3s.51-2.42 1.44-3.3c.94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.48 1.37.23.22.6.22.83 0 .94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.49 1.37 1.92 1.82 1.92 4.78 0 6.6Z" style="stroke-width:0;fill:#ff0202"/></svg>\n';
  				varCon += '</div>\n';
@@ -439,7 +438,7 @@ function getProfList(page){
 				varCon += '<li class="d-flex flex-row text-break"><strong>이메일</strong>' + item.email + '</li>\n';
 				varCon += '<li class="d-flex flex-row text-break"><strong>전화번호</strong>' + item.tlphon + '</li>\n';
 				varCon += '<li class="d-flex flex-row text-break" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>연구분야</strong>' + rsrch + '</li>\n';
-				varCon += '<li class="d-flex flex-row text-break"><strong>연구실</strong>' + item.labRum + '</li>\n';
+				varCon += '<li class="d-flex flex-row text-break"><strong>연구실</strong>' + item.location + '</li>\n';
 				varCon += '</ul>\n';
 				varCon += '</div>\n';
 				

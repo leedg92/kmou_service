@@ -54,6 +54,7 @@ import rbs.egovframework.LoginVO;
 import rbs.egovframework.util.ApiUtil;
 import rbs.modules.major.service.MajorService;
 import rbs.modules.major.serviceOra.MajorServiceOra;
+import rbs.modules.majorInfo.service.MajorInfoService;
 import rbs.modules.sbjt.serviceOra.SbjtServiceOra;
 import rbs.modules.search.service.SearchService;
 
@@ -96,10 +97,10 @@ public class MajorController extends ModuleController {
 	@Resource(name = "sbjtServiceOra")
 	protected SbjtServiceOra sbjtServiceOra;
 	
-	/*	@Resource(name = "codeOptnServiceOra")
-	protected CodeOptnServiceOra codeOptnServiceOra;
+	@Resource(name = "majorInfoService")
+	protected MajorInfoService majorInfoService;
 	
-	@Resource(name = "inuUserService")
+	/*@Resource(name = "inuUserService")
 	private InuUserService inuUserService;
 	
 	@Resource(name = "searchLogService")
@@ -146,8 +147,8 @@ public class MajorController extends ModuleController {
 		DataForm queryString = attrVO.getQueryString();
 		boolean isAdmMode = attrVO.isAdmMode(); // 관리자면 true, 사용자면 false
 		
-		model.addAttribute("collegeList", sbjtServiceOra.getCollegeList());
-		model.addAttribute("departList", sbjtServiceOra.getDepartList(null));
+		model.addAttribute("collegeList", majorInfoService.getCollegeList());
+		model.addAttribute("departList", majorInfoService.getDepartList(null));
 		
 		// 4. 기본경로
 		fn_setCommonPath(attrVO);
@@ -168,7 +169,7 @@ public class MajorController extends ModuleController {
 		String univ = request.getParameter("UNIV");
 		
 		param.put("univ", univ);
-		list = sbjtServiceOra.getDepartList(param);
+		list = majorInfoService.getDepartList(param);
 		
 		model.addAttribute("departList", list);
 		
@@ -189,7 +190,7 @@ public class MajorController extends ModuleController {
 		
 		
 		param.put("depart", depart);
-		list = sbjtServiceOra.getMajorList(param);
+		list = majorInfoService.getMajorList(param);
 		
 		model.addAttribute("majorList", list);
 		
@@ -218,11 +219,11 @@ public class MajorController extends ModuleController {
 		
 		// 1. 페이지정보 setting
 		RbsPaginationInfo paginationInfo = new RbsPaginationInfo();
-		int listUnit = 10;	// 페이지당 목록 수
-		int listMaxUnit = 5;	// 최대 페이지당 목록 수 
-		int listUnitStep = 10;	// 페이지당 목록 수 증가값
+		int listUnit = 6;	// 페이지당 목록 수
+		int listMaxUnit = 10;	// 최대 페이지당 목록 수 
+		int listUnitStep = 6;	// 페이지당 목록 수 증가값
 		
-		int pageUnit = 10;
+		int pageUnit = 6;
 		int pageSize = 10;	
 		
 		int page = StringUtil.getInt(request.getParameter("page"), 1);				// 현재 페이지 index
@@ -349,10 +350,9 @@ public class MajorController extends ModuleController {
 				sortMap.put("field", "DEPT_CD");
 				sortMap.put("order", "ASC");
 				sortList.add(sortMap);
-			} else if(StringUtil.isEquals(orderBy, "byType")  ) {
-				sortMap.put("sortType", "fieldSort");
-				sortMap.put("field", "MAJOR_CD");
-				sortMap.put("order", "ASC");
+			} else {
+				sortMap.put("sortType", "scoreSort");
+				sortMap.put("order", "DESC");
 				sortList.add(sortMap);
 			} 
 			
@@ -374,12 +374,10 @@ public class MajorController extends ModuleController {
 				System.out.println("**********************startNum : " + startNum);
 				//reqJsonObj.put("pageNo", startNum);
 			}
-			logger.debug("reqJsonObj========>"+reqJsonObj);
 			
 			//api 호출
 			String responseData = null;
 			responseData = ApiUtil.getRestApi(url, endpoint, ApiUtil.METHOD_POST, reqJsonObj);
-			logger.debug("responseData========>"+responseData);
 			
 			//log insert
 			if(StringUtil.isEquals(flagLog, "Y")) {
@@ -387,11 +385,9 @@ public class MajorController extends ModuleController {
 			}
 			
 			JSONObject responseJson = JSONObject.fromObject(responseData);
-			logger.debug("responseJson========>"+responseJson);
 			
 			//전체 갯수 설정
 			int totalCount = 0;
-			logger.debug("responseCount========>"+responseJson.getJSONObject("data").getInt("total_count"));
 			if(null != responseJson.getJSONObject("data").getString("total_count")) {
 				totalCount = responseJson.getJSONObject("data").getInt("total_count");
 			}
@@ -404,7 +400,6 @@ public class MajorController extends ModuleController {
 	
 			//전공 목록 추출
 			JSONArray resultArray = responseJson.getJSONObject("data").getJSONArray("result");
-			logger.debug("resultArray=====lectureSubjectList===>"+resultArray);
 	
 			List<Map<String, String>> majorList = new ArrayList<>();
 			

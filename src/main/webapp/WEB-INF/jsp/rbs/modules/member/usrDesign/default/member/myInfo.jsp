@@ -116,11 +116,118 @@
 	  padding-top: 0.5rem;
 	  z-index: 1;
 	}	
+	
+    /* 모달 컨텐츠의 최대 높이 설정 */
+    .modal-content {
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    /* 모달 본문 레이아웃 수정 */
+    .modal-body {
+        display: flex;
+        flex-wrap: nowrap; /* 박스들이 한 줄에 유지되도록 변경 */
+        gap: 2rem; /* 화살표를 위한 공간 확보 */
+        padding: 1rem;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    /* 박스 스타일 수정 */
+    .box {
+        flex: 1; /* 동일한 너비로 설정 */
+        min-width: 0; /* flex-basis 오버라이드 방지 */
+        max-height: 100%; /* 부모 높이에 맞춤 */
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        border-radius: 0.5rem;
+    }
+
+    /* lesson_wrap 내부 스크롤 */
+    .lesson_wrap {
+        flex: 1; /* 남은 공간 모두 차지 */
+        overflow-y: auto;
+        min-height: 0; /* flex 컨테이너 내에서 스크롤 가능하게 함 */
+    }
+
+
+    .modal_enrollSubj .pre_appl:before {
+        content: '';
+        display: block;
+        width: 25px;
+        height: 16px;
+        background: url(../images/arr_b_tail.png) no-repeat;
+        background-size: 100%;
+        position: absolute;
+        top: 50%;
+        left: -2rem; /* 위치 조정 */
+        transform: translateY(-50%) rotate(-90deg); /* 가로 방향으로 회전 */
+    }
+
+    /* 하단 버튼 그룹 스타일 */
+    .bottom_btn_group {
+        position: sticky;
+        bottom: 0;
+        background-color: white;
+        padding-top: 0.5rem;
+        z-index: 1;
+    }
+
+    /* 반응형 레이아웃을 위한 미디어 쿼리 */
+    @media (max-width: 768px) {
+        .modal-body {
+            flex-direction: column;
+        }
+        .box {
+            width: 100%;
+        }
+        .modal_enrollSubj .pre_appl:before {
+            display: none; /* 모바일에서는 화살표 숨김 */
+        }
+    }
+    
+    
+    .reorder-buttons {
+    display: inline-flex;
+    flex-direction: column;
+    margin-left: 10px;
+	}
+	
+	.reorder-buttons button {
+	    background: none;
+	    border: none;
+	    cursor: pointer;
+	    padding: 5px;
+	    font-size: 14px;
+	}
+	
+	.reorder-buttons button:hover {
+	    color: #007bff;
+	}
+	
+	#toggleReorder.active, #saveOrder {
+	    background-color: #28a745;
+	    color: white;
+	}
+	
+	#saveOrder {
+	    display: none;
+	}
 </style>
 <div class="mask2"></div>
 <div id="overlay" style="display:none;"></div>
 <div class="loader" style="display:none;"></div>
 
+
+<form id="sbjtView" name="sbjtView" method="post" action="../sbjt/view.do?mId=32">
+	<input type="hidden" name="mId" id="mId" value="32"/>
+	<input type="hidden" name="SUBJECT_CD" id="SUBJECT_CD" value=""/>
+	<input type="hidden" name="DEPT_CD" id="DEPT_CD" value=""/>
+	<input type="hidden" name="YEAR" id="YEAR" value=""/>
+	<input type="hidden" name="SMT" id="SMT" value=""/>
+</form>
 <form id="majorView" name="majorView" method="post" action="">
 	<input type="hidden" name="mId" value="35">
 	<input type="hidden" id="MAJOR_CD" name="MAJOR_CD" value="">
@@ -142,7 +249,7 @@
 
 		<div class="sub_background mypage_bg">
 		    <section class="inner">
-		        <h3 class="title fw-bolder text-center text-white">마이페이지</h3>
+		        <h3 class="title fw-bolder text-center text-white">마이페이지${sukangLoginTryTime}</h3>
 				<p class="sub_title_script">성적 및 이수사항을 확인할 수 있습니다.</p>
 		    </section>
 		</div>
@@ -220,40 +327,40 @@
 		                        <div class="table_area table_section_type01" id="tableReqCDT"></div>
 				                <div class="req_credit_chart_box"><canvas id="chartReqCDT" height="160px"></canvas></div>		                            
 		                     </div>
-		                     <span>※ 소요학점은 참고용이며, 정확하지 않을 수 있습니다. 정확한 내용은 『종합정보시스템 > 수강 > 수강관리 > 개인별적용학점/교육과정)』을 참고하세요.</span>
+		                     <span>※ 소요학점은 참고용이며, 정확하지 않을 수 있습니다. 정확한 내용은 『종합정보시스템 > 학적 > 학생정보조회』을 참고하세요.</span>
 		                </section>
 		                
 		                <div class="completion status">
 		                	<section class="table_item mb-5 accum_chek">
-			                    <h5 class="pb-2">학기별 성적</h5>
+			                    <h5 class="pb-2" id="tableCumCDTExcel">학기별 성적</h5>
 			                    <div class="table_area" id="tableCumCDT"></div>
 			                </section>
 			                
 							<section class="table_item mb-5 accum_chek">
-			                    <h5 class="pb-2">졸업인증자격</h5>
+			                    <h5 class="pb-2" id="tableGradReqExcel">졸업인증자격</h5>
 			                    <div class="table_area" id="tableGradReq"></div>
 		                	</section>
 		                </div>
 		                
 		                <div class="completion status">
 		                	<section class="table_item mb-5 accum_chek">
-			                    <h5 class="pb-2">필수 이수현황(전공)</h5>
+			                    <h5 class="pb-2" id="tableMajorReqExcel">필수 이수현황(전공)</h5>
 			                    <div class="table_area" id="tableMajorReq"></div>
 			                </section>
 			                
 							<section class="table_item mb-5 accum_chek">
-			                    <h5 class="pb-2">필수 이수현황(교양)</h5>
+			                    <h5 class="pb-2" id="tableMinorReqExcel">필수 이수현황(교양)</h5>
 			                    <div class="table_area" id="tableMinorReq"></div>
 		                	</section>
 		                </div>
 		                
 		                <section class="table_item mb-5 nonSbjt_chek">
-		                    <h5 class="d-flex flex-row justify-content-between align-items-center">비교과 프로그램 신청이력</h5>
+		                    <h5 class="d-flex flex-row align-items-center" id="tableNonSbjtHistExcel">비교과 프로그램 신청이력</h5>
 		                    <div class="table_area" id="tableNonSbjtHist"></div>
 		                </section>
 		                
 		                <section class="table_item mb-5 perf_chek">
-		                    <h5 class="d-flex flex-row justify-content-between align-items-center">과목별 성적 <span class="retake_i">재수강가능</span></h5>
+		                    <h5 class="d-flex flex-row align-items-center">과목별 성적 <span class="retake_i" id="tableSubjectCDTExcel">재수강가능</span></h5>
 		                    <div class="table_area" id="tableSubjectCDT"></div>
 		                </section>
 		                
@@ -794,7 +901,7 @@
 	                	</section-->
 		                
 		                <section class="table_item perf_chek">
-		                    <h5 class="pb-2">학적변동내역</h5>
+		                    <h5 class="pb-2" id="tableRecHistExcel">학적변동내역</h5>
 		                    <div class="table_area" id="tableRecHist"></div>
 		                </section>
 		                
@@ -851,7 +958,7 @@
 		                        <div class="d-flex gap-2 mycart_btonset02">
 		                            <button type="button" class="view_timeTable d-flex flex-row align-items-center gap-1 bg-white" data-bs-toggle="modal" id="showTimeTable" data-bs-target="#timeTable">
 		                                <img src="../images/ico_b_cal.png" alt="달력 아이콘"/>시간표 보기</button>
-		                            <button type="button" class="save_applClass d-flex flex-rwo align-items-center gap-1 bg-white text-start word_keep"  data-bs-toggle="modal" id="showApplTimeTable" data-bs-target="#applTimeTable">
+		                            <button type="button" class="save_applClass d-flex flex-rwo align-items-center gap-1 bg-white text-start word_keep"  data-bs-toggle="modal" id="showApplTimeTable">
 		                                <img src="../images/ico_sk_sho.png" alt="장바구니 아이콘"/> 수강신청시스템 장바구니 등록
 		                            </button>
 		                            <button type="button" class="all_remove d-flex flex-row align-items-center gap-1 text-white border-0" id="cartSelectedDel">
@@ -1096,11 +1203,10 @@
                     <img src="close_icon.png" alt="닫기 아이콘" />
                 </button>
             </div>
+            <div class="title_wrap d-flex flex-wrap justify-content-between align-items-end align-items-sm-center mb-2 mb-sm-3">
+                <p class="ms-auto" id="isMerged" style="display: none;">빨간색으로 표시된 시간표가 중복됩니다.</p>
+            </div>
             <div class="modal-body">
-                <div class="title_wrap d-flex flex-wrap justify-content-between align-items-end align-items-sm-center mb-2 mb-sm-3">
-                    <h2>2024년 3학년 1학기</h2>
-                    <p class="ms-auto" id="isMerged" style="display: none;">빨간색으로 표시된 시간표가 중복됩니다.</p>
-                </div>
                 <div class="">
                     <table class="table">
                         <caption class="blind">시간표</caption>
@@ -1136,13 +1242,17 @@
         </div>
     </div>
 </div>
+
+
+<c:if test="${!empty BOTTOM_PAGE}"><jsp:include page = "${BOTTOM_PAGE}" flush = "false"/></c:if>
+
 <!-- 모달 - 수강신청 테이블 -->
 <div class="modal fade modal-xl modal_enrollSubj " id="applTimeTable" aria-hidden="true" aria-labelledby="enrollSubjLabel" tabindex="-1" style="display: none;">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header bg-black">
 				<h1 class="modal-title text-white modal_title_plstb" id="enrollSubjLabel">예비수강신청 장바구니 등록하기</h1>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="applTimTableClose">
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="applTimeTableClose">
 					<img src="../images/ico_w_close.png" alt="닫기 아이콘" />
 				</button>
 			</div>
@@ -1151,14 +1261,14 @@
 					<h2>나의 장바구니</h2>
 					<!--하단 버튼모음-->
 					<section class="bottom_btn_group d-flex flex-wrap justify-content-between mt-3 gap-2">
-						<div class="d-flex flex-row gap-2">
+						<div class="d-flex flex-row gap-2 appl">
 							<button type="button" class="all_check text-white border-0 d-flex flex-row align-items-center gap-1 btn-fg" value="beforeChk">
 								<i></i>
 								전체선택
 							</button>
 							<button type="button" class="remove_check d-inline-flex btn-fg" value="beforeClear">선택 일괄해제</button>
 						</div>
-						<div>
+						<div class="appl">
 							<button type="button" class="select_put text-white border-0" id="btnAddSbjt">
 								<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none">
 									<g fill="#fff" clip-path="url(#a)">
@@ -1173,27 +1283,43 @@
 					</section>					
 					<!--item wrap-->
 					<div class="lesson_wrap" id="appndSbjt">
+
 					</div>					
 
 				</div>
 				<!--우측 박스-->
-				<div class="box pre_appl">
+				<div class="box">
 					<!--타이틀-->
 					<h2>예비수강신청 현황</h2>
 					<!--하단 버튼모음-->
 					<section class="bottom_btn_group d-flex flex-wrap justify-content-between mt-3 gap-2">
-						<div class="d-flex flex-wrap gap-2">
+						<div class="d-flex flex-wrap gap-3 appl">
 							<button type="button" class="all_check text-white border-0 d-flex flex-row align-items-center gap-1 btn-fg" value="afterChk">
 								<i></i>
 								전체선택
 							</button>
-							<button type="button" class="remove_check d-inline-flex btn-fg" value="afterClear">선택 일괄해제</button>
-						</div>
-						<div>
-							<button type="button" class="all_delet text-white d-flex align-items-center flex-row border-0" onclick="delSbjt('all');">
+							<button type="button" class="remove_check d-inline-flex btn-fg" value="afterClear" >선택 일괄해제</button>
+							<button type="button" class="all_delet text-white d-flex align-items-center flex-row border-0" id="btnDelSbjt">
 								<img src="../images/ico_w_close.png" alt="삭제 아이콘" class="d-inline-block" />
 								<span class="text-center ps-1">선택 일괄삭제</span>
+							</button>						
+						</div>						
+						<div class="d-flex flex-wrap gap-3 reorder hidden">
+							<button type="button" class="all_check text-white border-0 d-flex flex-row align-items-center gap-1 btn-fg" id="saveOrder">
+								<i></i>
+								저장
 							</button>
+							<button type="button" class="remove_check d-inline-flex btn-fg" id="cancelOrder">
+								<i></i>
+								취소
+							</button>							
+						</div>						
+						<div class="appl">
+							<button type="button" class="select_put text-white border-0" id="reorderBtn">
+								<img src="../images/ico_w_close2.png" alt="순서변경 아이콘" class="d-inline-block" />
+								<span class="text-center ps-1">순서변경</span>
+							</button>
+
 						</div>
 					</section>
 					<!--item wrap-->
@@ -1216,5 +1342,3 @@
 		</div>
 	</div>
 </div>
-
-<c:if test="${!empty BOTTOM_PAGE}"><jsp:include page = "${BOTTOM_PAGE}" flush = "false"/></c:if>

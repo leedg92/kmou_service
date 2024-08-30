@@ -479,11 +479,11 @@ function getInitSbjtList(page){
 		    	}
 	            
 	            
- 				var varCon = '<div class="item border">\n';
- 					
+ 				var varCon = `<div class="item border" onclick="sbjtView('\${subjectKey}', '\${deptKey}', '\${year}', '\${smtCd}')" style="cursor:pointer;">\n`;
+ 				
  				varCon += '<div id="' + id + '" class="like_container ' + onRed + '">\n';
  				varCon += '<div class="link_cnt text-end">\n';
- 				varCon += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="likeChange(\''+ id + '\', \'sbjt\')">\n';
+ 				varCon += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="event.stopPropagation();likeChange(\''+ id + '\', \'sbjt\')">\n';
  				varCon += '<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.08.01 4.53.01 6.07s.64 3 1.79 4.09l7.8 7.39a.62.62 0 0 0 .83 0l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Z" style="fill:#fff;stroke-width:0"/>\n';
  				varCon += '<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.07.01 4.53.01 6.07s.63 3 1.79 4.09 7.8 7.39 7.8 7.39c.11.1.26.16.41.16.15 0 .3-.06.41-.16l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Zm-.83 7.39-7.39 7-7.39-7c-.93-.89-1.44-2.06-1.44-3.3s.51-2.42 1.44-3.3c.94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.48 1.37.23.22.6.22.83 0 .94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.49 1.37 1.92 1.82 1.92 4.78 0 6.6Z" style="stroke-width:0;fill:#ff0202"/></svg>\n';
  				varCon += '</div>\n';
@@ -507,8 +507,20 @@ function getInitSbjtList(page){
 					varCon += '<li class="">' + item.COMDIV_NM + '</li>\n';
 				}
 				
-				
-				varCon += '<li class="name_of_class"><span>' + item.COLG_NM + '</span><span>' + item.DEPT_NM + '</span>' + $elemMajorNm + '</li>\n';
+
+				varCon += '<li class="name_of_class"><span>' + item.COLG_NM + '</span>';
+				if(item.ORG_LVL == '3'){
+					if(item.DEPT_NM != "" && item.DEPT_NM != "교양교육원" && item.DEPT_NM != "학사과"){
+						varCon += '<span>' + item.DEPT_NM + '</span>';	
+					}	
+				}
+				if(item.ORG_LVL == '4'){
+					if(item.DEPT_NM != "" && item.DEPT_NM != "교양교육원" && item.DEPT_NM != "학사과"){
+						varCon += '<span>' + item.UP_DEPT_NM + '</span>';	
+					}	
+				}
+				varCon += $elemMajorNm + '</li>\n';
+				/* varCon += '<li class="name_of_class"><span>' + item.COLG_NM + '</span><span>' + item.DEPT_NM + '</span>' + $elemMajorNm + '</li>\n'; */
 				if(typeof(item.MAIN_ABI_NM) != "undefined"){
 					varCon += '<li class="name_of_class"><span>' + item.MAIN_ABI_NM + '</span></li>\n';
 				}
@@ -706,7 +718,8 @@ function getSbjtList(page){
 				}
 				var abiNm = "전공능력";
 				var abi   = (typeof(item.majorAbi) == "undefined" || item.majorAbi == "") ? "-" : item.majorAbi;
-				if(item.colgCd == '446000'){
+				if((item.comdivNm).indexOf('교양') != -1){
+					console.log("씨부레");
 					abiNm = "핵심역량"
 					abi   = (typeof(item.essentialAbi) == "undefined" || item.essentialAbi == "") ? "-" : item.essentialAbi;
 				}
@@ -724,13 +737,12 @@ function getSbjtList(page){
 		        		}
 			 		});
 		    	}
-	            
-				var varCon = '<div class="item border">\n';			
- 				/* varCon += `<div class="item border" onclick="sbjtView('\${subjectKey}', '\${deptKey}', '\${year}', '\${smtCd}')">\n`; */
- 				/* varCon += `<a href="javascript:void(0);" onclick="sbjtView('\${subjectKey}', '\${deptKey}', '\${year}', '\${smtCd}')" title="제목" class="d-block  fw-semibold">`; */
+				 
+				var varCon = '';			
+ 				varCon += `<div class="item border" onclick="sbjtView('\${subjectKey}', '\${deptKey}', '\${year}', '\${smtCd}')" style="cursor:pointer;">\n`;
  				varCon += '<div id="' + id + '" class="like_container ' + onRed + '">\n';
  				varCon += '<div class="link_cnt text-end">\n';
- 				varCon += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18" onclick="likeChange(\''+ id + '\', \'sbjt\')">\n';
+ 				varCon += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18" onclick="event.stopPropagation();likeChange(\''+ id + '\', \'sbjt\')">\n';
  				varCon += '<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.08.01 4.53.01 6.07s.64 3 1.79 4.09l7.8 7.39a.62.62 0 0 0 .83 0l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Z" style="fill:#fff;stroke-width:0"/>\n';
  				varCon += '<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.07.01 4.53.01 6.07s.63 3 1.79 4.09 7.8 7.39 7.8 7.39c.11.1.26.16.41.16.15 0 .3-.06.41-.16l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Zm-.83 7.39-7.39 7-7.39-7c-.93-.89-1.44-2.06-1.44-3.3s.51-2.42 1.44-3.3c.94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.48 1.37.23.22.6.22.83 0 .94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.49 1.37 1.92 1.82 1.92 4.78 0 6.6Z" style="stroke-width:0;fill:#ff0202"/></svg>\n';
  				varCon += '</div>\n';
@@ -753,28 +765,29 @@ function getSbjtList(page){
 				} else{
 					varCon += '<li class="">' + item.comdivNm + '</li>\n';
 				}
-				varCon += '<li class="name_of_class"><span>' + item.colgNm + '</span><span>' + item.deptNm + '</span></li>\n';
-				if((item.comdivNm).indexOf('전공') != -1){
+				
+				varCon += '<li class="name_of_class"><span>' + item.colgNm + '</span>';
+				if(item.deptNm != "" && item.deptNm != "학사과"){
+					varCon += '<span>' + item.deptNm + '</span>';	
+				}
+				varCon += '</li>\n';
+				if((item.comdivNm).indexOf('전공') != -1 || (item.comdivNm).indexOf('일반') != -1){
 					var majorAbi = item.majorAbi;
 					if(typeof(majorAbi) != 'undefined' && majorAbi != ''){
 						varCon += '<li class="name_of_class"><span>' + majorAbi + '</span></li>\n';	
 					}
 					
-					
 				} 
 				if((item.comdivNm).indexOf('교양') != -1) {
-					console.log("교양");
-					var essentialAbi = essentialAbi;
+					var essentialAbi = item.essentialAbi;
 					
 					if(typeof(essentialAbi) != 'undefined' && essentialAbi != ''){
 						varCon += '<li class="name_of_class"><span>' + essentialAbi + '</span></li>\n'; 
-					}
-						
+					}	
 				}
 				varCon += '</ul>\n';
 				varCon += '<h5 class="title ellip_2 mb-3">\n';
 				varCon += `<a href="javascript:void(0);" onclick="sbjtView('\${subjectKey}', '\${deptKey}', '\${year}', '\${smtCd}')" title="제목" class="d-block  fw-semibold"> \${subjectNm}(\${subjectKey})</a>\n`;
-				/* varCon += `\${subjectNm}(\${subjectKey})`; */
 				varCon += '</h5>\n';
 				varCon += '<p class="desc_txt mb-4 ellip_2">';
 				if(item.subjDescKor == ""){
@@ -790,7 +803,6 @@ function getSbjtList(page){
 				varCon += '<li class="d-flex flex-row col-12 col-xl-6 mb-2 mb-xl-0"><strong>이수학년</strong><span>' + (item.grade == '0' ? '전체' : item.grade) + '학년</span></li>\n';
 				/* varCon += '<li class="d-flex flex-row col-12 col-xl-6 mb-2"><strong>' + abiNm + '</strong><span>' + abi + '</span></li>\n'; */
 				varCon += '</ul>\n';
-				/* varCon += '</a>\n'; */
 				varCon += '</div>\n';
 				
 				varItemObj.append(varCon);

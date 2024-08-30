@@ -48,7 +48,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import rbs.egovframework.LoginVO;
 import rbs.egovframework.util.ApiUtil;
-import rbs.egovframework.util.Paging;
+import rbs.modules.majorInfo.service.MajorInfoService;
 import rbs.modules.sbjt.service.SbjtService;
 import rbs.modules.sbjt.serviceOra.SbjtServiceOra;
 import rbs.modules.search.service.SearchService;
@@ -81,10 +81,10 @@ public class SbjtController extends ModuleController {
 	@Resource(name = "sbjtServiceOra")
 	protected SbjtServiceOra sbjtServiceOra;
 	
-/*	@Resource(name = "codeOptnServiceOra")
-	protected CodeOptnServiceOra codeOptnServiceOra;
+	@Resource(name = "majorInfoService")
+	protected MajorInfoService majorInfoService;
 	
-	@Resource(name = "inuUserService")
+	/*@Resource(name = "inuUserService")
 	private InuUserService inuUserService;
 	
 	@Resource(name = "searchLogService")
@@ -200,7 +200,7 @@ public class SbjtController extends ModuleController {
 		if (stdCore8 != null) stdCoreList.add(stdCore8);
 
 		model.addAttribute("stdCore", String.join(",", stdCoreList));
-		model.addAttribute("collegeList", sbjtServiceOra.getCollegeList());
+		model.addAttribute("collegeList", majorInfoService.getCollegeList());
 		
 		fn_setCommonPath(attrVO);
 		
@@ -222,7 +222,6 @@ public class SbjtController extends ModuleController {
 		ModelAndView mav = new ModelAndView("jsonView");
 		
 		DataForm queryString = attrVO.getQueryString();
-		logger.debug("****************request**********" + request +"****************");
 		boolean isAdmMode = attrVO.isAdmMode(); // 관리자면 true, 사용자면 false
 		//int fnIdx = attrVO.getFnIdx();
 		JSONObject settingInfo = attrVO.getSettingInfo();
@@ -260,6 +259,9 @@ public class SbjtController extends ModuleController {
 		
 		String univ = request.getParameter("univ");
 		String depart = request.getParameter("depart");
+		if (depart != null && !"".equals(depart)) {
+		    depart = depart.substring(0, depart.length() - 1) + '%';
+		}
 		String major = request.getParameter("major");
 		String year = request.getParameter("year");
 		String semester = request.getParameter("semester");
@@ -399,7 +401,6 @@ public class SbjtController extends ModuleController {
 		ModelAndView mav = new ModelAndView("jsonView");
 		
 		DataForm queryString = attrVO.getQueryString();
-		logger.debug("****************request**********" + request +"****************");
 		boolean isAdmMode = attrVO.isAdmMode(); // 관리자면 true, 사용자면 false
 		//int fnIdx = attrVO.getFnIdx();
 		JSONObject settingInfo = attrVO.getSettingInfo();
@@ -518,7 +519,7 @@ public class SbjtController extends ModuleController {
 		//HashMap<String, Object> searchCodeMap = getSearchCode();
 		
 		List<?> collegeList = null;
-		collegeList = sbjtServiceOra.getCollegeList();
+		collegeList = majorInfoService.getCollegeList();
 		
 //		if(request.getParameter("top_search") != null && !"".equals(request.getParameter("top_search"))) {
 			
@@ -595,7 +596,11 @@ public class SbjtController extends ModuleController {
 				sortList.add(sortMap1);
 				sortList.add(sortMap2);
 				sortList.add(sortMap3);
-			}
+			} else {
+				sortMap1.put("sortType", "scoreSort");
+				sortMap1.put("order", "DESC");
+				sortList.add(sortMap1);
+			} 
 		
 			
 			reqJsonObj.put("keyword", top_search);					//검색어
@@ -611,8 +616,9 @@ public class SbjtController extends ModuleController {
 			reqJsonObj.put("semester", semester);					//학기  GH0210
 			reqJsonObj.put("grade", grade);							//학년   1
 			reqJsonObj.put("course_classification", stdComplet);	//이수구분   UE010024
-			reqJsonObj.put("core_competence", stdCore);				//핵심역량(주역량)
-			reqJsonObj.put("sub_core_competence", stdCore);			//핵심역량(부역량)
+			reqJsonObj.put("competence", stdCore);					//핵심역량(전부)
+			//reqJsonObj.put("core_competence", stdCore);				//핵심역량(주역량)
+			//reqJsonObj.put("sub_core_competence", stdCore);			//핵심역량(부역량)
 			
 			//sortMap = null;
 			//sortList = null;	
@@ -686,7 +692,7 @@ public class SbjtController extends ModuleController {
 					map.put("colgCd", sbjtJobj.getString("COLG_CD"));
 					map.put("grade", sbjtJobj.getString("GRADE"));
 					map.put("id", sbjtJobj.getString("id"));
-					map.put("subjDescKor", sbjtJobj.getString("SUBJ_DESC_KOR"));
+					map.put("subjDescKor", sbjtJobj.getString("SUBJ_DESC"));
 					map.put("subjDescEng", sbjtJobj.getString("SUBJ_DESC_ENG"));
 					map.put("sisu", sbjtJobj.getString("SISU"));
 					map.put("comdivNm", sbjtJobj.getString("COMDIV_NM"));
@@ -734,7 +740,7 @@ public class SbjtController extends ModuleController {
 		
 		
 		param.put("univ", univ);
-		list = sbjtServiceOra.getDepartList(param);
+		list = majorInfoService.getDepartList(param);
 		
 		model.addAttribute("departList", list);
 		
@@ -755,7 +761,7 @@ public class SbjtController extends ModuleController {
 		
 		
 		param.put("depart", depart);
-		list = sbjtServiceOra.getMajorList(param);
+		list = majorInfoService.getMajorList(param);
 		
 		model.addAttribute("majorList", list);
 		
@@ -825,7 +831,6 @@ public class SbjtController extends ModuleController {
 	@ModuleAuth(name="VEW")
 	@RequestMapping(value = "/view.do")
 	public String view(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, HttpServletResponse response, ModelMap model) throws Exception {
-		logger.debug("****************subjectDetail**********apiStart****************");
 		
 		// 1. 필수 parameter 검사-과목별 식별ID(소속분류,학과전공,교과목코드,학기,년도)
 		String subjectCd = request.getParameter("SUBJECT_CD");
@@ -885,7 +890,6 @@ public class SbjtController extends ModuleController {
 	 */
 	@RequestMapping(value="/openLecView.json", headers="Ajax")
 	public ModelAndView openLecView(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model,@RequestParam Map<String, Object> paramMap) throws Exception {
-		logger.debug("****************openLecView**********ajaxStart****************");
 		
 		ModelAndView mav = new ModelAndView("jsonView");
 			
@@ -907,9 +911,6 @@ public class SbjtController extends ModuleController {
 		model.addAttribute("list", list); // 개설과목
 
 		
-		logger.debug("****************openLecView**********ajaxEnd****************");
-		
-		
 		return mav;
 	}
 	
@@ -923,7 +924,6 @@ public class SbjtController extends ModuleController {
 	 */
 	@RequestMapping(value="/classView.json", headers="Ajax")
 	public ModelAndView classView(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model,@RequestParam Map<String, Object> paramMap) throws Exception {
-		logger.debug("****************classView**********ajaxStart****************");
 		
 		ModelAndView mav = new ModelAndView("jsonView");
 		
@@ -996,8 +996,6 @@ public class SbjtController extends ModuleController {
 		model.addAttribute("paginationInfo", paginationInfo);										// 페이징정보
 
 		
-		logger.debug("****************classView**********ajaxEnd****************");
-		
 		
 		return mav;
 	}
@@ -1046,7 +1044,6 @@ public class SbjtController extends ModuleController {
 	@ModuleAuth(name="VEW")
 	@RequestMapping(value="/planView.do")
 	public String planView(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, HttpServletResponse response, ModelMap model) throws Exception {
-		logger.debug("****************planView**********Start****************");
 	
 		// 모듈정보
 		Map<String, Object> param = new HashMap<String, Object>();
@@ -1084,7 +1081,6 @@ public class SbjtController extends ModuleController {
 		model.addAttribute("coreList", coreList);
 		model.addAttribute("abiList", abiList);
 		
-		logger.debug("****************planView**********End****************");
 		
 		
 		// 4. 기본경로
@@ -1430,7 +1426,6 @@ public class SbjtController extends ModuleController {
 	 */
 	@RequestMapping(value="/statView.json", headers="Ajax")
 	public ModelAndView statDetail(@ModuleAttr ModuleAttrVO attrVO, HttpServletRequest request, ModelMap model,@RequestParam Map<String, Object> paramMap) throws Exception {
-		logger.debug("****************statView**********ajaxStart****************");
 		
 		ModelAndView mav = new ModelAndView("jsonView");
 		

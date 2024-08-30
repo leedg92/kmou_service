@@ -583,10 +583,10 @@
 													<input type="checkbox" id="chkMaj_Basi" class="form-check-input chk-sbjt-search" value="UE010024">
 													<label class="form-check-label" for="chkMaj_Basi">전공기초</label>
 												</li>	
-												<li class="form-check  col-2">
-													<input type="checkbox" id="chkMaj_Teach" class="form-check-input chk-sbjt-search" value="UE010031">
-													<label class="form-check-label" for="chkMaj_Teach">교직</label>
-												</li>																							
+<!-- 												<li class="form-check  col-2"> -->
+<!-- 													<input type="checkbox" id="chkMaj_Teach" class="form-check-input chk-sbjt-search" value="UE010031"> -->
+<!-- 													<label class="form-check-label" for="chkMaj_Teach">교직</label> -->
+<!-- 												</li>																							 -->
 											</ul>
 											<ul class="d-flex flex-row">
 												<li class="form-check  col-3 general-check-form" >
@@ -648,10 +648,10 @@
 													<input type="checkbox" id="chkMaj_BasiMy" class="form-check-input chk-sbjt-searchMy" value="UE010024">
 													<label class="form-check-label" for="chkMaj_BasiMy">전공기초</label>
 												</li>		
-												<li class="form-check  col-2">
-													<input type="checkbox" id="chkMaj_TeachMy" class="form-check-input chk-sbjt-searchMy" value="UE010031">
-													<label class="form-check-label" for="chkMaj_TeachMy">교직</label>
-												</li>																																				
+<!-- 												<li class="form-check  col-2"> -->
+<!-- 													<input type="checkbox" id="chkMaj_TeachMy" class="form-check-input chk-sbjt-searchMy" value="UE010031"> -->
+<!-- 													<label class="form-check-label" for="chkMaj_TeachMy">교직</label> -->
+<!-- 												</li>																																				 -->
 											</ul>
 											<ul class="d-flex flex-row">
 												<li class="form-check  col-3 general-check-form" >

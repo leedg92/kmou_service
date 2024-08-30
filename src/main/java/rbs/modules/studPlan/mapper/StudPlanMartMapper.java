@@ -63,6 +63,18 @@ public class StudPlanMartMapper extends MartAbstractMapper{
 		return selectList("mart.modules.studPlan.studPlanOraMapper.getProfList", param);
 	}
 
+	public List<Map<String, Object>> getConfirmedStudPlan(List<Map<String, Object>> notConfirmedList) {
+		return selectList("mart.modules.studPlan.studPlanOraMapper.getConfirmedStudPlan", notConfirmedList);
+	}
+
+	public int sendStudPlanToAHS010TB(Map<String, Object> studAplyInfmt) {
+		return insert("mart.modules.studPlan.studPlanOraMapper.sendStudPlanToAHS010TB", studAplyInfmt);
+	}
+
+	public int sendStudPlanToAHS020TB(Map<String, Object> sbjt) {
+		return insert("mart.modules.studPlan.studPlanOraMapper.sendStudPlanToAHS020TB", sbjt);
+	}
+
 
 
 

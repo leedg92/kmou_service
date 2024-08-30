@@ -66,7 +66,7 @@
                                 </tr>
                                 <tr>
                                     <th scope="col" class="align-middle ps-3">연구실</th>
-                                    <td class="align-middle">${profInfo.TEA_LABRUM }</td>
+                                    <td class="align-middle">${profInfo.TEA_LOCATION }</td>
                                     <th scope="col" class="align-middle ps-3">홈페이지</th>
                                     <td class="align-middle text-break">-</td>
                                 </tr>

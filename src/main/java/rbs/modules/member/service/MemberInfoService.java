@@ -95,6 +95,12 @@ public interface MemberInfoService {
 	public List<Object> getMyMajorReq(Map<String, Object> param);
 	
 	/**
+	 * 교양필수 이수현황 체크(교양교육원 교양교육이수체계 적용 관리 테이블의 row수)
+	 * @param param
+	 * @return int
+	 */
+	public int getChkMinorReq(Map<String, Object> param);
+	/**
 	 * 교양필수 이수현황
 	 * @param param
 	 * @return
@@ -130,5 +136,6 @@ public interface MemberInfoService {
      * @throws Exception
      */
 	public int hashtagDelete(Map<String, Object> param) throws Exception;
+
 
 }

@@ -167,8 +167,12 @@
 	<select id="selectDeptList" parameterType="java.util.HashMap" resultType="dataMap">
 		<include refid="rbs.commonDBMSMapper.PAGING_TOP"/>
 			SELECT * FROM <include refid="DEPT_TABLE_NAME"/> A
-			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
-			ORDER BY A.DEPT_CD DESC
+			WHERE 1 =1
+			<if test="COLG != null">AND COLG_CD = #{COLG}</if> 
+			<if test="DEPART != null and MAJOR == null">AND (DEPT_CD = #{DEPART} OR UP_CD = #{DEPART})</if>
+			<if test="MAJOR != null">AND DEPT_CD = #{MAJOR} AND UP_CD = #{DEPART}</if>
+			<if test="MAJOR_NM != null">AND DEPT_NM LIKE #{MAJOR_NM}</if>
+			ORDER BY A.ISDELETE ASC, A.DEPT_CD ASC 
 		<include refid="rbs.commonDBMSMapper.PAGING_BOTTOM"/>
 	</select>
 	
@@ -219,13 +223,19 @@
 		FROM 
 			<include refid="MAJOR_TABLE_NAME"/> A
 			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			<if test="DEPART != null">AND DEPT_CD = #{DEPART}</if>
+			<if test="MAJOR != null">AND MAJOR_CD = #{MAJOR}</if>
 	</select>
 	
 	<select id="selectDeptCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
 		SELECT COUNT(1) CNT
 		FROM 
 			<include refid="DEPT_TABLE_NAME"/> A
-			<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
+			WHERE 1=1
+			<if test="COLG != null">AND COLG_CD = #{COLG}</if> 
+			<if test="DEPART != null and MAJOR == null">AND (DEPT_CD = #{DEPART} OR UP_CD = #{DEPART})</if>
+			<if test="MAJOR != null">AND DEPT_CD = #{MAJOR} AND UP_CD = #{DEPART}</if>
+			<if test="MAJOR_NM != null">AND DEPT_NM LIKE #{MAJOR_NM}</if>
 	</select>
 	
 	<select id="selectTrackCount" parameterType="java.util.HashMap" resultType="java.lang.Integer">
@@ -346,10 +356,10 @@
 	
 	<insert id="insertAddMajorList" parameterType="java.util.HashMap">
 		INSERT INTO <include refid="MAJOR_COUR_TABLE_NAME"/>
-			( MAJOR_CD, FIELD_CD, SUBJECT_NM, GRADE, FIELD, SMT, SUBJECT_CD, 
+			( MAJOR_CD, FIELD_CD, SUBJECT_NM, GRADE, FIELD, SMT, SUBJECT_CD, YEAR,
 			 SINBUN_CODE, CDT_NUM, WTIME_NUM, PTIME_NUM, REGI_ID, REGI_IP, LAST_MODI_ID, LAST_MODI_IP )
 		VALUES
-			(#{MAJOR_CD}, #{FIELD_CD}, #{SUBJECT_NM}, #{COM_GRADE}, #{FIELD}, #{SMT}, #{SUBJECT_CD},
+			(#{MAJOR_CD}, #{FIELD_CD}, #{SUBJECT_NM}, #{COM_GRADE}, #{FIELD}, #{SMT}, #{SUBJECT_CD}, #{YEAR},
 			#{COMDIV_CODE}, #{CDT_NUM}, #{WTIME_NUM}, #{PTIME_NUM}, #{REGI_ID}, #{REGI_IP}, #{REGI_ID}, #{REGI_IP})    
 	</insert>
 	
@@ -361,6 +371,8 @@
 			,FIELD_CD
 			,FIELD
 			,GRADE
+			,YEAR
+			,SMT
 		FROM <include refid="MAJOR_COUR_TABLE_NAME"/>
 		WHERE 1=1
 		<if test=' YEAR != null and YEAR != "" '>
@@ -375,6 +387,20 @@
 		ORDER BY GRADE, SUBJECT_CD, FIELD_CD
 	</select>
 	
+	<delete id="deleteCourMajorList" parameterType="java.util.HashMap">
+		DELETE FROM <include refid="MAJOR_COUR_TABLE_NAME"/>		
+		WHERE MAJOR_CD = #{MAJOR_CD}
+	</delete>
+	
+	<insert id="insertMajorCour" parameterType="java.util.HashMap">
+		INSERT INTO <include refid="MAJOR_COUR_TABLE_NAME"/> (
+			<include refid="rbs.commonMapper.INSERT_COLUMNS"/>
+			, REGI_DATE, LAST_MODI_DATE
+		) VALUES (
+			<include refid="rbs.commonMapper.INSERT_VALUES"/>
+			, <include refid="rbs.commonDBMSMapper.currentDate"/>, <include refid="rbs.commonDBMSMapper.currentDate"/>
+		)
+	</insert>	
 	
 	<select id="selectFieldList" parameterType="java.util.HashMap" resultType="dataMap">
 		SELECT A.*
@@ -476,6 +502,14 @@
 		<include refid="MAJORINFO_TABLE_MAJOR"/> A
 		<include refid="rbs.commonMapper.SELECT_DF_WHERE"/>
 		<include refid="editAuthWhereQuery"/>
+	</select>
+	
+	<select id="selectDeptModify" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT 
+			A.*
+		FROM 
+		<include refid="DEPT_TABLE_NAME"/> A  
+		WHERE A.DEPT_CD = #{DEPT_CD}
 	</select>
 	
 	<select id="selectModifyTrack" parameterType="java.util.HashMap" resultType="dataMap">
@@ -655,6 +689,11 @@
 		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
 		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
 	</update>
+	<update id="updateDept" parameterType="java.util.HashMap">
+		UPDATE <include refid="DEPT_TABLE_NAME"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
+		, ISDELETE = #{ISDELETE}
+		<include refid="rbs.commonMapper.COM_SG_WHERE"/>
+	</update>
 	<update id="updateYear" parameterType="java.util.HashMap">
 		UPDATE <include refid="MAJORINFO_TABLE_YEAR"/> SET LAST_MODI_DATE = <include refid="rbs.commonDBMSMapper.currentDate"/> 
 		<include refid="rbs.commonDBMSMapper.UPDATE_ADD_SET"/>
@@ -754,6 +793,36 @@
 		WHERE
 			MJ_CD = #{mjCd}
 		GROUP BY YY
+	</select>
+	
+	<select id="getCollegeList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 		COLG_CD	, COLG_NM
+			FROM 		<include refid="DEPT_TABLE_NAME"/>
+			WHERE 		ISDELETE = '0'
+						AND DEPT_LEVEL = '2'	
+			ORDER BY 	COLG_CD
+			
+	</select>
+	
+	<select id="getDepartList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 		DEPT_CD, DEPT_NM
+			FROM 		<include refid="DEPT_TABLE_NAME"/>
+			WHERE 		ISDELETE = '0'
+						AND DEPT_LEVEL = '3'
+						<if test="univ != null and univ != ''">
+						AND UP_CD = #{univ}
+						</if>
+			ORDER BY 	COLG_CD, DEPT_CD
+			
+	</select>
+	
+	<select id="getMajorList" parameterType="java.util.HashMap" resultType="dataMap">
+			SELECT 		*
+			FROM 		<include refid="DEPT_TABLE_NAME"/>
+			WHERE		ISDELETE = '0'
+						AND DEPT_LEVEL = '4'
+			AND 		UP_CD = #{depart}
+			ORDER BY 	DEPT_CD ASC
 	</select>
 	
 	

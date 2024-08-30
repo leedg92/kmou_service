@@ -209,7 +209,7 @@
 		    SDM_CD = #{SDM_CD} 
 		AND REVSN_NO = #{REVSN_NO}
 	</update>
-	<!-- 수정보완 저장 --> 	
+	<!-- 수정보완 저장마감 --> 	
 	<update id="lastSupplementComplete" parameterType="java.util.HashMap">
 		UPDATE 
 			uni_sdm_aply_infmt
@@ -222,5 +222,25 @@
 		    SDM_CD = #{SDM_CD} 
 		AND REVSN_NO = #{REVSN_NO}
 	</update>	
+		
+	<select id="getStudAplyInfmt" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+			*
+		FROM
+			uni_sdm_aply_infmt A
+		WHERE
+			SDM_CD = #{SDM_CD}
+		AND REVSN_NO = #{REVSN_NO}
+	</select>	
+		
+	<select id="getStudSbjtInfmt" parameterType="java.util.HashMap" resultType="dataMap">
+		SELECT
+			*
+		FROM
+			uni_sdm_sbjt_infmt A
+		WHERE
+			SDM_CD = #{SDM_CD}
+		AND REVSN_NO = #{REVSN_NO}
+	</select>	
 	
 </mapper>            

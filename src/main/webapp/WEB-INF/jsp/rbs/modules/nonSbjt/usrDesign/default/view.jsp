@@ -224,7 +224,7 @@
 											</td>
 											<td>
 												<div class="<c:if test="${onOff eq 'off'}">off_box</c:if>">${hist.D_DAY}</div>
-												${hist.PARTICIPANT }명 / ${hish.SIGNIN_LIMIT}명 <br>(최대 ${hish.SIGNIN_LIMIT}명 접수가능)
+												${hist.PARTICIPANT }명 / ${hist.SIGNIN_LIMIT}명 <br>(최대 ${hist.SIGNIN_LIMIT}명 접수가능)
 											</td>
 										</tr>
 									</c:forEach>

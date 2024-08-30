@@ -1031,6 +1031,7 @@ button#pdf {z-index:2; border: 0; background: #0f3e8e;color: #FFF;font-size: 14p
 .resu_box .majref_wrap h5 span{color:#555;font-size:14px; font-weight:normal;line-height:1.5;}
 .resu_box .majref_wrap .item .desc_txt{min-height:unset;}
 .resu_box .majref_wrap .info{column-gap:3rem;row-gap:0.5rem;}
+.resu_box .majref_wrap .info li {width:47%;}
 .resu_box .majref_wrap .info li strong{min-width:unset;}
 .resu_box .majref_wrap .item .info li:nth-child(4){align-items:flex-start!important;}
 .resu_box .majref_wrap .item .info li:nth-child(4) strong{min-width:45px;}
@@ -1224,8 +1225,10 @@ padding:1px 8px; display:block; text-align:center; }
 .myP_tab_wrap {}
 
 
-.myP_tab_wrap h5{font-size: 17px; color:#222; font-weight: bolder;margin-bottom:10px;;}
-.myP_tab_wrap h5 .retake_i{font-size:11px; font-weight:bolder; background:#F0C80899; border-radius:25rem;display:inline-block; padding:0.25rem;padding-right:0.5rem;}
+.myP_tab_wrap h5{font-size: 17px; color:#222; font-weight: bolder;margin-bottom:10px;position:relative;}
+.myP_tab_wrap h5 button {margin-left:10px;background:#0B9150;border:1px solid #02692D;font-weight:600;font-size:1.2rem;}
+.myP_tab_wrap h5 button:hover {background:#fff; color:#02692D;border:1px solid #02692D;}
+.myP_tab_wrap h5 .retake_i{font-size:11px; font-weight:bolder; background:#F0C80899; border-radius:25rem;display:inline-block; padding:0.25rem;padding-right:0.5rem;position:absolute;top:0;right:0;}
 .myP_tab_wrap h5 .retake_i:before{content:'!'; width:16px; height:16px;background:#FF0202;display:inline-flex; border-radius:50%; justify-content: center ; align-items:center;font-weight: bold; font-size:13px; ; color:#fff;;margin-right:0.25rem; padding-right:0.1rem;}
 .myP_degrr_cont .table_item table{border-top:1px solid var(--pk_blue);border-bottom:1px solid #DEE3F2;margin-bottom:1.5rem; font-size:14px;}
 .myP_degrr_cont .table_item:last-child table{margin-bottom:0;}
@@ -1692,6 +1695,7 @@ padding:1px 8px; display:block; text-align:center; }
     /*통합검색*/
     .resu_box .profss_wrap .item,
     .resu_box .plan_section .item{width:calc(50% - 0.5rem)}
+    .resu_box .majref_wrap .info li {width:100%;}
     
      /*전공 상세 - 인재상 표*/
     .speci_talent table {font-size:14px;}

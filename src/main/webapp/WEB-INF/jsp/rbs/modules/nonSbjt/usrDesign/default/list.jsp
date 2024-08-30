@@ -247,6 +247,7 @@
 						<h5 class="search_res mb-3" ><strong class="fw-bolder"><span id="keyword"></span></strong>에 대한 총 <span id="totalCount"></span>건의 게시글이 있습니다.</h5>
 						<div class="nonsbjt_title_boxselect">
 							<select class="form-select rounded-pill" aria-label="select" id="orderBy" name="orderBy">
+								<option value="DEFAULT">정렬 기준</option>
 								<option value="SIGNIN_END_RANK">모집종료 임박순</option>
 								<option value="PARTICIPANT_RATE_RANK">인기순</option>
 								<option value="REG_DATE_RANK">최신등록순</option>

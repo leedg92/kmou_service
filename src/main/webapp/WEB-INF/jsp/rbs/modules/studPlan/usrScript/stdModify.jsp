@@ -678,7 +678,7 @@ let duplSbjtArr = [];
 			sId = $("#sbInfo-"+DOC_ID);
 			
 			//셀렉트박스 분기용(전공/교양에 따라)
-			var majorArray = ['UE010021', 'UE010022', 'UE010024', 'UE010031'];
+			var majorArray = ['UE010021', 'UE010022', 'UE010024'];
 			var genArray = ['UE010011', 'UE010012']
 			var sbjtFgHtml = '';
 			if(majorArray.includes(sId.attr('aria-COMDIV_CODE'))){
@@ -687,7 +687,6 @@ let duplSbjtArr = [];
 							 '<option value="UE010021"'+ (sId.attr('COMDIV_CODE') == "UE010021" ? 'selected' : '') +'>전공필수</option>'+
 							 '<option value="UE010022"'+ (sId.attr('COMDIV_CODE') == "UE010022" ? 'selected' : '') +'>전공선택</option>'+
 							 '<option value="UE010024"'+ (sId.attr('COMDIV_CODE') == "UE010024" ? 'selected' : '') +'>전공기초</option>'+
-							 '<option value="UE010031"'+ (sId.attr('COMDIV_CODE') == "UE010031" ? 'selected' : '') +'>교직</option>'+
 							 '</select>'+
 							 '</li>';				
 			}else if(genArray.includes(sId.attr('aria-COMDIV_CODE'))){
@@ -697,6 +696,12 @@ let duplSbjtArr = [];
 							 '<option value="UE010012"'+ (sId.attr('COMDIV_CODE') == "UE010012" ? 'selected' : '') +'>교양선택</option>'+
 							 '</select>'+
 							 '</li>';	
+			}else{
+// 				sbjtFgHtml = '<li>'+
+// 				 '<select class="form-select selectSbjtFg" id="selectSbjtFg">'+
+// 				 '<option value="UE010031"'+ (sId.attr('COMDIV_CODE') == "UE010031" ? 'selected' : '') +'>교직</option>'+
+// 				 '</select>'+
+// 				 '</li>';	
 			}
 			
 			
@@ -761,7 +766,7 @@ let duplSbjtArr = [];
 					sId = $("#sbInfo-"+chkIdx[i].value);	
 					
 					//셀렉트박스 분기용(전공/교양에 따라)
-					var majorArray = ['UE010021', 'UE010022', 'UE010024', 'UE10031'];
+					var majorArray = ['UE010021', 'UE010022', 'UE010024'];
 					var genArray = ['UE010011', 'UE010012']
 					var sbjtFgHtml = '';
 					if(majorArray.includes(sId.attr('aria-COMDIV_CODE'))){
@@ -770,7 +775,6 @@ let duplSbjtArr = [];
 									 '<option value="UE010021"'+ (sId.attr('COMDIV_CODE') == "UE010021" ? 'selected' : '') +'>전공필수</option>'+
 									 '<option value="UE010022"'+ (sId.attr('COMDIV_CODE') == "UE010022" ? 'selected' : '') +'>전공선택</option>'+
 									 '<option value="UE010024"'+ (sId.attr('COMDIV_CODE') == "UE010024" ? 'selected' : '') +'>전공기초</option>'+
-									 '<option value="UE010031"'+ (sId.attr('COMDIV_CODE') == "UE010031" ? 'selected' : '') +'>교직</option>'+
 									 '</select>'+
 									 '</li>';				
 					}else if(genArray.includes(sId.attr('aria-COMDIV_CODE'))){
@@ -780,6 +784,12 @@ let duplSbjtArr = [];
 									 '<option value="UE010012"'+ (sId.attr('COMDIV_CODE') == "UE010012" ? 'selected' : '') +'>교양선택</option>'+
 									 '</select>'+
 									 '</li>';	
+					}else{
+// 						sbjtFgHtml = '<li>'+
+// 						 '<select class="form-select selectSbjtFg" id="selectSbjtFg">'+
+// 						 '<option value="UE010031"'+ (sId.attr('COMDIV_CODE') == "UE010031" ? 'selected' : '') +'>교직</option>'+
+// 						 '</select>'+
+// 						 '</li>';	
 					}
 					
 					html += '<div class="item p-3 head-after" id="headAfter-'+chkIdx[i].value+'">';
@@ -878,6 +888,10 @@ let duplSbjtArr = [];
 	
 	// 과목 목록 불러오기 button
 	function getSbjtList(){		
+		if($("#selectColg").val() == ""){
+			alert("대학을 선택해주세요.");
+			return false;
+		}
 		//대학/전공 선택값(마지막 선택값만 API로 넘긴다)
 		var selectedBox = ($("#selectMj").val() != "" ? $("#selectMj").val() : ($("#selectDept").val() != "" ? $("#selectDept").val() : ($("#selectColg").val() != "" ? $("#selectColg").val() : "")));	
 		//이수구분 선택값(아무것도 선택하지 않을 시엔 배열에 전체 값을 강제로 넣는다.)
@@ -1159,7 +1173,7 @@ let duplSbjtArr = [];
 			if(finalSumPntList[i].ORG_CODE == 'EXTERNAL'){
 				colgNm = '타 대학/기관/산업체';
 			}else{
-				colgNm = '해양대학교';
+				colgNm = '국립한국해양대학교';
 			}
 						
 			pHtml += '<tr>';
@@ -1333,8 +1347,8 @@ let duplSbjtArr = [];
 	
 	function proDelBtn(){
 		if(confirm('입력하신 상담 교수를 초기화 하시겠습니까?')){
-			$("#profConNm").val("");
-			$("#profConCd").val("");
+			$("#proConNm").val("");
+			$("#proConCd").val("");
 		}
 	}
 	
@@ -1908,7 +1922,7 @@ let duplSbjtArr = [];
 	//저장된 교과목 목록 display
 	function setSavedSbjtToModal(data){
 		var html = "";
-		var majorArray = ['UE010021', 'UE010022', 'UE010024', 'UE010031'];
+		var majorArray = ['UE010021', 'UE010022', 'UE010024'];
 		var genArray = ['UE010011', 'UE010012'];
 		for(var i=0; i < data.length; i++){
 			
@@ -1920,7 +1934,6 @@ let duplSbjtArr = [];
 			                 '<option value="UE010021"'+ (data[i].COMDIV_CODE == "UE010021" ? 'selected' : '') +'>전공필수</option>'+
 			                 '<option value="UE010022"'+ (data[i].COMDIV_CODE == "UE010022" ? 'selected' : '') +'>전공선택</option>'+
 			                 '<option value="UE010024"'+ (data[i].COMDIV_CODE == "UE010024" ? 'selected' : '') +'>전공기초</option>'+
-			                 '<option value="UE010031"'+ (data[i].COMDIV_CODE == "UE010031" ? 'selected' : '') +'>교직</option>'+			                 
 			                 '</select>'+
 			                 '</li>';                
 			}else if(genArray.includes(data[i].COMDIV_CODE)){
@@ -1930,6 +1943,12 @@ let duplSbjtArr = [];
 			                 '<option value="UE010012"'+ (data[i].COMDIV_CODE == "UE010012" ? 'selected' : '') +'>교양선택</option>'+
 			                 '</select>'+
 			                 '</li>';    
+			}else{
+// 				sbjtFgHtml = '<li>'+
+//                 '<select class="form-select selectSbjtFg" id="selectSbjtFg">'+
+//                 '<option value="UE010031"'+ (data[i].COMDIV_CODE == "UE010031" ? 'selected' : '') +'>교직</option>'+			                 
+//                 '</select>'+
+//                 '</li>'; 
 			}
 
 			html += '<div class="item p-3 head-after" id="headAfter-'+data[i].DOC_ID+'">';

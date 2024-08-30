@@ -7,6 +7,8 @@
 .page a.on {color:#fff;background:#f48168;border:1px solid #f48168;z-index:2}
 </style>
 <script type="text/javascript">
+var isPageLoad;
+
 $(function(){
     // 페이지 로드 시 대학 목록 불러오기
     getCollList();

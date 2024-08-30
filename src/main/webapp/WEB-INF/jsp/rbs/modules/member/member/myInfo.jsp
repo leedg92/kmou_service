@@ -2,6 +2,7 @@
 
 <%-- <script type="text/javascript" src="<c:out value="${contextPath}/include/js/jquery-1.9.1.min.js"/>"></script> --%>
 <script type="text/javascript" src="<c:out value="${contextPath}/include/js/tabulator.js"/>"></script>
+<script type="text/javascript" src="<c:out value="${contextPath}/include/js/xlsx.full.min.js"/>"></script>
 <script type="text/javascript" src="<c:out value="${contextPath}/include/js/Chart.min.js"/>"></script>
 <script type="text/javascript" src="<c:out value="${contextPath}/include/js/chartjs-plugin-doughnutlabel.min.js"/>"></script>
 <script type="text/javascript" src="<c:out value="${contextPath}/include/js/chartjs-plugin-datalabels.min.js"/>"></script>
@@ -62,8 +63,18 @@ const _GPA = {
 	SCR_AVG 		: "<c:out value="${USER_GPA[0].TOTAL_PERCENT}"/>"
 };
 
+const _SUKANG_LOGIN = {
+	TRY_TIME		: "<c:out value="${sukangLoginVO.tryTime}"/>",	
+	ERR_CODE		: "<c:out value="${sukangLoginVO.errCode}"/>",	
+	ERR_MSG			: "<c:out value="${sukangLoginVO.errMessage}"/>",	
+	PRE_APPL_DTTM	: "<c:out value="${sukangLoginVO.preApplDttm}"/>"
+}
+
+
 //장바구니
 var basketList = {};
+//로그인 프로시저 리턴 데이터
+var sukangData = {};
 
 $(function(){
 	/*
@@ -264,6 +275,11 @@ $(function(){
 		sbjtContain();
 	});
 	
+	// 선택 일괄담기 button
+	$("#btnDelSbjt").on('click', function(){
+		delSbjt();
+	});
+	
 	// 전체선택/선택 일괄해제 button
 	$(".btn-fg").on('click', function(){
 		if($(this).val() == 'beforeChk'){
@@ -277,27 +293,67 @@ $(function(){
 		}
 	});
 	
-	$("#showApplTimeTable").click(function() {
-		
-		$.ajax({
-		 	url: '/web/basket/sukangLogin.do?mId=52',
-		 	beforeSend:function(request){request.setRequestHeader('Ajax', 'true');},
-		 	contentType:'application/json',	
-		 	type: 'POST',
-		 	success: function(data){
-		 		console.log(JSON.stringify(data))		 				       		 		
-				renderBeforeCart();
-				renderApplList();
-		 	}
-		});	
-		
-		
-	});
+	$('#showApplTimeTable').click(function(){
+		if(_SUKANG_LOGIN.ERR_CODE === 'N'){
+			alert('['+_SUKANG_LOGIN.ERR_MSG + ']\n' + '예비수강신청 시작일시가 지났을 경우 로그아웃 후 다시 로그인해주세요. \n\n' +
+					'예비수강신청 시작 일시\n'+ '- '+ _SUKANG_LOGIN.PRE_APPL_DTTM + '\n\n' +
+					'회원님의 로그인 일시\n' + '- '+ _SUKANG_LOGIN.TRY_TIME)
+			return false;
+		}else{
+			//예비수강신청 나의 장바구니
+			renderBeforeCart();
+			
+			//예비수강신청 현황
+			renderApplList();	
+		    $('#applTimeTable').modal('show');	    					
+		}
+	})
 	
-	$('#applTimTableClose').click(function() {
+	$('#applTimeTableClose').click(function() {
 	    getBasketCart();
 	});
 	
+	//순서변경 모드 활성화 버튼
+	$('#reorderBtn').click(function(){
+		$('.appl').addClass('hidden');
+		$('#appndSbjt').empty();
+		var html = '';
+		html += '<div class="lesson_wrap no_contents_wrap d-flex justify-content-center align-items-center reorder">' +
+				'<div class="d-flex flex-column justify-content-center align-items-center">' +
+				'<img src="../images/kmou_noshad_big.png" alt="해양이" />' + 
+			    '<p class="text-center mt-2">' + 
+			    	'순서변경중...' + 
+			    '</p>' + 
+			    '</div>' + 
+				'</div>';
+		$('#appndSbjt').append(html)
+		$('.reorder').removeClass('hidden');
+	});
+	
+	//순서변경 취소
+	$('#cancelOrder').click(function(){
+		$('.appl').removeClass('hidden');
+		$('.reorder').addClass('hidden');
+		renderBeforeCart();
+		renderApplList();	
+	});
+	
+	//순서저장
+	$('#saveOrder').click(function(){
+		if(confirm('변경된 순서로 저장하시겠습니까?')){
+			saveNewOrder();
+		}		
+	});
+	
+    
+    $("input[name=pwdInput]").on("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            sukangLogin();
+            
+        }
+    });
+
 
 });
 
@@ -371,6 +427,14 @@ function pageCommonInit(){
 	$(".bookmarkTab").removeClass("active");
 	$("#sbjtTab").addClass("active");	
 	getSbjtList(1);
+	
+// 	setTimeout(function(){		
+// 		//예비수강신청 나의 장바구니
+// 		renderBeforeCart();
+		
+// 		//예비수강신청 현황
+// 		renderApplList();	
+// 	},1000)
 }
  
 // 기본정보
@@ -648,7 +712,11 @@ function createChartReqCDT() {
     
     "<c:forEach items="${USER_REQ_CDT}" var="item">"
     labelList.push("${item.GUBUN}");
-    baseDataList.push(Number("${item.BASE_CDT}"));
+    if ("${item.GUBUN}" === '일반선택') {
+        baseDataList.push(null);  // 일반선택의 경우 기준학점을 null로 설정
+    } else {
+        baseDataList.push(Number("${item.BASE_CDT}"));
+    }
     doneDataList.push(Number("${item.DONE_CDT}"));
     takingDataList.push(Number("${item.TAKING_CDT}"));
     "</c:forEach>"
@@ -675,7 +743,6 @@ function createChartReqCDT() {
             }
         ]
     };
-
     const opts = {
         responsive: true,
         maintainAspectRatio: false,
@@ -692,7 +759,7 @@ function createChartReqCDT() {
                 ticks: { 
                     fontSize: 10, 
                     fontColor: "#000000", 
-                    fontStyle: 'bold', // Y축 라벨 굵게 표시
+                    fontStyle: 'bold',
                     beginAtZero: true 
                 },
                 gridLines: { color: "#ffffff00" } 
@@ -715,6 +782,9 @@ function createChartReqCDT() {
             callbacks: {
                 label: function(tooltipItem, data) {
                     const datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
+                    if (datasetLabel === '기준학점(학번기준)' && tooltipItem.yLabel === '일반선택') {
+                        return datasetLabel + ': -';
+                    }
                     return datasetLabel + ": " + tooltipItem.xLabel;
                 }
             }
@@ -723,18 +793,20 @@ function createChartReqCDT() {
             datalabels: {
                 color: 'white',
                 display: function(context) {
-                    return context.dataset.data[context.dataIndex] > 0; // 값이 0보다 클 때만 레이블 표시
+                    return context.dataset.data[context.dataIndex] > 0;
                 },
                 font: {
                     weight: 'bold'
                 },
                 formatter: function(value, context) {
+                    if (context.dataset.label === '기준학점(학번기준)' && context.chart.data.labels[context.dataIndex] === '일반선택') {
+                        return '';
+                    }
                     return value;
                 }
             }
         }
     };
-
     page_prop.chartReqCDT = new Chart(document.getElementById('chartReqCDT').getContext('2d'), {
         type: 'horizontalBar',
         data: data,
@@ -751,10 +823,10 @@ function createTableReqCDT(ctx){
 	"<c:forEach items="${USER_REQ_CDT}" var="item">"
 	var data = {};	
 	
-	data.GUBUN = "${item.GUBUN}";
-	data.BASE_CDT = "${item.BASE_CDT}";
-	data.DONE_CDT = "${item.DONE_CDT}";
-	data.TAKING_CDT = "${item.TAKING_CDT}";
+    data.GUBUN = "${item.GUBUN}";
+    data.BASE_CDT = "${item.GUBUN}" === '일반선택' ? '-' : "${item.BASE_CDT}";
+    data.DONE_CDT = "${item.DONE_CDT}";
+    data.TAKING_CDT = "${item.TAKING_CDT}";
 	
 	_DATASET.push(data);
 	"</c:forEach>"
@@ -777,56 +849,96 @@ function createTableReqCDT(ctx){
             { title		: "이수학점", 		field: "DONE_CDT", 			headerSort:false, }, 
             { title		: "수강중학점", 	field: "TAKING_CDT", 		headerSort:false, },
         ],
+        
+        downloadConfig:{
+            columnGroups:false,
+            rowGroups:false,
+            columnCalcs:false,
+        },
+        downloadReady: function(fileContents, blob){
+            return blob;
+        },
+    });
+
+    // Excel 다운로드 버튼 추가
+    $('#tableGradReqExcel').append('<button type="button" id="excelDownloadBtnGradReq" class="btn btn-sm btn-primary">Excel 다운로드</button>');
+    $('#excelDownloadBtnGradReq').click(function() {
+        page_prop.tableGradReq.download("xlsx", "졸업인증내역.xlsx");
+    });
+	
+	
+}
+
+//학기별성적(테이블)
+function createTableCumCDT(ctx){
+    const _DATASET = [];
+    
+    "<c:forEach items="${USER_CUM_CDT}" var="item">"
+    var data = {};
+    
+    "<c:if test="${item.YEAR == null}">"
+    data.YEAR_SMT = "전체";
+    "</c:if>"
+    
+    "<c:if test="${item.YEAR != null}">"
+    data.YEAR_SMT = "${item.YEAR} - ${item.SMT}";
+    "</c:if>"
+    
+    data.STUDENT_NO = "${item.STUDENT_NO}";
+    data.REQ_CDT = "${item.REQ_CDT}";
+    data.GAIN_CDT = "${item.GAIN_CDT}";
+    data.GPA_AVG = "${item.GPA_AVG}";
+    data.TOTAL_PERCENT = "${item.TOTAL_PERCENT}";
+    data.DEPT_RANK = "${item.DEPT_RANK}";
+    
+    _DATASET.push(data);
+    "</c:forEach>"
+    
+    page_prop.tableCumCDT = new Tabulator(ctx, {
+        layout          : "fitColumns",
+        height          : "300px",
+        placeholder     : "학기별 성적 정보가 없습니다.",
+        cellHozAlign    : 'center',
+        cellVertAlign   : "middle",
+        data            : _DATASET,
+        index           : "YEAR_SMT",
+        paginationSize  : 100,
+        
+        rowFormatter    : (row) => setRowStyle(row, '#FEFCE2'),
+        columns         : [                             
+            { title     : "학년도/학기",    field: "YEAR_SMT",          headerSort:false, },
+            { title     : "신청학점",       field: "REQ_CDT",           headerSort:true, },
+            { title     : "취득학점",       field: "GAIN_CDT",          headerSort:true, }, 
+            { title     : "평균학점",       field: "GPA_AVG",           headerSort:true, },
+            { title     : "백분율",        field: "TOTAL_PERCENT",     headerSort:true, },
+            { title     : "석차",          field: "DEPT_RANK",         headerSort:true, },
+        ],
+
+        // Excel 다운로드 설정 추가
+        downloadConfig:{
+            columnGroups:false,
+            rowGroups:false,
+            columnCalcs:false,
+        },
+        downloadReady: function(fileContents, blob){
+            return blob;
+        },
+    });
+
+    // Excel 다운로드 버튼 추가
+    $('#tableCumCDTExcel').append('<button type="button" id="excelDownloadBtnCumCDT" class="btn btn-sm btn-primary">Excel 다운로드</button>');
+    $('#excelDownloadBtnCumCDT').click(function() {
+        page_prop.tableCumCDT.download("xlsx", "학기별성적.xlsx", {
+            sheetName: "학기별성적"
+        });
     });
 }
 
-// 학기별성적(테이블)
-function createTableCumCDT(ctx){
-	const _DATASET = [];
-	
-	"<c:forEach items="${USER_CUM_CDT}" var="item">"
-	var data = {};
-	
-	"<c:if test="${item.YEAR == null}">"
-	data.YEAR_SMT = "전체";
-	"</c:if>"
-	
-	"<c:if test="${item.YEAR != null}">"
-	data.YEAR_SMT = "${item.YEAR} - ${item.SMT}";
-	"</c:if>"
-	
-	data.STUDENT_NO = "${item.STUDENT_NO}";
-	data.REQ_CDT = "${item.REQ_CDT}";
-	data.GAIN_CDT = "${item.GAIN_CDT}";
-	data.GPA_AVG = "${item.GPA_AVG}";
-	data.TOTAL_PERCENT = "${item.TOTAL_PERCENT}";
-	data.DEPT_RANK = "${item.DEPT_RANK}";
-	
-	_DATASET.push(data);
-	"</c:forEach>"
-	
-	page_prop.tableCumCDT = new Tabulator(ctx, {
-        layout			: "fitColumns",
-		height			: "300px",
-        placeholder		: "학기별 성적 정보가 없습니다.",
-        cellHozAlign	: 'center',
-        cellVertAlign	: "middle",
-        data			: _DATASET,
-        index			: "YEAR_SMT",
-//         frozenRows		: 1,
-        paginationSize	: 100,
-        
-        rowFormatter	: (row) => setRowStyle(row, '#FEFCE2'),
-
-        columns			: [ 							
-            { title		: "학년도/학기", 	field: "YEAR_SMT", 			headerSort:false, },
-            { title		: "신청학점", 		field: "REQ_CDT", 			headerSort:true, },
-            { title		: "취득학점", 		field: "GAIN_CDT", 			headerSort:true, }, 
-            { title		: "평균학점", 		field: "GPA_AVG", 			headerSort:true, },
-            { title		: "백분율", 		field: "TOTAL_PERCENT", 	headerSort:true, },
-            { title		: "석차", 			field: "DEPT_RANK", 		headerSort:true, },
-        ],
-    });
+// 행 스타일 설정 함수 (기존 코드에 없었다면 추가해주세요)
+function setRowStyle(row, color) {
+    if (row.getData().YEAR_SMT === "전체") {
+        row.getElement().style.backgroundColor = color;
+    }
 }
 
 // 졸업인증내역(테이블)
@@ -913,7 +1025,7 @@ function createTableSubjectCDT(ctx){
         columns			: [ 							
             { title		: "편성", 			field: "YEAR_SMT", 			headerSort:true, },
             { title		: "과목", 			field: "SUBJECT_NM", 		headerSort:true, 	width:150},
-            { title		: "구분",	 		field: "COMDIV_NM", 		headerSort:false, 
+            { title		: "구분",	 		field: "COMDIV_NM", 		headerSort:true, 
             								formatter:function(cell){ 
             									return makeComDivBadge(cell.getData().COMDIV_NM);
             								}, 	
@@ -934,7 +1046,25 @@ function createTableSubjectCDT(ctx){
         	if(convMag.indexOf(data.CONV_MAG) != -1){
         		row.getElement().style.backgroundColor = "#F0C80899";
             }
-        }
+        },
+
+        // Excel 다운로드 설정 추가
+        downloadConfig:{
+            columnGroups:false,
+            rowGroups:false,
+            columnCalcs:false,
+        },
+        downloadReady: function(fileContents, blob){
+            return blob;
+        },
+    });
+
+    // Excel 다운로드 버튼 추가
+    $('#tableSubjectCDTExcel').before('<button type="button" id="excelDownloadBtnSubjectCDT" class="btn btn-sm btn-primary">Excel 다운로드</button>');
+    $('#excelDownloadBtnSubjectCDT').click(function() {
+        page_prop.tableSubjectCDT.download("xlsx", "과목별성적.xlsx", {
+            sheetName: "과목별성적"
+        });
     });
 }
 
@@ -969,6 +1099,21 @@ function createTableRecordHistory(ctx){
             { title		: "신청일자", 		field: "REQ_DT", 		headerSort:true, },
             { title		: "변경일자", 		field: "CHG_DT", 		headerSort:true, },
         ],
+        // Excel 다운로드 설정 추가
+        downloadConfig:{
+            columnGroups:false,
+            rowGroups:false,
+            columnCalcs:false,
+        },
+        downloadReady: function(fileContents, blob){
+            return blob;
+        },
+    });
+
+    // Excel 다운로드 버튼 추가
+    $('#tableRecHistExcel').append('<button type="button" id="excelDownloadBtnRecHist" class="btn btn-sm btn-primary">Excel 다운로드</button>');
+    $('#excelDownloadBtnRecHist').click(function() {
+        page_prop.tablerRecordHistory.download("xlsx", "학적변동내역.xlsx");
     });
 }
 
@@ -1010,6 +1155,20 @@ function createTableMajorReq(ctx){
 	            								formatter:function(cell){ return makeCompleteBadge(cell.getData().S_FLAG);}, 
 	            }, 
 	        ],
+	        downloadConfig:{
+	            columnGroups:false,
+	            rowGroups:false,
+	            columnCalcs:false,
+	        },
+	        downloadReady: function(fileContents, blob){
+	            return blob;
+	        },
+	    });
+
+	    // Excel 다운로드 버튼 추가
+	    $('#tableMajorReqExcel').append('<button type="button" id="excelDownloadBtnMajorReq" class="btn btn-sm btn-primary">Excel 다운로드</button>');
+	    $('#excelDownloadBtnMajorReq').click(function() {
+	        page_prop.tableMajorReq.download("xlsx", "전공필수이수현황.xlsx");
 	    });
 	}
 	catch(error){ asdf(error);}
@@ -1081,7 +1240,21 @@ function createTableMinorReq(ctx){
 	            								formatter:function(cell){ return makeCompleteBadge(cell.getData().S_FLAG);}, 
 	            }, 
 	        ],
+	        downloadConfig:{
+	            columnGroups:false,
+	            rowGroups:false,
+	            columnCalcs:false,
+	        },
+	        downloadReady: function(fileContents, blob){
+	            return blob;
+	        },
 	    });
+
+	    // Excel 다운로드 버튼 추가
+	    $('#tableMinorReqExcel').append('<button type="button" id="excelDownloadBtnMinorReq" class="btn btn-sm btn-primary">Excel 다운로드</button>');
+	    $('#excelDownloadBtnMinorReq').click(function() {
+	        page_prop.tableMinorReq.download("xlsx", "교양필수이수현황.xlsx");
+	    });	
 	}
 	catch(error){ asdf(error);}
 	finally{ return; }
@@ -1094,8 +1267,8 @@ function createTableNonSbjtHist(ctx){
 	
 	"<c:forEach items="${USER_NON_SBJT_SIGNIN}" var="item">"
 	var data = {};
-	data.TITLE = "${item.TITLE}";
-	data.SUB_TITLE = "${item.SUB_TITLE}";
+	data.TITLE = `${item.TITLE}`;
+	data.SUB_TITLE = `${item.SUB_TITLE}`;
 	data.GRADE = "${item.GRADE}학년";
 	data.IS_COMPLETE = "${item.IS_COMPLETE}";
 	data.PROGRAM_DATE = "${item.START_DATE}(${item.START_DAY}) ${item.START_TIME} ~ ${item.END_DATE}(${item.END_DAY}) ${item.END_TIME }";
@@ -1123,6 +1296,21 @@ function createTableNonSbjtHist(ctx){
 	            { title		: "이수여부", 			field: "IS_COMPLETE", 			headerSort:false, width:70, },
 	            { title		: "비고", 			field: "NOTE", 			headerSort:false, width:100,	 },
 	        ],
+	        // Excel 다운로드 설정 추가
+	        downloadConfig:{
+	            columnGroups:false,
+	            rowGroups:false,
+	            columnCalcs:false,
+	        },
+	        downloadReady: function(fileContents, blob){
+	            return blob;
+	        },
+	    });
+
+	    // Excel 다운로드 버튼 추가
+	    $('#tableNonSbjtHistExcel').append('<button type="button" id="excelDownloadBtnNonSbjtHist" class="btn btn-sm btn-primary">Excel 다운로드</button>');
+	    $('#excelDownloadBtnNonSbjtHist').click(function() {
+	        page_prop.tableMinorReq.download("xlsx", "비교과신청이력.xlsx");
 	    });
 	}
 	catch(error){ asdf(error);}
@@ -1304,7 +1492,8 @@ function getMyBookmarkCount(){
 
 
 
-function setBookmarkBottomContents(contentsHtml, tabFg, data){	
+function setBookmarkBottomContents(contentsHtml, tabFg, data){
+	getMyBookmarkCount();
    	//페이징 변수 선언
 	var pageInfo = data.paginationInfo;
 		
@@ -1343,7 +1532,7 @@ function setBookmarkBottomContents(contentsHtml, tabFg, data){
 	
 	if(totalPageCount > pageSize){
 		if(firstPageNoOnPageList > pageSize){
-			var prevPageNo = firstPageNoOnPageList;
+			var prevPageNo = firstPageNoOnPageList - pageSize;
 		} else{
 			var prevPageNo = firstPageNo;
 		}
@@ -1428,7 +1617,7 @@ function getSbjtList(page){
 						'</li>'+
 				        '</ul>' +
 			            '<h5 class="title mb-1">' +
-			            '<a href="javascript:" onclick="sbjtView(\''+list.SUBJECT_CD+'\',\''+deptKey+'\',\''+list.YEAR+'\',\''+list.SMT+'\')" title="' + list.SUBJECT_NM + '" class="d-block  fw-semibold">' + list.SUBJECT_NM + '</a> <span>' + (list.SUBJECT_ENM === undefined ? '' : list.SUBJECT_ENM) + '</span>' +
+			            '<a href="javascript:sbjtView(\''+list.SUBJECT_CD+'\',\''+deptKey+'\',\''+list.YEAR+'\',\''+list.SMT+'\');"  title="' + list.SUBJECT_NM + '" class="d-block  fw-semibold">' + list.SUBJECT_NM + '</a> <span>' + (list.SUBJECT_ENM === undefined ? '' : list.SUBJECT_ENM) + '</span>' +
 			            '</h5>' +
 			            '<p class="desc_txt mb-4 mb-sm-3" >' + (list.SUBJ_DESC === undefined ? '' : list.SUBJ_DESC) + '</p>' +
 			            '<ul class="desc_txt info d-flex flex-wrap align-items-start maj_card" style="width:100%">' +
@@ -1470,7 +1659,7 @@ function getSbjtList(page){
 /* 상세보기(교과목코드, 부서코드, 년도, 분반) */
 function sbjtView(a,b,c,d){
 	
-	var form = document.viewForm;
+	var form = document.sbjtView;
 	form.SUBJECT_CD.value = a;
 	form.DEPT_CD.value = b;
 	form.YEAR.value = c;
@@ -1510,14 +1699,14 @@ function getLecList(page){
 			        var DOC_ID = list.SUBJECT_CD +'_'+list.DEPT_CD+'_'+list.YEAR+'_'+list.GRADE+'_'+list.SMT+'_'+list.DIVCLS+'_'+list.EMP_NO
 			        var rstrMcnt = (typeof(list.RSTR_MCNT) == "undefined") ? "-" : list.RSTR_MCNT;
 	
-			        
+			        console.log(list);
 			        bookmarkList += '<div class="item border d-flex flex-row align-items-center">' +
 			            '<div class="form-check d-flex justify-content-center pe-2">' +
 			            '<input class="form-check-input" type="checkbox" value="' + DOC_ID + '" id="bmkChk_' + index + '" name="bmkChk">' +
 			            '<label class="blind" for="bmkChk_' + index + '">강좌선택</label>' +
 			            '</div>' +
 			            '<div>' +
-			            '<div class="cursor_pointer" data-bs-toggle="modal" data-bs-target="#syllabusModal" onclick="getLectureView(\''+list.SUBJECT_CD+'\',\''+list.DEPT_CD+'\',\''+list.EMP_NO+'\',\''+list.YEAR+'\',\''+list.DIVCLS+'\');">' +
+			            '<div class="cursor_pointer" data-bs-toggle="modal" data-bs-target="#syllabusModal" onclick="getLectureView(\''+list.SUBJECT_CD+'\',\''+list.DEPT_CD+'\',\''+list.EMP_NO+'\',\''+list.YEAR+'\',\''+list.DIVCLS+'\',\''+list.SMT+'\');">' +
 			            '<ul class="cate d-flex flex-row gap-1 flex-wrap">' +
 			            '<li class="' + categoryClass + '">' + list.COMDIV_CODE_NAME + '</li>' +
 	
@@ -1577,9 +1766,9 @@ function getLecList(page){
  }
  
 /* 개설강좌 상세정보 및 강의평가 */
-function getLectureView(subjectCd, deptCd, empNo, year, divcls){
+function getLectureView(subjectCd, deptCd, empNo, year, divcls, smt){
 	
-	var varAction = "/web/sbjt/lectureView.json?mId=32&SUBJECT_CD=" + subjectCd + "&DEPT_CD=" + deptCd + "&EMP_NO=" + empNo + "&YEAR=" + year + "&DIVCLS=" + divcls;
+	var varAction = "/web/sbjt/lectureView.json?mId=32&SUBJECT_CD=" + subjectCd + "&DEPT_CD=" + deptCd + "&EMP_NO=" + empNo + "&YEAR=" + year + "&DIVCLS=" + divcls + "&SMT=" + smt;
 	
 	
 	$.ajax({
@@ -2011,6 +2200,7 @@ function getMyLoveList(type){
 			}),
 			success: function(data){			
 				resolve(data.bookmarkList);
+				console.log(JSON.stringify(data))
 			},error:function() {
 				reject("");
 			}
@@ -2272,137 +2462,112 @@ function cartAllChk(e){
 
 //장바구니 시간표
 function setTimeTable(cartList) {
-    // 테이블 초기화
-    $("#timeTableBody").empty();
+    // 시간표 구조 초기화 (17행 7열)
+    var timeTable = Array(17).fill().map(() => Array(7).fill(null));
 
-    // 0교시부터 16교시까지 교시와 시간을 동적으로 생성
-    for (var i = 0; i <= 16; i++) {
-        $("#timeTableBody").append(
-            '<tr>' +
-                '<td style="text-align: center">' + i + '</td>' +
-                '<td style="text-align: center">' + (i + 8) + ':00</td>' +
-                '<td style="text-align: center; vertical-align: middle;">.</td>' +
-                '<td style="text-align: center; vertical-align: middle;">.</td>' +
-                '<td style="text-align: center; vertical-align: middle;">.</td>' +
-                '<td style="text-align: center; vertical-align: middle;">.</td>' +
-                '<td style="text-align: center; vertical-align: middle;">.</td>' +
-                '<td style="text-align: center; vertical-align: middle;">.</td>' +
-                '<td style="text-align: center; vertical-align: middle;">.</td>' +
-            '</tr>'
-        );
-    }
-
-    // 각 셀의 상태를 추적할 객체 생성
-    var scheduleMatrix = {};
-    var previousHue = 210; 
-
-    // 먼저 데이터를 처리하여 셀 병합을 위한 정보를 저장
-    cartList.forEach(function(item) {
+    // 각 수업을 시간표에 배치
+    cartList.forEach(function(item, index) {
         var match = item.roomTime.match(/([월화수목금토일])(\d+)~(\d+)/);
         if (match) {
-            var day = match[1];
+            var day = ['월', '화', '수', '목', '금', '토', '일'].indexOf(match[1]);
             var startTime = parseInt(match[2]);
             var endTime = parseInt(match[3]);
-            var colIndex = ['월', '화', '수', '목', '금', '토', '일'].indexOf(day) + 3;
-
             for (var period = startTime; period <= endTime; period++) {
-                var rowIndex = period;
-                var cellId = day + rowIndex;
-
-                if (!scheduleMatrix[cellId]) {
-                    scheduleMatrix[cellId] = { subjects: [], cell: null };
+                if (!timeTable[period][day]) {
+                    timeTable[period][day] = [];
                 }
-                scheduleMatrix[cellId].subjects.push(item.subjectNm);
+                timeTable[period][day].push({
+                    subjectNm: item.subjectNm,
+                    index: index
+                });
             }
         }
     });
 
-    var hueIncrement = 20; 
-    var saturation = 50; 
-    var lightness = 70; 
-
-    // 병합되지 않은 셀들을 먼저 병합
-    var mergedCells = {};
-
-    for (var cellId in scheduleMatrix) {
-        var subjects = scheduleMatrix[cellId].subjects;
-        var day = cellId[0];
-        var rowIndex = parseInt(cellId.slice(1));
-        var colIndex = ['월', '화', '수', '목', '금', '토', '일'].indexOf(day) + 3;
-
-        if (subjects.length === 1) {
-            var startRowIndex = rowIndex;
-            while (scheduleMatrix[day + (startRowIndex - 1)] && scheduleMatrix[day + (startRowIndex - 1)].subjects.length === 1) {
-                startRowIndex--;
-            }
-            var endRowIndex = rowIndex;
-            while (scheduleMatrix[day + (endRowIndex + 1)] && scheduleMatrix[day + (endRowIndex + 1)].subjects.length === 1) {
-                endRowIndex++;
-            }
-
-            var rowspan = endRowIndex - startRowIndex + 1;
-            if (!mergedCells[day + startRowIndex]) {
-                var row = $('#timeTableBody tr:nth-child(' + (startRowIndex + 1) + ')');
-                var cell = row.find('td:nth-child(' + colIndex + ')');
-                previousHue = (previousHue + hueIncrement) % 360;
-                var color = 'hsl(' + previousHue + ', ' + saturation + '%, ' + lightness + '%)';
-                cell.css('background-color', color)
-                    .css('color', '#FFFFFF')
-                    .css('vertical-align', 'middle')
-                    .attr('rowspan', rowspan)
-                    .text(subjects[0]);
-
-                for (var period = startRowIndex + 1; period <= endRowIndex; period++) {
-                    $('#timeTableBody tr:nth-child(' + (period + 1) + ') td:nth-child(' + colIndex + ')').remove();
+    // 병합 정보 계산
+    var mergeInfo = Array(17).fill().map(() => Array(7).fill(null));
+    for (var period = 0; period < 17; period++) {
+        for (var day = 0; day < 7; day++) {
+            if (timeTable[period][day] && !mergeInfo[period][day]) {
+                var rowspan = 1;
+                var colspan = 1;
+                
+                // 세로 병합 (rowspan) 계산
+                while (period + rowspan < 17 && 
+                       JSON.stringify(timeTable[period + rowspan][day]) === JSON.stringify(timeTable[period][day])) {
+                    rowspan++;
                 }
-                mergedCells[day + startRowIndex] = true;
+                
+                // 가로 병합 (colspan) 계산
+                while (day + colspan < 7 && 
+                       JSON.stringify(timeTable[period][day + colspan]) === JSON.stringify(timeTable[period][day])) {
+                    colspan++;
+                }
+                mergeInfo[period][day] = { rowspan: rowspan, colspan: colspan };
+                
+                // 병합될 셀 표시
+                for (var r = 0; r < rowspan; r++) {
+                    for (var c = 0; c < colspan; c++) {
+                        if (r !== 0 || c !== 0) {
+                            mergeInfo[period + r][day + c] = 'merged';
+                        }
+                    }
+                }
             }
         }
     }
 
-    // 중복된 셀들을 처리하여 병합
-    for (var cellId in scheduleMatrix) {
-        var subjects = scheduleMatrix[cellId].subjects;
-        var day = cellId[0];
-        var rowIndex = parseInt(cellId.slice(1));
-        var colIndex = ['월', '화', '수', '목', '금', '토', '일'].indexOf(day) + 3;
-
-        if (subjects.length > 1) {
-            var startRowIndex = rowIndex;
-            while (scheduleMatrix[day + (startRowIndex - 1)] && scheduleMatrix[day + (startRowIndex - 1)].subjects.length > 1) {
-                startRowIndex--;
-            }
-            var endRowIndex = rowIndex;
-            while (scheduleMatrix[day + (endRowIndex + 1)] && scheduleMatrix[day + (endRowIndex + 1)].subjects.length > 1) {
-                endRowIndex++;
-            }
-
-            var rowspan = endRowIndex - startRowIndex + 1;
-            if (!mergedCells[day + startRowIndex]) {
-                var row = $('#timeTableBody tr:nth-child(' + (startRowIndex + 1) + ')');
-                var cell = row.find('td:nth-child(' + colIndex + ')');
-                var shortText = subjects[0] + ' 외 ' + (subjects.length - 1) + '개';
-                var fullText = subjects.join(', <br>');
-                cell.css('background-color', 'red')
-                    .css('color', '#FFFFFF')
-                    .css('vertical-align', 'middle')
-                    .attr('rowspan', rowspan)
-                    .html(shortText)
-                    .attr('data-fulltext', fullText)
-                    .attr('data-shorttext', shortText)
-                    .hover(
-                        function() { $(this).html($(this).attr('data-fulltext')); },
-                        function() { $(this).html($(this).attr('data-shorttext')); }
-                    );
-
-                for (var period = startRowIndex + 1; period <= endRowIndex; period++) {
-                    $('#timeTableBody tr:nth-child(' + (period + 1) + ') td:nth-child(' + colIndex + ')').remove();
+    // 테이블 생성
+    var tableHTML = '';
+    for (var period = 0; period < 17; period++) {
+        tableHTML += '<tr>';
+        tableHTML += '<td style="text-align: center">' + period + '</td>';
+        tableHTML += '<td style="text-align: center">' + (period + 8) + ':00</td>';
+        
+        for (var day = 0; day < 7; day++) {
+            if (mergeInfo[period][day] === 'merged') continue;
+            
+            if (timeTable[period][day]) {
+                var info = mergeInfo[period][day];
+                var subjects = timeTable[period][day];
+                var cellContent = '';
+                var cellStyle = '';
+                
+                if (subjects.length === 1) {
+                    cellContent = subjects[0].subjectNm;
+                    cellStyle = 'background-color: hsl(' + (subjects[0].index * 20 % 360) + ', 50%, 70%); color: #FFFFFF;';
+                } else {
+                    var shortText = subjects[0].subjectNm + ' 외 ' + (subjects.length - 1) + '개';
+                    var fullText = subjects.map(s => s.subjectNm).join(',\n');
+                    cellContent = shortText;
+                    cellStyle = 'background-color: red; color: #FFFFFF;';
                 }
-                mergedCells[day + startRowIndex] = true;
+                
+                tableHTML += '<td style="text-align: center; vertical-align: middle; ' + cellStyle + '" ' +
+                             'rowspan="' + info.rowspan + '" colspan="' + info.colspan + '" ' +
+                             (subjects.length > 1 ? 'data-fulltext="' + fullText + '"' : '') + '>' +
+                             cellContent + '</td>';
+            } else {
+                tableHTML += '<td style="text-align: center; vertical-align: middle;">.</td>';
             }
         }
+        tableHTML += '</tr>';
     }
 
+    // 테이블에 HTML 삽입
+    $("#timeTableBody").html(tableHTML);
+
+    // 호버 이벤트 추가
+    $("#timeTableBody td[data-fulltext]").hover(
+        function() {
+            var fullText = $(this).attr('data-fulltext').replace(/\n/g, '<br>');
+            $(this).html(fullText);
+        },
+        function() {
+            var shortText = $(this).text().split(',')[0] + ' 외 ' + ($(this).text().split(',').length - 1) + '개';
+            $(this).text(shortText);
+        }
+    );
 
     $("#isMerged").show();
 }
@@ -2477,73 +2642,85 @@ function hideLoading() {
 }	
 
 //예비수강신청 AI시스템 장바구니 리스트
-function renderBeforeCart(){
+function renderBeforeCart(){	
 	var html ='';
 	$("#appndSbjt").empty();
-	$.each(basketList, function(i, list){
-		
-		var sbjt_class;
-		switch(list.COMDIV_CODE_NAME){
-			case "전공공통" :
-				sbjt_class = "nati_navy";
-				break;
-			case "전공필수" :
-				sbjt_class = "alon_red";
-				break;
-			case "전공선택" :
-				sbjt_class = "styl_skyb";
-				break;
-			case "필수교양" :
-				sbjt_class = "styl_lighb";
-				break;
-			default : 
-				sbjt_class = "refi_yell";
-		}
-		
-		var DOC_ID = list.SUBJECT_CD + '_' + list.DIVCLS			
-	    html += '<div class="item p-3" style="border-top: 1px solid #ddd;">';
-	    html += 	'<div class="d-inline-flex form-check">';
-	    html += 		'<label class="blind" for="lessons_'+DOC_ID+'">선택</label>';
-	    html += 		'<input type="checkbox" id="lessons_'+DOC_ID+'" class="form-check-input chk-before" value="'+DOC_ID+'">';
-	    html += 	'</div>';
-	    html += 	'<section class="d-inline-flex flex-column flex-lg-row justify-content-between">';
-	    html += 		'<input type="hidden" id="sbInfo-'+DOC_ID+'" value="'+DOC_ID+'" data-subjectCd="'+list.SUBJECT_CD+'" data-divcls="'+list.DIVCLS+'" />';
-	    html += 		'<div class="d-flex flex-column align-items-start" id="div-'+DOC_ID+'">';
-	    html += 			'<ul class="cate d-flex flex-wrap gap-2">';
-	    html += 				'<li class="text-white '+sbjt_class+'">'+list.COMDIV_CODE_NAME+'</li>';
-	    html += 				'<li class="border">';
-	    html += 					'<span>'+list.DEPT_NM+'</span>';
-	    html += 				'</li>';
-	    html += 			'</ul>';
-	    html += 			'<h4 class="text-truncate ellip_2 my-2 h-sbjt-kor-nm" id="sbjtNm-'+list.DOC_ID+'"><span class="text-truncate text-dark text-opacity-75">['+list.SUBJECT_CD+'-'+list.DIVCLS+'] </span>' +(list.SUBJECT_NM||'')+'</h4>';
-	    html += 			'<div class="w-100">';
-	    html += 				'<dl class="d-inline-flex">';
-	    html += 					'<dt class="me-2">학점</dt>';
-	    html += 					'<dd class="text-dark text-opacity-75">'+list.CDT_NUM+'</dd>';
-	    html +=					'</dl>';
-	    html += 				'<dl class="d-inline-flex position-relative pe-4">';
-	    html += 					'<dt class="me-2">편성</dt>';
-	    html += 					'<dd class="text-dark text-opacity-75">'+list.YEAR+'학년도 '+list.COM_GRADE+'학년</dd>';
-	    html += 				'</dl>';
-	    html += 				'<dl class="d-inline-flex position-relative pe-4">';
-	    html += 					'<dt class="me-2">담당교수</dt>';
-	    html += 					'<dd class="text-dark text-opacity-75">'+list.EMP_NM+'</dd>';
-	    html += 				'</dl>';
-	    html += 			'</div>';
-	    html += 		'</div>';
-	    html += 		'<div class="btn_wrap">';	
-// 	    html +=				'<button type="button" class="btn_dele" onclick="deleteBasket(\''+DOC_ID+'\')">';
-	    html +=				'<button type="button" class="btn_dele" onclick="deleteBasket(\'' + list.YEAR + '\',\'' + list.SMT + '\',\''+ list.SUBJECT_CD + '\',\'' + list.DEPT_CD + '\',\'' + list.DIVCLS + '\',\'' + list.SUBJECT_NM + '\', \'' + list.EMP_NO + '\', \'' + DOC_ID + '\')">';
-	    html +=					'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-	    html +=				'</button>';
-	    html += 			'<button type="button" class="btn_put" onclick="sbjtContain(\''+DOC_ID+'\');">';
-	    html += 				'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
-	    html += 			'</button>';
-	    html += 		'</div>';
-	    html += 	'</section>';
-	    html += '</div>'; 
-	});
-	$("#appndSbjt").append(html);
+	if(basketList.length != 0){
+		$.each(basketList, function(i, list){
+			
+			var sbjt_class;
+			switch(list.COMDIV_CODE_NAME){
+				case "전공공통" :
+					sbjt_class = "nati_navy";
+					break;
+				case "전공필수" :
+					sbjt_class = "alon_red";
+					break;
+				case "전공선택" :
+					sbjt_class = "styl_skyb";
+					break;
+				case "필수교양" :
+					sbjt_class = "styl_lighb";
+					break;
+				default : 
+					sbjt_class = "refi_yell";
+			}
+			
+			var DOC_ID = list.SUBJECT_CD + '_' + list.DIVCLS			
+		    html += '<div class="item p-3" style="border-top: 1px solid #ddd;">';
+		    html += 	'<div class="d-inline-flex form-check appl">';
+		    html += 		'<label class="blind" for="lessons_'+DOC_ID+'">선택</label>';
+		    html += 		'<input type="checkbox" id="lessons_'+DOC_ID+'" class="form-check-input chk-before" value="'+DOC_ID+'">';
+		    html += 	'</div>';
+		    html += 	'<section class="d-inline-flex flex-column flex-lg-row justify-content-between">';
+		    html += 		'<input type="hidden" id="sbInfo-'+DOC_ID+'" value="'+DOC_ID+'" data-subjectCd="'+list.SUBJECT_CD+'" data-divcls="'+list.DIVCLS+'" data-subjectNm="'+list.SUBJECT_NM+'"/>';
+		    html += 		'<div class="d-flex flex-column align-items-start" id="div-'+DOC_ID+'">';
+		    html += 			'<ul class="cate d-flex flex-wrap gap-2">';
+		    html += 				'<li class="text-white '+sbjt_class+'">'+list.COMDIV_CODE_NAME+'</li>';
+		    html += 				'<li class="border">';
+		    html += 					'<span>'+list.DEPT_NM+'</span>';
+		    html += 				'</li>';
+		    html += 			'</ul>';
+		    html += 			'<h4 class="text-truncate ellip_2 my-2 h-sbjt-kor-nm" id="sbjtNm-'+list.DOC_ID+'"><span class="text-truncate text-dark text-opacity-75">['+list.SUBJECT_CD+'-'+list.DIVCLS+'] </span>' +(list.SUBJECT_NM||'')+'</h4>';
+		    html += 			'<div class="w-100">';
+		    html += 				'<dl class="d-inline-flex">';
+		    html += 					'<dt class="me-2">학점</dt>';
+		    html += 					'<dd class="text-dark text-opacity-75">'+list.CDT_NUM+'</dd>';
+		    html +=					'</dl>';
+		    html += 				'<dl class="d-inline-flex position-relative pe-4">';
+		    html += 					'<dt class="me-2">편성</dt>';
+		    html += 					'<dd class="text-dark text-opacity-75">'+list.YEAR+'학년도 '+list.COM_GRADE+'학년</dd>';
+		    html += 				'</dl>';
+		    html += 				'<dl class="d-inline-flex position-relative pe-4">';
+		    html += 					'<dt class="me-2">담당교수</dt>';
+		    html += 					'<dd class="text-dark text-opacity-75">'+list.EMP_NM+'</dd>';
+		    html += 				'</dl>';
+		    html += 			'</div>';
+		    html += 		'</div>';
+		    html += 		'<div class="btn_wrap appl">';	
+		    html +=				'<button type="button" class="btn_dele" onclick="deleteBasket(\'' + list.YEAR + '\',\'' + list.SMT + '\',\''+ list.SUBJECT_CD + '\',\'' + list.DEPT_CD + '\',\'' + list.DIVCLS + '\',\'' + list.SUBJECT_NM + '\', \'' + list.EMP_NO + '\', \'' + DOC_ID + '\')">';
+		    html +=					'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+		    html +=				'</button>';
+		    html += 			'<button type="button" class="btn_put" onclick="sbjtContain(\''+DOC_ID+'\');">';
+		    html += 				'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+		    html += 			'</button>';
+		    html += 		'</div>';
+		    html += 	'</section>';
+		    html += '</div>'; 
+		});
+		$("#appndSbjt").append(html);	
+	}else{
+		var html = '';
+		html += '<div class="lesson_wrap no_contents_wrap d-flex justify-content-center align-items-center reorder">' +
+				'<div class="d-flex flex-column justify-content-center align-items-center">' +
+				'<img src="../images/kmou_noshad_big.png" alt="해양이" />' + 
+			    '<p class="text-center mt-2">' + 
+			    	'장바구니가 비어있습니다.' + 
+			    '</p>' + 
+			    '</div>' + 
+				'</div>';
+		$('#appndSbjt').append(html)
+	}				
 }
 
 
@@ -2556,69 +2733,96 @@ function renderApplList(){
 			contentType:'application/json',	
 			type: 'POST',
 			success: function(result){
+				var ord = 1;
 				var html ='';
 				$("#applSbjt").empty();
-				$.each(result.preApplList, function(i, list){
+				if(result.preApplList.length != 0){
+					$.each(result.preApplList, function(i, list){
+						
+						var sbjt_class;
+						switch(list.COMDIV_NM){
+							case "전공공통" :
+								sbjt_class = "nati_navy";
+								break;
+							case "전공필수" :
+								sbjt_class = "alon_red";
+								break;
+							case "전공선택" :
+								sbjt_class = "styl_skyb";
+								break;
+							case "필수교양" :
+								sbjt_class = "styl_lighb";
+								break;
+							default : 
+								sbjt_class = "refi_yell";
+						}					
+						var DOC_ID = list.SUBJECT_CD + '_' + list.DIVCLS			
+					    html += '<div class="item p-3" style="border-top: 1px solid #ddd;" data-year="'+list.YEAR+'" data-smt="'+list.SMT+'" data-subjectCd="'+list.SUBJECT_CD+'" data-divcls="'+list.DIVCLS+'" data-ui_ord="'+ord+'" data-org_ord="'+list.ORD+'">';
+					    html += 	'<div class="d-inline-flex form-check appl">';
+					    html += 		'<label class="blind" for="lessons_'+DOC_ID+'">선택</label>';
+					    html += 		'<input type="checkbox" id="lessons_'+DOC_ID+'" class="form-check-input chk-after" value="'+DOC_ID+'">';
+					    html += 	'</div>';
+					    html += 	'<section class="d-inline-flex flex-column flex-lg-row justify-content-between">';
+					    html += 		'<input type="hidden" id="applInfo-'+DOC_ID+'" value="'+DOC_ID+'" data-subjectCd="'+list.SUBJECT_CD+'" data-divcls="'+list.DIVCLS+'" data-subjectNm="'+list.SUBJECT_NM+'"/>';
+					    html += 		'<div class="d-flex flex-column align-items-start" id="div-'+DOC_ID+'">';
+					    html += 			'<ul class="cate d-flex flex-wrap gap-2">';
+			 			html += 				'<li class="text-white '+sbjt_class+'">'+list.COMDIV_NM+'</li>';				    
+					    html += 				'<li class="border">';
+					    html += 					'<span>'+list.DEPT_NM+'</span>';
+					    html += 				'</li>';
+					    html += 			'</ul>';
+					    html += 			'<h4 class="text-truncate ellip_2 my-2 h-sbjt-kor-nm" id="sbjtNm-'+list.DOC_ID+'"><span class="text-truncate text-dark text-opacity-75">['+list.SUBJECT_CD+'-'+list.DIVCLS+'] </span>' +(list.SUBJECT_NM||'')+'</h4>';
+					    html += 			'<div class="w-100">';
+					    html += 				'<dl class="d-inline-flex">';
+					    html += 					'<dt class="me-2">학점</dt>';
+					    html += 					'<dd class="text-dark text-opacity-75">'+list.CDT_NUM+'</dd>';
+					    html +=					'</dl>';
+					    html += 				'<dl class="d-inline-flex position-relative pe-4">';
+					    html += 					'<dt class="me-2">편성</dt>';
+					    html += 					'<dd class="text-dark text-opacity-75">'+list.YEAR+'학년도 '+list.COM_GRADE+'학년</dd>';
+					    html += 				'</dl>';
+					    html += 				'<dl class="d-inline-flex position-relative pe-4">';
+					    html += 					'<dt class="me-2">담당교수</dt>';
+					    html += 					'<dd class="text-dark text-opacity-75">'+(list.EMP_NM||'')+'</dd>';
+					    html += 				'</dl>';
+					    html += 			'</div>';
+					    html += 		'</div>';
+					    html += 		'<div class="btn_wrap appl">';	
+					    html +=				'<button type="button" class="btn_dele" onclick="delSbjt(\''+DOC_ID+'\')">';
+					    html +=					'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+					    html +=				'</button>';
+					    html += 		'</div>';
+					    html += 		'<div class="btn_wrap reorder hidden" style="display:block;">';					    	
+	                    html += 			'<button type="button" class="btn_put" onclick="moveItem(\''+DOC_ID+'\', \'up\')" style="rotate:270deg;">';
+	                    html += 			'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+	                    html += 			'</button>';
+	                    html += 			'<button type="button" class="btn_put" onclick="moveItem(\''+DOC_ID+'\', \'down\')" style="rotate:90deg;">';
+	                    html += 			'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+	                    html += 			'</button>';
+					    html += 		'</div>';				    				    	
+					    html += 	'</section>';
+					    html += '</div>'; 
+					    
+					    ord ++;
+					});
+					$("#applSbjt").append(html);
 					
-					var sbjt_class;
-					switch(list.COMDIV_NM){
-						case "전공공통" :
-							sbjt_class = "nati_navy";
-							break;
-						case "전공필수" :
-							sbjt_class = "alon_red";
-							break;
-						case "전공선택" :
-							sbjt_class = "styl_skyb";
-							break;
-						case "필수교양" :
-							sbjt_class = "styl_lighb";
-							break;
-						default : 
-							sbjt_class = "refi_yell";
-					}
-					
-					var DOC_ID = list.SUBJECT_CD + '_' + list.DIVCLS			
-				    html += '<div class="item p-3" style="border-top: 1px solid #ddd;">';
-				    html += 	'<div class="d-inline-flex form-check">';
-				    html += 		'<label class="blind" for="lessons_'+DOC_ID+'">선택</label>';
-				    html += 		'<input type="checkbox" id="lessons_'+DOC_ID+'" class="form-check-input chk-after" value="'+DOC_ID+'">';
-				    html += 	'</div>';
-				    html += 	'<section class="d-inline-flex flex-column flex-lg-row justify-content-between">';
-				    html += 		'<input type="hidden" id="sbInfo-'+DOC_ID+'" value="'+DOC_ID+'" data-subjectCd="'+list.SUBJECT_CD+'" data-divcls="'+list.DIVCLS+'" />';
-				    html += 		'<div class="d-flex flex-column align-items-start" id="div-'+DOC_ID+'">';
-				    html += 			'<ul class="cate d-flex flex-wrap gap-2">';
-		 			html += 				'<li class="text-white '+sbjt_class+'">'+list.COMDIV_NM+'</li>';				    
-// 				    html += 				'<li class="text-white '+sbjt_class+'">'+list.COMDIV_NM+'</li>';
-				    html += 				'<li class="border">';
-				    html += 					'<span>'+list.DEPT_NM+'</span>';
-				    html += 				'</li>';
-				    html += 			'</ul>';
-				    html += 			'<h4 class="text-truncate ellip_2 my-2 h-sbjt-kor-nm" id="sbjtNm-'+list.DOC_ID+'"><span class="text-truncate text-dark text-opacity-75">['+list.SUBJECT_CD+'-'+list.DIVCLS+'] </span>' +(list.SUBJECT_NM||'')+'</h4>';
-				    html += 			'<div class="w-100">';
-				    html += 				'<dl class="d-inline-flex">';
-				    html += 					'<dt class="me-2">학점</dt>';
-				    html += 					'<dd class="text-dark text-opacity-75">'+list.CDT_NUM+'</dd>';
-				    html +=					'</dl>';
-				    html += 				'<dl class="d-inline-flex position-relative pe-4">';
-				    html += 					'<dt class="me-2">편성</dt>';
-				    html += 					'<dd class="text-dark text-opacity-75">'+list.YEAR+'학년도 '+list.COM_GRADE+'학년</dd>';
-				    html += 				'</dl>';
-				    html += 				'<dl class="d-inline-flex position-relative pe-4">';
-				    html += 					'<dt class="me-2">담당교수</dt>';
-				    html += 					'<dd class="text-dark text-opacity-75">'+list.EMP_NM+'</dd>';
-				    html += 				'</dl>';
-				    html += 			'</div>';
-				    html += 		'</div>';
-				    html += 		'<div class="btn_wrap">';	
-				    html +=				'<button type="button" class="btn_dele" onclick="delPreAppl(\''+DOC_ID+'\')">';
-				    html +=					'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
-				    html +=				'</button>';
-				    html += 		'</div>';
-				    html += 	'</section>';
-				    html += '</div>'; 
-				});
-				$("#applSbjt").append(html);
+				    
+					updateArrowButtons();
+				}else{
+					var html = '';
+					html += '<div class="lesson_wrap no_contents_wrap d-flex justify-content-center align-items-center reorder">' +
+							'<div class="d-flex flex-column justify-content-center align-items-center">' +
+							'<img src="../images/kmou_noshad_big.png" alt="해양이" />' + 
+						    '<p class="text-center mt-2">' + 
+						    	'예비수강신청 내역이 존재하지 않습니다.' + 
+						    '</p>' + 
+						    '</div>' + 
+							'</div>';
+					$('#applSbjt').append(html);
+					$('#reorderBtn').addClass('hidden')
+				}
+				
 			}, error: function(request, error){ asdf(error) }
 		});
 	}catch(e){
@@ -2628,48 +2832,293 @@ function renderApplList(){
 
 }
 
+//화살표 버튼 업데이트 함수
+function updateArrowButtons() {
+    $('#applSbjt .item').each(function(index, item) {
+        var $item = $(item);
+        var $upButton = $item.find('.btn_put[onclick*="up"]');
+        var $downButton = $item.find('.btn_put[onclick*="down"]');
+        
+        // 첫 번째 아이템
+        if (index === 0) {
+            $upButton.hide();
+            $downButton.show();
+        } 
+        // 마지막 아이템
+        else if (index === $('#applSbjt .item').length - 1) {
+            $upButton.show();
+            $downButton.hide();
+        } 
+        // 중간 아이템들
+        else {
+            $upButton.show();
+            $downButton.show();
+        }
+    });
+}
+
+//예비수강신청 현황 카드 이동 함수
+function moveItem(docId, direction) {
+    var currentItem = $('#div-' + docId).closest('.item');
+    var currentIndex = currentItem.index();
+    var sibling;
+    var targetIndex;
+
+    if (direction === 'up') {
+        sibling = currentItem.prev('.item');
+        targetIndex = currentIndex - 1;
+    } else {
+        sibling = currentItem.next('.item');
+        targetIndex = currentIndex + 1;
+    }
+
+    if (sibling.length > 0) {
+        if (direction === 'up') {
+            currentItem.insertBefore(sibling);
+        } else {
+            currentItem.insertAfter(sibling);
+        }
+        
+        currentItem.hide().fadeIn(300); // 애니메이션 효과
+        
+        updateOrderAttributes(currentIndex, targetIndex);
+        
+        updateArrowButtons();
+    }
+}
+
+//순서 속성 업데이트 함수
+function updateOrderAttributes(index1, index2) {
+    $('#applSbjt .item').each(function(index) {
+        var $item = $(this);
+        var newOrder = index + 1;
+        
+        // data-ui_ord는 항상 업데이트
+        $item.attr('data-ui_ord', newOrder);
+        
+        // 변경된 두 항목에 대해서만 data-org_ord 업데이트
+        if (index === index1 || index === index2) {
+            var originalOrder = $item.attr('data-org_ord');
+            if (originalOrder === undefined) {
+                originalOrder = 'undefined';
+            }
+            $item.attr('data-org_ord', newOrder);
+        }
+    });
+}
+
+//저장 버튼 클릭 시 실행될 함수 (예시)
+function saveNewOrder() {
+    var changedItems = $('#applSbjt .item').filter(function() {
+        return $(this).attr('data-ui_ord') == $(this).attr('data-org_ord');
+    }).map(function() {
+        return {
+            YEAR: $(this).attr('data-year'),
+            SMT: $(this).attr('data-smt'),
+            SUBJECT_CD: $(this).attr('data-subjectCd'),
+            DIVCLS: $(this).attr('data-divcls'),
+            ORD: $(this).attr('data-ui_ord')
+        };
+    }).get();
+
+
+    $.ajax({
+		url: '/web/basket/updateOrder.do?mId=52',
+		contentType:'application/json',	
+		type: 'POST',
+		data: JSON.stringify({ 
+			'changedItems' : changedItems
+		}),
+		success: function(data){
+			if(data.result == 'DONE'){
+				alert("정상적으로 처리되었습니다.")
+				$('#cancelOrder').trigger('click');				
+			}else{
+				alert("정상적으로 처리되지 못하였습니다. 관리자에게 문의해주세요.");
+				asdf(data.error);
+			}
+		}
+	});
+}
+
+
 //예비수강신청 선택 일괄 담기
 function sbjtContain(DOC_ID){		
 	var html = '';
 	var sId  = '';
-	
-	if(DOC_ID != null){
+	 var selectedSubjects = [];
 		
+	if(DOC_ID != null){ //단건 처리	
 		sId = $("#sbInfo-"+DOC_ID);
-		
-		renderApplList()
-	}else{
-		
+        selectedSubjects.push({
+            subjectCd: sId.attr('data-subjectCd'),
+            subjectNm: sId.attr('data-subjectNm'),
+            divcls: sId.attr('data-divcls')
+        });		
+	}else{				//다중건 처리	
 		if($(".chk-before:checked").length == 0){
 				alert("과목을 선택해주세요.");
 				return false;
 		}else{
 			var chkIdx 	= $(".chk-before:checked");
 			
-			for(var i=0; i < chkIdx.length; i++){
-				
-				
-				sId = $("#sbInfo-"+chkIdx[i].value);	
-				
+			for(var i=0; i < chkIdx.length; i++){								
+				sId = $("#sbInfo-"+chkIdx[i].value);
+                selectedSubjects.push({
+                    subjectCd: sId.attr('data-subjectCd'),
+                    subjectNm: sId.attr('data-subjectNm'),
+                    divcls: sId.attr('data-divcls')
+                });
 			}
-			renderApplList
+		}
+	}
+	sukangSin(selectedSubjects);
+}
+
+
+// 예비수강신청 삭제
+function delSbjt(DOC_ID){
+	
+	var html = '';
+	var sId  = '';
+	 var selectedSubjects = [];
+		
+	if(DOC_ID != null){ //단건 처리	
+		sId = $("#applInfo-"+DOC_ID);
+        selectedSubjects.push({
+            subjectCd: sId.attr('data-subjectCd'),
+            subjectNm: sId.attr('data-subjectNm'),
+            divcls: sId.attr('data-divcls')
+        });		
+	}else{				//다중건 처리	
+		if($(".chk-after:checked").length == 0){
+				alert("과목을 선택해주세요.");
+				return false;
+		}else{
+			var chkIdx 	= $(".chk-after:checked");
 			
-			
-			
+			for(var i=0; i < chkIdx.length; i++){								
+				sId = $("#applInfo-"+chkIdx[i].value);
+                selectedSubjects.push({
+                    subjectCd: sId.attr('data-subjectCd'),
+                    subjectNm: sId.attr('data-subjectNm'),
+                    divcls: sId.attr('data-divcls')
+                });
+			}
 		}
 	}
 	
-	// 클래스 'selectSbjtFg'를 가진 모든 selectbox에 대해 change 이벤트 핸들러를 추가
-    $('.selectSbjtFg').on('change', function() {
-    	
-        // 이 selectbox의 value와 선택된 텍스트를 가져옴
-        var selectedValue = $(this).val();
-        var selectedText = $(this).find('option:selected').text();
+	console.log(selectedSubjects)
+	sukangDel(selectedSubjects);
+}
+
+
+//예비수강신청 - 신청
+function sukangSin(selectedSubject){    
+   	showLoading();
+       $.ajax({
+   		url: '/web/basket/sukangSin.do?mId=52',
+   		contentType:'application/json',	
+   		type: 'POST',
+   		data: JSON.stringify({ 
+               'SEL_SUBJECT_LIST' : selectedSubject
+   		}),
+   		success: function(data){
+   			alert(data.resultMsg);   	
+			hideLoading();
+			renderApplList();
+   		}
+   	});
+}
+
+//예비수강신청 - 삭제
+function sukangDel(selectedSubject){
+   	showLoading();
+    $.ajax({
+		url: '/web/basket/sukangDel.do?mId=52',
+		contentType:'application/json',	
+		type: 'POST',
+		data: JSON.stringify({ 
+            'SEL_SUBJECT_LIST' : selectedSubject
+		}),
+		success: function(data){
+			alert(data.resultMsg);   	
+			hideLoading();
+			renderApplList();
+		}
+	});
+}
+
+//브라우저 및 OS 정보 확인
+function getSystemInfo(type) {
+    var userAgent = navigator.userAgent;
+    var os = "Unknown OS";
+    var browser = "Unknown Browser";
+
+    // OS 감지
+    if (userAgent.indexOf("Win") > -1) os = "Windows";
+    else if (userAgent.indexOf("Mac") > -1) os = "MacOS";
+    else if (userAgent.indexOf("Linux") > -1) os = "Linux";
+    else if (userAgent.indexOf("Android") > -1) os = "Android";
+    else if (userAgent.indexOf("like Mac") > -1) os = "iOS";
+
+    // 브라우저 감지
+    if (userAgent.indexOf("Chrome") > -1) browser = "Chrome";
+    else if (userAgent.indexOf("Safari") > -1) browser = "Safari";
+    else if (userAgent.indexOf("Firefox") > -1) browser = "Firefox";
+    else if (userAgent.indexOf("MSIE") > -1 || userAgent.indexOf("Trident/") > -1) browser = "Internet Explorer";
+    else if (userAgent.indexOf("Edge") > -1) browser = "Edge";
+    else if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) browser = "Opera";
+
+    // 매개변수에 따라 OS 또는 브라우저 정보 반환
+    if (type === 'os') {
+        return os;
+    } else if (type === 'browser') {
+        return browser;
+    }
+}
+
+//랜덤 키 생성
+function generateRandomKey() {
+    var array = new Uint8Array(32);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, function(byte) {
+        return ('0' + byte.toString(16)).slice(-2);
+    }).join('');
+}
+
+// 패스워드 암호화
+function encryptPassword(password, secretKey, callback) {
+    var encoder = new TextEncoder();
+    var data = encoder.encode(password);
+    
+    var keyBytes = new Uint8Array(secretKey.match(/[\da-f]{2}/gi).map(function (h) {
+        return parseInt(h, 16)
+    }));
+    
+    window.crypto.subtle.importKey(
+        "raw",
+        keyBytes,
+        { name: "AES-GCM" },
+        false,
+        ["encrypt"]
+    ).then(function(cryptoKey) {
+        var iv = window.crypto.getRandomValues(new Uint8Array(12));
         
-        // 이 selectbox를 포함하고 있는 상위 div를 찾고, 그 안에서 input 태그를 찾아 aria 속성을 업데이트
-        var parentDiv = $(this).closest('div.item');
-        parentDiv.find('input[name="sdmAddList"]').attr('aria-COMDIV_CODE', selectedValue);
-        parentDiv.find('input[name="sdmAddList"]').attr('aria-COMDIV_CODE_NM', selectedText);
+        window.crypto.subtle.encrypt(
+            { name: "AES-GCM", iv: iv },
+            cryptoKey,
+            data
+        ).then(function(encryptedData) {
+            var encryptedArray = new Uint8Array(encryptedData);
+            var encryptedHex = Array.from(encryptedArray, function(byte) {
+                return ('0' + byte.toString(16)).slice(-2);
+            }).join('');
+            var ivHex = Array.from(iv, function(byte) {
+                return ('0' + byte.toString(16)).slice(-2);
+            }).join('');
+            callback(ivHex + encryptedHex);
+        });
     });
 }
 

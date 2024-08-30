@@ -265,6 +265,7 @@
 					<div class="sbjt_title_box title_box pb-3 mb-3">
 						<div class="sbjt_title_boxselect">
 							<select class="form-select rounded-pill" aria-label="select" id="orderBy" name="orderBy">
+								<option value="">정렬기능</option>
 								<option value="bySbjtName">교과명순</option>
 								<option value="bySbjtType">교과분류순</option>
 								<option value="byGrade">학년순</option>

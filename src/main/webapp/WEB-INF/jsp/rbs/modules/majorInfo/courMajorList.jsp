@@ -5,7 +5,7 @@
 	itemOrder="${itemInfo[itemOrderName]}" />
 <script type="text/javascript">
 
-var sptPsnKorList = [];
+var fieldList = [];
 
 $(function(){
 	<itui:submitInit items="${itemInfo.items}" itemOrder="${itemInfo[itemOrderName]}"/>
@@ -23,21 +23,8 @@ $(function(){
 		}
 	});	
 	
-	// 소속구분 변경시 대학 세팅
-	$('#s_colgCd').change( function() {			
-		getDeptData($('#s_colgCd').val());
-	});
-	// 소속대학 선택 시 학과 목록 선택값 변경	
-	$('#s_fcltSustCd').change( function() {
-		getMajorData($('#s_fcltSustCd').val());
-	});
-	
-	$('#s_mjCd').change( function() {
-		getRegisteredYear($('#s_mjCd').val());
-		$('#mjNmKor').val($('#s_mjCd option:selected').text());
-		$('#mjNmEng').val($('#s_mjCd option:selected').attr('deptnmeng'));
-		$("#yearbox").show();
-	});
+	var majorCd = '<c:out value="${param.majorCd}"/>';
+	getFieldData(majorCd);
 
 	
 	$("#graduationCnt, #collegeCnt").change(function() {
@@ -94,33 +81,52 @@ $(function(){
 		}catch(e){return false;}
 	});
 	
+	/* $("[id^=field]").change(function(){
+		console.log("진입확인");
+		var idValue = $(this).attr('id');
+		var indexNumber = idValue.replace("field",'');
+		console.log(indexNumber);
+		$("#fieldNm" + indexNumber).text($(this).children("option:selected").text())
+		console.log($(this).children("option:selected").text());
+		
+		console.log($(this).children("option:selected").val());
+	}) */
+	
 	//전문인 추가 행 추가
 	$("[id^=addSub]").click(function(){
+		
 		
 		var idValue = $(this).attr('id');
 		var indexNumber = idValue.replace("addSub",'');
 		
+		
+		
 		var index = $("#tpSubContent > tbody > tr").length;
 		var length = Number($("#majorRowLength").val());
 		var dtLength = Number($("#dtLength").val());
-		var sbjtFgNm = $("#sbjtFgNm" + indexNumber).val();
-		var openShyrNm = $("#openShyrNm" + indexNumber).val();
-		var shtmNm = $("#shtmNm" + indexNumber).val();
-		var shtmCd = $("#shtmCd" + indexNumber).val();
-		var openSustMjNm = $("#openSustMjNm" + indexNumber).val();
-		var sptPsnKor = $("#s_sptPsnKor" + indexNumber).val();
-		var shyrFg = $("#shyrFg" + indexNumber).val();
-		var sbjtNmKor = $("#sbjtNmKor" + indexNumber).val();
-		var sbjtFg = $("#sbjtFg" + indexNumber).val();
+		
+		var comdivCd = $("#comdivCd" + indexNumber).val();
+		var grade = $("#grade" + indexNumber).val();
+		var openDept = $("#openDept" + indexNumber).val();
+		var subjectNm = $("#subjectNm" + indexNumber).val();
+		var field = $("#field" + indexNumber).val();
+		
+		var sinbunCd = $("#sinbunCd" + indexNumber).val();
+		var subjectCd = $("#subjectCd" + indexNumber).val();
+		var fieldCd = $("#fieldCd" + indexNumber).val();
+		var year = $("#year" + indexNumber).val();
+		var smt = $("#smt" + indexNumber).val();
+		var cdtNum = $("#cdtNum" + indexNumber).val();
 		var lastModiId = $("#lastModiId" + indexNumber).val();
 		var lastModiDate = $("#lastModiDate" + indexNumber).val();
-		var courseNo = $("#courseNo" + indexNumber).val();
-		var pnt = $("#pnt" + indexNumber).val();
+		
 		var theoTmCnt = $("#theoTmCnt" + indexNumber).val();
 		var pracTmCnt = $("#pracTmCnt" + indexNumber).val();
 		var courseNo = $("#courseNo" + indexNumber).val();
-		var inputList = ["sptPsnKor"];
-		var inputName = ["전문인(한글)"];
+		var inputList = ["filed"];
+		var inputName = ["진출분야"];
+		
+		
 		
 		length += 1;
 		$("#majorRowLength").val(length);
@@ -130,34 +136,33 @@ $(function(){
 		//innerHtml += '<tr><td><input type="checkbox" class="checkbox-type01" name="chkbox"></td>'
 		innerHtml += '<tr>'
 		innerHtml += '<td class="num" id="num"></td>'
-// 		innerHtml += '<td><input type="hidden" value="'+ (length-2) +'" name="ord' + (length -2) + '"><span id="ord">' + (length-1) + '</span></td>'
-		innerHtml += '<td><input type="hidden" value="'+ sbjtFgNm +'" name="sbjtFgNm' + (length -2) + '" id="sbjtFgNm' + (length -2) + '"><span >' + sbjtFgNm + '</span></td>'
-		innerHtml += '<td><input type="hidden" value="'+ openShyrNm +'" name="openShyrNm' + (length -2) + '" id="openShyrNm' + (length -2) + '"><span >' + openShyrNm + '</span></td>'
-		innerHtml += '<td><input type="hidden" value="'+ shtmNm +'" name="shtmNm' + (length -2) + '" id="shtmNm' + (length -2) + '"><span >' + shtmNm + '</span></td>'
-		innerHtml += '<td><input type="hidden" value="'+ openSustMjNm +'" name="openSustMjNm' + (length -2) + '" id="openSustMjNm' + (length -2) + '"><span >' + openSustMjNm + '</span></td>'		
-		innerHtml += '<td><input type="hidden" value="'+ sbjtNmKor +'" name="sbjtNmKor' + (length -2) + '" id="sbjtNmKor' + (length -2) + '"><span >' + sbjtNmKor + '</span></td>'
-		
-		innerHtml += '<td><select name="is_sptPsnKor'+ (length -2) +'" id="s_sptPsnKor' + (length -2) + '" class="select" style="width:60%" title="인재상" "></select> '+ '</td>'
+		innerHtml += '<td><input type="hidden" value="'+ comdivCd +'" name="comdivCd' + (length -2) + '" id="comdivCd' + (length -2) + '"><span >' + comdivCd + '</span></td>'
+		innerHtml += '<td><input type="hidden" value="'+ grade +'" name="grade' + (length -2) + '" id="grade' + (length -2) + '"><span >' + grade + '</span></td>'
+		innerHtml += '<td><input type="hidden" value="'+ openDept +'" name="openDept' + (length -2) + '" id="openDept' + (length -2) + '"><span >' + openDept + '</span></td>'
+		innerHtml += '<td><input type="hidden" value="'+ subjectNm +'" name="subjectNm' + (length -2) + '" id="subjectNm' + (length -2) + '"><span >' + subjectNm + '</span></td>'		
+		innerHtml += '<td><select name="field'+ (length -2) +'" id="field' + (length -2) + '" class="field" style="width:60%" title="진출분야" "></select> '+ '</td>'
 		
 		innerHtml += '<td><button type="button" class="btnTypeG">NEW</button></td>'
 		
 		innerHtml += '<td><button type="button" onclick=fun_delete_major(this); id="fn_btn_majorCancel" class="btnTypeF">삭제</button></td>'		
 	
 		innerHtml += '<input type="hidden" value="'+ lastModiId +'" name="lastModiId' + (length -2) + '" id="lastModiId' + (length -2) + '">'
-		innerHtml += '<input type="hidden" value="'+ courseNo +'" name="courseNo' + (length -2) + '" id="courseNo' + (length -2) + '">' + '</>'
-		innerHtml += '<input type="hidden" value="'+ shyrFg +'" name="shyrFg' + (length -2) + '" id="shyrFg' + (length -2) + '">' + '</>'
-		innerHtml += '<input type="hidden" value="'+ shtmCd +'" name="shtmCd' + (length -2) + '" id="shtmCd' + (length -2) + '">' + '</>'
-		innerHtml += '<input type="hidden" value="'+ sbjtFg +'" name="sbjtFg' + (length -2) + '" id="sbjtFg' + (length -2) + '">' + '</>'
-		innerHtml += '<input type="hidden" value="'+ pnt +'" name="pnt' + (length -2) + '" id="pnt' + (length -2) + '">' + '</>'
-		innerHtml += '<input type="hidden" value="'+ theoTmCnt +'" name="theoTmCnt' + (length -2) + '" id="theoTmCnt' + (length -2) + '">' + '</>'
-		innerHtml += '<input type="hidden" value="'+ pracTmCnt +'" name="pracTmCnt' + (length -2) + '" id="pracTmCnt' + (length -2) + '">' + '</>'
+		innerHtml += '<input type="hidden" value="" name="fieldNm' + (length -2) + '" id="fieldNm' + (length -2) + '">' + '</>'
+		/* innerHtml += '<input type="hidden" value="" name="fieldCd' + (length -2) + '" id="fieldCd' + (length -2) + '">' + '</>' */
+		innerHtml += '<input type="hidden" value="'+ year +'" name="year' + (length -2) + '" id="year' + (length -2) + '">' + '</>'
+		innerHtml += '<input type="hidden" value="'+ smt +'" name="smt' + (length -2) + '" id="smt' + (length -2) + '">' + '</>'
+		innerHtml += '<input type="hidden" value="'+ cdtNum +'" name="cdtNum' + (length -2) + '" id="cdtNum' + (length -2) + '">' + '</>'
+		innerHtml += '<input type="hidden" value="'+ subjectCd +'" name="subjectCd' + (length -2) + '" id="subjectCd' + (length -2) + '">' + '</>'
+
 		innerHtml += '<input type="text" name="dtLength" value="' + length + '"/>'
 		innerHtml += '</tr>'			
 		$("#dtLength").val(length);
 		$(this).closest('tr').after(innerHtml);
 		
-		for(var i=0; i < sptPsnKorList.length; i++){
-			$('#s_sptPsnKor'+(length -2)).append("<option value='" + sptPsnKorList[i].SPT_PSN_KOR + "'>" + sptPsnKorList[i].SPT_PSN_NM + "</option>");
+		console.log("필드리스트 출력");
+		console.log(fieldList);
+		for(var i=0; i < fieldList.length; i++){
+			$('#field'+(length -2)).append("<option value='" + fieldList[i].OPTION_CODE + "'>" + fieldList[i].OPTION_NAME + "</option>");
 		}
 		
 		$("#tpSubContent tbody tr").each(function(index){			
@@ -165,7 +170,7 @@ $(function(){
 		})
 		
 // 		$("#tpSubContent > tbody:last").append(innerHtml);
-		$("#sptPsnKor"+ (length-2)).focus();		
+		$("#field"+ (length-2)).focus();		
 
 	});
 	
@@ -195,7 +200,7 @@ $(function(){
 			$('#s_deptCd').val(deptCd);
 	</c:if>
 	
-	// 인재상 정보 불러오기
+	// 진출분야 정보 불러오기
 	<c:if test="${!empty param.mjCd}">
 			var mjCd = '<c:out value="${param.mjCd}"/>';
 			var year = '<c:out value="${param.year}"/>';
@@ -207,7 +212,7 @@ $(function(){
 	
 });
 
-//학부 교육과정 인재상 입력 행 삭제
+//학부 교육과정 진출분야 입력 행 삭제
 function fn_deleteTp(){
 	// cancel
 	$("#<c:out value="${param.inputFormId}"/> .fn_btn_cancel").click(function(){
@@ -231,13 +236,44 @@ function fun_delete_major(button){
 	
 }
 
+//진출분야 리스트 불러오기
+function getFieldData(majorCd) {
+	
+	try {		
+		$.ajax({
+			url: '/web/majorInfo/getFieldList.json?mId=44',
+		    type: 'POST',
+		    crossDomain: true,
+		    data: {
+		    	majorCd : majorCd
+	  		},
+		    beforeSend:function(request){
+		    	request.setRequestHeader('Ajax','true');
+		    }
+			}).done(function (data, textStatus, xhr) {
+				fieldList = data.fieldList;							
+					
+	  			/* for(var i=0; i < fieldList.length; i++){
+  					$('.field').append("<option name='FIELD' value='" + fieldList[i].OPTION_CODE + "'>" + fieldList[i].OPTION_NAME + "</option>");
+		    	} */
+	  			
+				
+			})
+			.fail(function(data, textStatus, errorThrown){
+			      /*pass*/
+			      alert(JSON.stringify(e))
+			});
+	} catch(e){
+		console.log(e);
+	}	
+}
 
-//학부 교육과정 인재상 입력 행 추가
+//학부 교육과정 진출분야 입력 행 추가
 function fn_sampleInputFormSubmit(){
 	<itui:submitValid items="${itemInfo.items}" itemOrder="${itemInfo[itemOrderName]}"/>
 	
-	var inputList = ["sptPsnKor"];
-	var inputName = ["전문인(한글)"];
+	var inputList = ["field"];
+	var inputName = ["진출분야"];
 	var docList = [];
 
 	
@@ -248,19 +284,20 @@ function fn_sampleInputFormSubmit(){
 		
 		for(var i = 0; i <= $("#dtLength").val() ; i++){
 			
-			var sbjtFgNm = ($('#sbjtFgNm'+i).val());
-			var openShyrNm = ($('#openShyrNm'+i).val());
-			var shtmNm = ($('#shtmNm'+i).val());
-			var openSustMjNm = ($('#openSustMjNm'+i).val());
-			var courseNo = ($('#courseNo'+i).val());
-			var sptPsnKor = ($('#s_sptPsnKor'+i).val());
+			var comdivCd = ($('#comdivCd'+i).val());
+			var grade = ($('#grade'+i).val());
+			var openDept = ($('#openDept'+i).val());
+			var subjectNm = ($('#subjectNm'+i).val());
+			var subjectCd = ($('#subjectCd'+i).val());
+			var fieldCd = ($('#field'+i + ' option:selected').val());
+			var fieldNm = ($('#field'+i + ' option:selected').text());
+			$("#fieldNm"+i).val(fieldNm);
+			var cons = grade + openDept + subjectNm + subjectCd + fieldCd;
 			
-			var cons = sbjtFgNm + openShyrNm + openSustMjNm + courseNo + sptPsnKor;
 			
 			docList.push(cons);
 			
 		}
-		
 		for(var i = 0; i <= $("#dtLength").val() ; i++){
 			
 			var id = '#s_' + value + i;
@@ -270,12 +307,12 @@ function fn_sampleInputFormSubmit(){
 			for (var k= 0 ; k < docList.length ; k++) {
 				if ( i != k) {
 					if(i != docList.length) {						
-						if($('#s_sptPsnKor'+k).val() != undefined){
+						if($('#field'+k).val() != undefined){
 							if (docList[i] == null || docList[k] == null) {
 								continue;
 							}
 							if (docList[k] == docList[i]){			
-								alert("중복된 인재상(한글)을 입력할 수 없습니다");
+								alert("중복된 진출분야를 입력할 수 없습니다");
 								$(id).focus();
 								return false;	
 							}	
@@ -289,7 +326,7 @@ function fn_sampleInputFormSubmit(){
 		
 			if ($(id).val() != null) {
 				if($(id).val().trim() === ''){
-					alert("인재상(한글) 항목들은 필수 입력값입니다.");
+					alert("진출분야 항목들은 필수 입력값입니다.");
 					$(id).focus();
 					return false;
 				}				
@@ -307,8 +344,6 @@ function fn_sampleInputFormSubmit(){
 	const majorIdx = urlParams.get('majorIdx');
 	const yearIdx = urlParams.get('yearIdx');
 	
-	console.log("majorIdx", majorIdx)
-	console.log("yearIdx", yearIdx)	
 	
 	$("#majorIdx").attr("value", majorIdx);
 	$("#yearIdx").attr("value", yearIdx);
@@ -318,182 +353,5 @@ function fn_sampleInputFormSubmit(){
 function fn_sampleInputReset(){
 	<itui:submitReset items="${itemInfo.items}" itemOrder="${itemInfo[itemOrderName]}"/>
 }	
-  // 대학 selectbox 세팅
-function getCollegeData() {
-	try {		
-		$.ajax({
-			url: '/web/haksaCode/getCollegeList.json?mId=141',
-		    type: 'POST',
-		    crossDomain: true,
-		    beforeSend:function(request){
-		    	request.setRequestHeader('Ajax','true');
-		    }
-			}).done(function (data, textStatus, xhr) {
-				$("#s_fcltSustCd").children('option:not(:first)').remove();
-				$("#s_mjCd").children('option:not(:first)').remove();
-				for(var idx in data.haksaCode){
-		        	$('#s_colgCd').append("<option value='" + data.haksaCode[idx].DEPT_CD + "' deptNmEng='" + data.haksaCode[idx].DEPT_ENG_NM + "'>" + data.haksaCode[idx].DEPT_KOR_NM + "</option>");
-		    	}
-			}).fail(function(data, textStatus, errorThrown){
-			      /*pass*/
-			      console.log('error 발생 : ' + errorThrown);
-			});
-	} catch(e){
-		console.log(e);
-	}
-}
 
-
-// 학과/학부 select 변경시
-function getDeptData(clsfCd) {
-	try {
-		var colgCd = $('#s_colgCd').val();
-		$.ajax({
-			url: '/web/haksaCode/getDeptList.json?mId=141',
-		    type: 'POST',
-		    crossDomain: true,
-		    data: {
-		    	colgCd : colgCd
-	  		},
-		    beforeSend:function(request){
-		    	request.setRequestHeader('Ajax','true');
-		    }
-			}).done(function (data, textStatus, xhr) {
-				$("#s_fcltSustCd").children('option:not(:first)').remove();
-				for(var idx in data.haksaCode){
-		        	$('#s_fcltSustCd').append("<option value='" + data.haksaCode[idx].DEPT_CD + "' deptNmEng='" + data.haksaCode[idx].DEPT_ENG_NM + "'>" + data.haksaCode[idx].DEPT_KOR_NM + "</option>");
-		    	}
-				$('#s_colgCd').val(colgCd);
-			}).fail(function(data, textStatus, errorThrown){
-			      /*pass*/
-			      console.log('error 발생 : ' + errorThrown);
-			});
-	} catch(e){
-		console.log(e);
-	}
-}
- 
-// 학과/학부 select 변경시
-function getMajorData(fcltSustCd) {
-	try {		
-		var fcltSustCd = $('#s_fcltSustCd').val();
-		var fcltSustNm = $('#s_fcltSustCd option:selected').text();
-		var fcltSustEngNm = $('#s_fcltSustCd option:selected').attr('deptnmeng');
-		$.ajax({
-			url: '/web/haksaCode/getMajorList.json?mId=141',
-		    type: 'POST',
-		    crossDomain: true,
-		    data: {
-		    	fcltSustCd : fcltSustCd
-	  		},
-		    beforeSend:function(request){
-		    	request.setRequestHeader('Ajax','true');
-		    }
-			}).done(function (data, textStatus, xhr) {
-				$("#s_mjCd").children('option:not(:first)').remove();
-				// 학과/학부의 정보가 전공일시
-				if(data.haksaCode.length == 0){					
-					 if(fcltSustNm != '전체'){
-						$('#s_mjCd option:first').val(fcltSustCd);
-						$('#mjNmKor').val(fcltSustNm);
-						$('#mjNmEng').val(fcltSustEngNm);
-						getRegisteredYear(fcltSustCd);
-						$("#yearbox").show();
-					 }else{
-						$('#s_mjCd option:first').val("");
-					 }
-				}else{
-					for(var idx in data.haksaCode){
-			        	$('#s_mjCd').append("<option value='" + data.haksaCode[idx].DEPT_CD + "' deptNmEng='" + data.haksaCode[idx].DEPT_ENG_NM + "'>" + data.haksaCode[idx].DEPT_KOR_NM + "</option>");
-			    	}					
-				}		
-				$('#s_fcltSustCd').val(fcltSustCd);
-
-
-			}).fail(function(data, textStatus, errorThrown){
-			      /*pass*/
-			      console.log('error 발생 : ' + errorThrown);
-			});
-	} catch(e){
-		console.log(e);
-	}
- }
- 
-// 인재상 리스트 불러오기
-function getSptPsnData(mjCd,year) {
-	
-	var dtLength = Number($("#dtLength").val());
-	
-	try {		
-		$.ajax({
-			url: '/web/haksaCode/getSptPsnList.json?mId=192',
-		    type: 'POST',
-		    crossDomain: true,
-		    data: {
-		    	year : year,
-		    	mjCd : mjCd
-	  		},
-		    beforeSend:function(request){
-		    	request.setRequestHeader('Ajax','true');
-		    }
-			}).done(function (data, textStatus, xhr) {
-				sptPsnKorList = data.haksaCode;
-				for(var j=0; j <= dtLength; j++){					
-					
-		  			for(var i=0; i < sptPsnKorList.length; i++){
-
-		  				if ($("#sptPsnKor"+j).val() == sptPsnKorList[i].SPT_PSN_KOR) {
-		  					$('#s_sptPsnKor'+j).append("<option value='" + sptPsnKorList[i].SPT_PSN_KOR + "' selected>" + sptPsnKorList[i].SPT_PSN_NM  + "</option>");		  					
-		  				} else {
-		  					$('#s_sptPsnKor'+j).append("<option value='" + sptPsnKorList[i].SPT_PSN_KOR + "'>" + sptPsnKorList[i].SPT_PSN_NM + "</option>");	  						
-		  				}		  				
-			    	}		  			
-		  			
-		  			if ($("#sptPsnKor"+j).val() == $('#s_sptPsnKor'+j).val()) {
-		  				$('#sptPsnKor'+j).val($('#s_sptPsnKor'+ j + 'option:selected').text());
-		  			}		  			 
-				}
-			}).fail(function(data, textStatus, errorThrown){
-			      /*pass*/
-			      console.log('error 발생 : ' + errorThrown);
-			});
-	} catch(e){
-		console.log(e);
-	}	
-}
-	
-	
-	
-	
-
- 
-function getRegisteredYear(value){
-	$.ajax({
-		url: '${URL_REGISTERED_YEAR}',
-	    type: 'GET',
-	    crossDomain: true,
-	    data: {
-	    	mjCd : value
-  		},
-  		success:function(data){
-  			$("#year option").prop('disabled', false);
-  			var registeredYearList = data.registeredYearList
-  			for(var i=0; i < registeredYearList.length; i++){
-  	  			$("#year option").each(function(){
-  	  			var optionVal = $(this).val();
-  					if(optionVal === registeredYearList[i].YY){
-  						$(this).prop('disabled', true).text(optionVal + "(등록됨)");
-  					}else{
-  						$(this).prop('disabled', false).text(optionVal);
-  					}
-  				})
-  			};
-
-  		},
-  		error:function(e){
-  			alert(JSON.stringify(e))
-  		}
-		})
-
-} 
 </script>

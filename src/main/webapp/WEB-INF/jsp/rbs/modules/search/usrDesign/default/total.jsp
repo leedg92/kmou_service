@@ -38,21 +38,38 @@
 	                	<c:if test="${!empty listDt.deptCd }"><c:set var="deptKey" value="${listDt.deptCd }"/></c:if>
 	                	<c:if test="${!empty listDt.majorCd }"><c:set var="deptKey" value="${listDt.majorCd }"/></c:if>
 	                	<c:set var="year" value="${listDt.year }"/>
+	                	<c:set var="grade" value="${listDt.grade }"/>
 	                	<c:set var="smtCd" value="${listDt.smtCd }"/>
+	                	<c:choose>
+	                		<c:when test="${fn:contains(listDt.comdivNm, '전공') }"><c:set var="mainAbi" value="${listDt.majorAbi }"/></c:when>
+	                		<c:when test="${fn:contains(listDt.comdivNm, '교양') }"><c:set var="mainAbi" value="${listDt.essentialAbi }"/></c:when>
+	                		<c:when test="${fn:contains(listDt.comdivNm, '일반') }"><c:set var="mainAbi" value="${listDt.majorAbi }"/></c:when>
+	                		<c:otherwise></c:otherwise>
+	                	</c:choose>
+	                	<c:set var="sbjtId" value="${subjectKey}_${deptKey}_${year}_${grade}_${smtCd}"/>
 	               		 <div class="item border" onclick="sbjtView('${subjectKey}', '${deptKey}', '${year}', '${smtCd}')" style="cursor:pointer;">
+	               		 	<div id="${sbjtId}" class="like_container ' + onRed + '">
+				 				<div class="link_cnt text-end">
+				 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="event.stopPropagation();likeChange('${sbjtId}', 'sbjt')">
+				 					<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.08.01 4.53.01 6.07s.64 3 1.79 4.09l7.8 7.39a.62.62 0 0 0 .83 0l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Z" style="fill:#fff;stroke-width:0"/>
+				 					<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.07.01 4.53.01 6.07s.63 3 1.79 4.09 7.8 7.39 7.8 7.39c.11.1.26.16.41.16.15 0 .3-.06.41-.16l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Zm-.83 7.39-7.39 7-7.39-7c-.93-.89-1.44-2.06-1.44-3.3s.51-2.42 1.44-3.3c.94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.48 1.37.23.22.6.22.83 0 .94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.49 1.37 1.92 1.82 1.92 4.78 0 6.6Z" style="stroke-width:0;fill:#ff0202"/></svg>
+				 				</div>
+ 	  						</div>
 	                        <ul class="cate d-flex flex-row flex-wrap gap-1 align-items-center mb-3">
 	                        	<c:choose>
 	                        		<c:when test="${listDt.comdivNm == '전공과목' }"><li class="maj">${listDt.comdivNm }</li></c:when>
 	                        		<c:when test="${listDt.comdivNm == '전공기초' }"><li class="maj_basic">${listDt.comdivNm }</li></c:when>
 	                        		<c:when test="${listDt.comdivNm == '전공필수' }"><li class="maj_esse">${listDt.comdivNm }</li></c:when>
 	                        		<c:when test="${listDt.comdivNm == '전공선택' }"><li class="maj_choice">${listDt.comdivNm }</li></c:when>
-	                        		<c:when test="${!empty fn:contains(comdivNm, '교양')}"><li class="refin">${listDt.comdivNm }</li></c:when>
+	                        		<c:when test="${listDt.comdivNm == '일반선택' }"><li class="general_selection">${listDt.comdivNm }</li></c:when>
+	                        		<c:when test="${!empty fn:contains(listDt.comdivNm, '교양')}"><li class="refin">${listDt.comdivNm }</li></c:when>
 	                        		<c:otherwise></c:otherwise>
 	                        	</c:choose>
-	                            <li class="name_of_class"><span>${listDt.colgNm }</span><span>${listDt.deptNm }</span></li>
+	                            <li class="name_of_class"><span>${listDt.colgNm }</span><c:if test="${!empty listDt.deptNm }"><span>${listDt.deptNm }</span></c:if></li>
+	                            <c:if test="${!empty mainAbi }"> <li class="name_of_class"><span>${mainAbi }</span></li></c:if>
 	                        </ul>
 	                        <h5 class="d-flex flex-wrap align-itmes-end">
-	                        <a href="javascript:void(0);" onclick="sbjtView('${subjectKey}', '${deptKey}', '${year}', '${smtCd}')" title="제목" class="d-block  fw-semibold"> ${subjectNm}</a>
+	                        <a href="javascript:void(0);" onclick="sbjtView('${subjectKey}', '${deptKey}', '${year}', '${smtCd}')" title="제목" class="d-block  fw-semibold"> ${subjectNm}(${subjectKey})</a>
 	                        <%-- <a href="/web/sbjt/view.do?mId=32&SUBJECT_CD=${subjectKey}&DEPT_CD=${deptKey}&YEAR=${year}&SMT=${smtCd}" title="제목" class="d-block  fw-semibold">${listDt.subjectNm }</a> --%>
 	                        </h5>
 	                        <p class="desc_txt mb-3 text-truncate">
@@ -139,19 +156,22 @@
                         <p>검색결과 <span>${majorCount }건</span></p>
                     </h4>
                     <div class="speci_wrap d-flex flex-wrap">
-                    	<form name="majorView" method="POST" action="/web/major/view.do">
-	                    	<input type="hidden" name="mId" value="35"/>
-	                    	<input type="hidden" name="MAJOR_CD" value=""/>
-	                    </form>
 	                    
 	                    <!-- ------------------------------------------------------------------------------------- -->
 	                    
-                    	<c:forEach var="listDt" items="${majorList }" varStatus="i">
+	                    <c:forEach var="listDt" items="${majorList }" varStatus="i">
                         <c:set var="listIdxName" value=""/>
 	                	<c:set var="majorKey" value="${listDt.MAJOR_CD }"/>
 	                	
                         <div class="item border" onclick="majorView('${majorKey}')" style="cursor:pointer;">
-                            <ul class="cate d-flex flex-row flex-wrap gap-1 align-items-center">
+                        	<div id="${majorKey}" class="like_container">
+                        		<div class="link_cnt text-end">
+                        		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="event.stopPropagation();likeChange('${majorKey}', 'major')">
+                        		<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.08.01 4.53.01 6.07s.64 3 1.79 4.09l7.8 7.39a.62.62 0 0 0 .83 0l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Z" style="fill:#fff;stroke-width:0"/>
+                        		<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.07.01 4.53.01 6.07s.63 3 1.79 4.09 7.8 7.39 7.8 7.39c.11.1.26.16.41.16.15 0 .3-.06.41-.16l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Zm-.83 7.39-7.39 7-7.39-7c-.93-.89-1.44-2.06-1.44-3.3s.51-2.42 1.44-3.3c.94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.48 1.37.23.22.6.22.83 0 .94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.49 1.37 1.92 1.82 1.92 4.78 0 6.6Z" style="stroke-width:0;fill:#ff0202"/></svg>
+                        		</div>
+                        	</div>
+                            <ul class="cate d-flex flex-row flex-wrap gap-1 align-items-center mb-2">
                                 <li><span>${listDt.COLG_NM}</span><span>${listDt.DEPT_NM}</span></li>
                             </ul>
                             <h5 class="title mb-3">
@@ -162,8 +182,8 @@
                                 </a>
                             </h5>
                             <dl class="d-flex flex-row mb-1">
-                                <dt>인재상</dt>
-                                <dd>${listDt.TALENT}</dd>
+                                <dt>전공 목표</dt>
+                                <dd>${listDt.GOAL }</dd>
                             </dl>
                             <dl class="d-flex flex-row ">
                                 <dt>진로</dt>
@@ -188,8 +208,16 @@
                     	<c:if test="${empty listDt.file_path }"><c:set var="imagePath" value="../images/bg_sub_profess.png"/></c:if>
                     	<c:set var="empKey" value="${listDt.empNo }"/>
                         <div class="item border" onclick="profView('${empKey}')" style="cursor:pointer;">
+                        	<div id="${empKey}" class="like_container ' + onRed + '">
+				 				<div class="link_cnt text-end">
+				 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 18"  onclick="event.stopPropagation();likeChange('${empKey}', 'prof')">
+				 					<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.08.01 4.53.01 6.07s.64 3 1.79 4.09l7.8 7.39a.62.62 0 0 0 .83 0l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Z" style="fill:#fff;stroke-width:0"/>
+				 					<path d="M18.23 1.98C17.08.89 15.55.29 13.92.29c-1.44 0-2.81.47-3.9 1.33A6.262 6.262 0 0 0 6.12.29c-1.64 0-3.17.6-4.32 1.69C.65 3.07.01 4.53.01 6.07s.63 3 1.79 4.09 7.8 7.39 7.8 7.39c.11.1.26.16.41.16.15 0 .3-.06.41-.16l7.79-7.38v-.01c2.37-2.25 2.37-5.92 0-8.17Zm-.83 7.39-7.39 7-7.39-7c-.93-.89-1.44-2.06-1.44-3.3s.51-2.42 1.44-3.3c.94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.48 1.37.23.22.6.22.83 0 .94-.89 2.19-1.38 3.49-1.37 1.32 0 2.55.49 3.49 1.37 1.92 1.82 1.92 4.78 0 6.6Z" style="stroke-width:0;fill:#ff0202"/></svg>
+				 				</div>
+			 	  			</div>
                         	<a href="javascript:void(0);" onclick="profView('${empKey}')" title="교수" class="simply_info d-flex flex-row flex-sm-column flex-md-row align-items-end align-items-sm-center align-items-md-end border-bottom pb-4 gap-3">
                             <%-- <a href="/web/prof/view.do?mId=33&empNo=${empKey}" title="교수" class="simply_info d-flex flex-row flex-sm-column flex-md-row align-items-end align-items-sm-center align-items-md-end border-bottom pb-4 gap-3"> --%>
+                            
                                 <span class="photo_box d-inline-block rounded-circle overflow-hidden">
 	                                <img src="${imagePath }" alt="교수님사진" style="width:100%; height:100%; object-fit:cover;"/>
 	                            </span>

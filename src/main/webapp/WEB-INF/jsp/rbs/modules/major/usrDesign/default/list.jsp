@@ -157,9 +157,9 @@
 				<div class="major_title_box title_box pb-3 mb-3">
 					<div class="major_title_boxselect">
 						<select class="form-select rounded-pill" aria-label="select" id="orderBy" name="orderBy">
+							<option value="">정렬기능</option>
 							<option value="byMajor">전공명순</option>
 							<option value="byDepart">학부(과)순</option>
-							<option value="by">분류순</option>
 						</select>
 					</div>
 				</div> 

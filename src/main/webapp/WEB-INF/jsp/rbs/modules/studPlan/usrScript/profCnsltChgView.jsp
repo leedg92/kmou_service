@@ -219,7 +219,7 @@ let sbjtArray = new Array();
 			if(finalSumPntList[i].ORG_CODE == 'EXTERNAL'){
 				colgNm = '타 대학/기관/산업체';
 			}else{
-				colgNm = '해양대학교';
+				colgNm = '국립한국해양대학교';
 			}
 						
 			pHtml += '<tr>';
@@ -769,7 +769,7 @@ let sbjtArray = new Array();
 			if(finalSumPntList[i].ORG_CODE == 'EXTERNAL'){
 				colgNm = '타 대학/기관/산업체';
 			}else{
-				colgNm = '해양대학교';
+				colgNm = '국립한국해양대학교';
 			}
 						
 			pHtml += '<tr>';
